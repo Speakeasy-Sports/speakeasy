@@ -1,0 +1,84 @@
+/* Design tokens. AGENTS.md section 8 is the source of truth. */
+
+:root {
+  /* Base palette, Speakeasy Sports */
+  --bg: #fcfbf8; /* warm white */
+  --bg-elev: #ffffff;
+  --fg: #141414; /* near-black */
+  --fg-muted: #5b5b57;
+  --fg-subtle: #8a8984;
+  --line: #e6e3dc;
+  --brand: #141414; /* Speakeasy mark; update when assets arrive */
+
+  /* School accent, overridden per section */
+  --accent: #141414;
+  --accent-fg: #ffffff;
+
+  /* Type. --font-serif is set by next/font/local in lib/fonts.ts. Placeholder family until brand type is chosen. */
+  --font-display: var(--font-serif, Georgia), Georgia, serif;
+  --font-body: var(--font-serif, Georgia), Georgia, serif;
+  --font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --text-body: 1.125rem; /* 18px mobile */
+  --leading-body: 1.6;
+  --measure: 42rem; /* ~680px, 65 to 75 characters */
+
+  --radius: 6px;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  color-scheme: light;
+}
+@media (min-width: 768px) {
+  :root {
+    --text-body: 1.25rem; /* 20px desktop */
+  }
+}
+
+:root:not([data-theme="light"]) {
+  @media (prefers-color-scheme: dark) {
+    --bg: #121210;
+    --bg-elev: #1a1a17;
+    --fg: #f2f0ea;
+    --fg-muted: #b5b3ac;
+    --fg-subtle: #8a8984;
+    --line: #2a2a26;
+    /* Brand accent outside a school section: near-black would vanish on the dark background. */
+    --accent: #f2f0ea;
+    --accent-fg: #121210;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121210;
+  --bg-elev: #1a1a17;
+  --fg: #f2f0ea;
+  --fg-muted: #b5b3ac;
+  --fg-subtle: #8a8984;
+  --line: #2a2a26;
+  --accent: #f2f0ea;
+  --accent-fg: #121210;
+  color-scheme: dark;
+}
+
+/* Georgia section */
+[data-school="georgia"] {
+  --accent: #ba0c2f;
+  --accent-fg: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) [data-school="georgia"] {
+    --accent: #e44a64;
+    --accent-fg: #121210;
+  }
+}
+:root[data-theme="dark"] [data-school="georgia"] {
+  --accent: #e44a64;
+  --accent-fg: #121210;
+}

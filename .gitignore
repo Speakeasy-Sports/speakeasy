@@ -1,0 +1,26 @@
+# dependencies
+node_modules
+
+# next.js
+.next
+out
+next-env.d.ts
+
+# env
+.env
+.env.local
+.env.*.local
+
+# testing
+coverage
+test-results
+playwright-report
+
+# sanity typegen intermediate (sanity.types.ts is committed)
+sanity/schema.json
+
+# misc
+.DS_Store
+*.pem
+*.tsbuildinfo
+.vercel
