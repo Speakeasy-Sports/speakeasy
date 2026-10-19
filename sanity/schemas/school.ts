@@ -3,6 +3,7 @@ import { HomeIcon } from "@sanity/icons/Home";
 import { isReservedSlug } from "../../lib/reserved-slugs";
 import { contrast, DARK_BG, isHex, LIGHT_BG } from "../../lib/color";
 import { hexColor } from "./shared/validation";
+import { altField } from "./shared/imageWithAlt";
 
 export const school = defineType({
   name: "school",
@@ -71,8 +72,8 @@ export const school = defineType({
           return ratio >= 4.5 || `Only ${ratio.toFixed(1)}:1 on the dark background. Pick a lighter shade (4.5:1 needed).`;
         }),
     }),
-    defineField({ name: "logo", type: "image", group: "identity", options: { hotspot: true } }),
-    defineField({ name: "heroImage", type: "image", group: "identity", options: { hotspot: true } }),
+    defineField({ name: "logo", type: "image", group: "identity", options: { hotspot: true }, fields: [altField] }),
+    defineField({ name: "heroImage", type: "image", group: "identity", options: { hotspot: true }, fields: [altField] }),
     defineField({ name: "description", type: "text", rows: 3, group: "identity" }),
     defineField({
       name: "order",

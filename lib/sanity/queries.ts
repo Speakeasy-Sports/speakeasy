@@ -76,7 +76,7 @@ export const SITE_SETTINGS_QUERY = defineQuery(`
   *[_id == "siteSettings"][0]{
     siteName,
     tagline,
-    defaultOgImage { asset->{ _id, url } },
+    defaultOgImage { asset->{ _id, url }, alt },
     socialLinks[]{ _key, platform, url },
     footerText,
     joinUrl,
@@ -177,7 +177,7 @@ export const ARTICLE_QUERY = defineQuery(`
     noIndex,
     seoTitle,
     seoDescription,
-    ogImageOverride { asset->{ _id, url } },
+    ogImageOverride { asset->{ _id, url }, alt },
     "school": primarySchool->{ ${SCHOOL_REF_FIELDS} },
     "schools": schools[]->{ _id, "slug": slug.current },
     "authors": authors[]->{ ${AUTHOR_REF_FIELDS} },
