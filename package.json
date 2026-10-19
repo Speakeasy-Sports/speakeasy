@@ -1,0 +1,48 @@
+{
+  "name": "speakeasy-sports",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "typegen": "sanity schema extract --path sanity/schema.json && sanity typegen generate",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "check:secrets": "node scripts/check-client-secrets.mjs"
+  },
+  "dependencies": {
+    "@portabletext/react": "^8.0.1",
+    "@sanity/client": "^8.9.0",
+    "@sanity/icons": "5.2.3",
+    "@sanity/image-url": "^2.1.1",
+    "@sanity/vision": "^6.19.0",
+    "@sanity/webhook": "^4.0.4",
+    "feed": "^6.0.0",
+    "next": "16.4.2",
+    "next-sanity": "^13.3.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "sanity": "^6.19.0",
+    "server-only": "0.0.1",
+    "styled-components": "^6.1.19"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.2",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.5"
+  }
+}
