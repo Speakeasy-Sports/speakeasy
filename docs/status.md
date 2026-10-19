@@ -26,12 +26,23 @@ Built and verified (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `p
 
 Still open from the review, for week 2: alt text is not build-enforced and `school.logo`, `school.heroImage`, `siteSettings.defaultOgImage`, and `article.ogImageOverride` have no alt field; `check:secrets` is not in CI (no workflow yet); OG image URLs are unversioned so a corrected headline can stay cached up to a day at the edge; Editors can still set "Published" by hand.
 
-## Deferred to week 2 (per AGENTS.md section 12)
+## Phase 1, week 2: pages (branch phase-1-week-2-pages)
 
-- Home lead story, secondary row, pagination. School sub-nav and tag filters.
-- Author, tag, podcasts, videos, search, newsletter, about, contact, terms, privacy pages.
-- Feeds, sitemap, robots, WordPress redirects.
+- Home and school fronts: lead, a hairline-divided row of three, Latest with a sticky rail (Join card, Listen and watch), pagination, full-width newsletter band. Top stories never repeat in Latest on any page.
+- School sub-nav with curated `navTags`; podcasts, videos, and tags filtered to a school keep the school's header and accent.
+- Author (ProfilePage JSON-LD), tag (school chips), podcasts and videos (lead plus grid), search (client index, highlighted matches), newsletter, About, Contact, Terms, Privacy.
+- Feeds (`/feed.xml`, `/{school}/feed.xml`), sitemap, robots, search index.
+- New content: `infoPage` type, `newsletterSampleUrl` in Settings, a Studio warning for duplicate featured ranks.
+- Light-mode `--fg-subtle` darkened to #6F6E6A: the old gray was 3.4:1 and failed for timestamps.
+- Mock server now evaluates real GROQ against a 27-article fixture dataset with placeholder art.
+- Verified: 52 unit tests, 24 smoke tests (phone and desktop), lint, typecheck, build, secret scan. Article page JS 188KB gzipped.
+
+Still for week 2: Sanity and Circle webhooks, `/api/newsletter`, WordPress redirect map (needs V6), Postmark review email.
+
+## Remaining for week 2 (per AGENTS.md section 12)
+
 - `/api/webhooks/sanity` (revalidation, `status` flip, Circle post), `/api/webhooks/circle`, `/api/newsletter` (the form already posts there and shows an error until it exists).
+- WordPress redirect map (needs V6).
 - Postmark review notifications.
 
 ## Not possible from the repo

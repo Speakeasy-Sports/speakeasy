@@ -1,6 +1,6 @@
 # Speakeasy Sports content site: build spec
 
-Status: v1.2, October 19, 2026
+Status: v1.3, October 19, 2026
 Owner: Jon Smith
 Purpose: Build spec and working agreement for the Speakeasy Sports content site. Lives at the repo root as `AGENTS.md`. Every contributor treats the Decisions section as fixed and everything else as the plan of record.
 
@@ -167,11 +167,16 @@ Circle sync (read-only in Studio, written by the webhook handler)
 
 ### siteSettings (singleton)
 - `siteName`, `tagline`, `defaultOgImage`, `socialLinks`, `footerText`
-- `joinUrl` (default Circle join url), `newsletterHeadline`, `newsletterBlurb`
+- `joinUrl` (default Circle join url), `newsletterHeadline`, `newsletterBlurb`, `newsletterSampleUrl` (url, a past issue)
 - `navSchools` (ordered refs)
 
+### infoPage
+- `title`, `slug` (one of `about`, `contact`, `terms`, `privacy`), `intro` (text, max 200), `body` (same Portable Text as articles)
+- One document per footer page. A missing page 404s rather than showing filler.
+
 ### Studio configuration
-- Desk structure: Articles (by status: Needs review, Scheduled, Published, Drafts), Schools, Authors, Tags, Sponsor slots, Settings.
+- Desk structure: Articles (by status: Needs review, Scheduled, Published, Drafts), Schools, Authors, Tags, Sponsor slots, Pages, Settings.
+- Featured rank: the Studio warns when another published article already holds the same rank. Ties are legal; the more recent story wins.
 - Scheduled drafts (Sanity Growth feature) handle timed publishing. Sanity does not set custom fields when it publishes, including scheduled publishes, so the site sets `status` itself: when `/api/webhooks/sanity` receives a published article whose `status` is not `published`, it patches the published document with `status: "published"` and `publishedAt` (if empty, set to now) using the write token. That patch fires the webhook again; the second delivery sees `published` and changes nothing. Nobody sets `published` by hand, and the option is hidden from Contributors.
 - Validation: `dek` required, hero alt required, at least one school and one author, `primarySchool` in `schools`.
 - Preview: visual editing with `next-sanity` and draft mode. Editors can preview any status.
@@ -191,6 +196,8 @@ Circle sync (read-only in Studio, written by the webhook handler)
 - Lead story: `featuredRank` 1. Large image or hero embed, type label, headline, dek, byline.
 - Secondary: `featuredRank` 2 to 4 in a row of three.
 - "Latest" list: most recent 20 published articles across all schools, with school label, type label, headline, timestamp. Load more via pagination at `/?page=2`.
+- Top stories are the first four of: featured ranks 1 to 4, then everything else newest first. With nothing featured they are the four newest. Latest excludes exactly those four on every page, so pages never repeat or skip a story.
+- `/?page=N` and `/{school}?page=N` are rewritten in `next.config.ts` to internal routes (`/latest/N`, `/{school}/latest/N`) so the front pages never read search params and stay fully static. The internal routes set their canonical back to the `?page=N` form.
 - Newsletter block between Latest and footer.
 - Persistent "Join the Club" in header.
 - ISR revalidate 60s, plus tag-based revalidation from the webhook.
@@ -199,7 +206,8 @@ Circle sync (read-only in Studio, written by the webhook handler)
 - Same layout as home scoped to the school, using the school accent token.
 - Section header: school name, `communityName`, join CTA to `circleJoinUrl`.
 - Sub-nav: Latest, Podcasts, Videos, then the school's `navTags` in order (curated in the school document, up to 6).
-- Reserved slugs (not valid school slugs): `authors`, `tags`, `podcasts`, `videos`, `search`, `newsletter`, `about`, `contact`, `terms`, `privacy`, `studio`, `api`, `feed.xml`.
+- Reserved slugs (not valid school slugs): `authors`, `tags`, `podcasts`, `videos`, `search`, `newsletter`, `about`, `contact`, `terms`, `privacy`, `studio`, `api`, `feed.xml`, `latest`, `search-index.json`, `sitemap.xml`, `robots.txt`.
+- Podcasts, Videos, and tag links in the sub-nav go to the site-wide pages filtered with `?school={slug}`; those pages render with the school's header, accent, and sub-nav, so the reader stays in the section.
 
 ### `/[school]/[slug]` Article
 Top to bottom:
@@ -275,7 +283,7 @@ Headline, blurb, email form posting to `/api/newsletter`, sample issue link.
 
 ### 7.5 Analytics
 - Plausible script in root layout with `data-domain="speakeasysports.com"`. Outbound link tracking on.
-- Custom events via `plausible('event', {props})`: `join_click` (location prop: header|article_end|school_header), `newsletter_signup`, `discuss_click`, `video_play`, `podcast_play`.
+- Custom events via `plausible('event', {props})`: `join_click` (location prop: header|article_end|school_header|rail), `newsletter_signup`, `discuss_click`, `video_play`, `podcast_play`.
 - No cookie banner needed with Plausible. Add one only if a cookie-setting embed is introduced.
 
 ### 7.6 Email
@@ -308,7 +316,7 @@ Headline, blurb, email form posting to `/api/newsletter`, sample issue link.
   --bg-elev: #FFFFFF;
   --fg: #141414;            /* near-black */
   --fg-muted: #5B5B57;
-  --fg-subtle: #8A8984;
+  --fg-subtle: #6F6E6A;      /* 4.9:1 on --bg; #8A8984 was 3.4:1 and failed for timestamps */
   --line: #E6E3DC;
   --brand: #141414;         /* Speakeasy mark; update when assets arrive */
 

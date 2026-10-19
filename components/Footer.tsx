@@ -12,69 +12,88 @@ const PLATFORM_LABELS: Record<string, string> = {
   website: "Website",
 };
 
+function Column({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <h2 className="label-caps text-fg-muted">{title}</h2>
+      <ul className="flex flex-col gap-2.5 font-ui text-[0.9375rem]">{children}</ul>
+    </div>
+  );
+}
+
+function Item({ href, children, external }: { href: string; children: React.ReactNode; external?: boolean }) {
+  const cls = "text-fg no-underline transition-colors hover:text-fg-muted";
+  return (
+    <li>
+      {external ? (
+        <a href={href} rel="noopener noreferrer" target="_blank" className={cls}>
+          {children}
+        </a>
+      ) : (
+        <Link href={href} className={cls}>
+          {children}
+        </Link>
+      )}
+    </li>
+  );
+}
+
 export function Footer({ settings }: { settings: SiteSettings | null }) {
   const year = new Date().getFullYear();
   const siteName = settings?.siteName ?? "Speakeasy Sports";
-  const schools = settings?.navSchools ?? [];
+  const schools = (settings?.navSchools ?? []).filter((s) => s.slug);
   const socials = (settings?.socialLinks ?? []).filter((s) => s.url);
 
   return (
-    <footer className="mt-16 border-t border-line bg-bg">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 font-ui text-sm text-fg-muted sm:grid-cols-3">
-        <div>
-          <p className="font-display text-lg font-semibold text-fg">{siteName}</p>
-          {settings?.tagline && <p className="mt-1">{settings.tagline}</p>}
-          <p className="mt-3">Built for fans.</p>
-        </div>
-
-        <nav aria-label="Sections" className="flex flex-col gap-2">
-          {schools.map((s) => (
-            <Link key={s._id} href={schoolPath(s.slug ?? "")} className="no-underline hover:text-fg">
-              {s.name}
+    <footer className="mt-24 border-t border-fg bg-bg">
+      <div className="shell py-14">
+        <div className="grid gap-12 md:grid-cols-12">
+          <div className="flex flex-col gap-4 md:col-span-5">
+            <Link href="/" className="font-display text-[2rem] font-bold leading-none tracking-[-0.03em] no-underline">
+              {siteName}
             </Link>
-          ))}
-          <Link href="/podcasts" className="no-underline hover:text-fg">
-            Podcasts
-          </Link>
-          <Link href="/videos" className="no-underline hover:text-fg">
-            Videos
-          </Link>
-          <Link href="/newsletter" className="no-underline hover:text-fg">
-            Newsletter
-          </Link>
-        </nav>
-
-        <div className="flex flex-col gap-2">
-          {socials.length > 0 && (
-            <ul className="flex flex-wrap gap-4">
-              {socials.map((s) => (
-                <li key={s._key}>
-                  <a href={s.url ?? "#"} rel="noopener noreferrer" target="_blank" className="no-underline hover:text-fg">
-                    {PLATFORM_LABELS[s.platform ?? ""] ?? s.platform}
-                  </a>
-                </li>
+            {settings?.tagline && <p className="max-w-sm text-lg leading-snug text-fg-muted">{settings.tagline}</p>}
+          </div>
+          <nav aria-label="Footer" className="grid grid-cols-2 gap-10 sm:grid-cols-3 md:col-span-7">
+            <Column title="Sections">
+              {schools.map((s) => (
+                <Item key={s._id} href={schoolPath(s.slug!)}>
+                  {s.name}
+                </Item>
               ))}
-            </ul>
-          )}
-          <div className="flex gap-4">
-            <Link href="/about" className="no-underline hover:text-fg">
-              About
-            </Link>
-            <Link href="/contact" className="no-underline hover:text-fg">
-              Contact
-            </Link>
-            <Link href="/terms" className="no-underline hover:text-fg">
+              <Item href="/podcasts">Podcasts</Item>
+              <Item href="/videos">Videos</Item>
+              <Item href="/search">Search</Item>
+            </Column>
+            <Column title="Speakeasy">
+              <Item href="/about">About</Item>
+              <Item href="/contact">Contact</Item>
+              <Item href="/newsletter">Newsletter</Item>
+              <Item href="/feed.xml">RSS</Item>
+            </Column>
+            {socials.length > 0 && (
+              <Column title="Follow">
+                {socials.map((s) => (
+                  <Item key={s._key} href={s.url!} external>
+                    {PLATFORM_LABELS[s.platform ?? ""] ?? s.platform}
+                  </Item>
+                ))}
+              </Column>
+            )}
+          </nav>
+        </div>
+        <div className="mt-14 flex flex-col gap-3 border-t border-line pt-6 font-ui text-[0.8125rem] text-fg-subtle md:flex-row md:items-center md:justify-between">
+          <p>{settings?.footerText ?? `${siteName} is an independent publication and is not affiliated with any university.`}</p>
+          <p className="flex flex-wrap gap-x-5 gap-y-2">
+            <span>
+              &copy; {year} {siteName}. Built for fans.
+            </span>
+            <Link href="/terms" className="text-fg-subtle no-underline hover:text-fg">
               Terms
             </Link>
-            <Link href="/privacy" className="no-underline hover:text-fg">
+            <Link href="/privacy" className="text-fg-subtle no-underline hover:text-fg">
               Privacy
             </Link>
-          </div>
-          <p className="mt-2 text-fg-subtle">
-            {settings?.footerText ?? `${siteName} is an independent publication and is not affiliated with any university.`}
-          </p>
-          <p className="text-fg-subtle">
-            &copy; {year} {siteName}
           </p>
         </div>
       </div>

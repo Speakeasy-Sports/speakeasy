@@ -18,7 +18,7 @@ test("school section renders with its accent", async ({ page }) => {
   const res = await page.goto(SCHOOL);
   expect(res?.status()).toBe(200);
   await expect(page.locator("h1")).toBeVisible();
-  await expect(page.locator(`[data-school="${SCHOOL.slice(1)}"]`).first()).toBeVisible();
+  await expect(page.locator(`main [data-school="${SCHOOL.slice(1)}"]`).first()).toBeVisible();
 });
 
 test("article page has the full top-to-bottom structure", async ({ page }) => {
@@ -68,4 +68,48 @@ test("social card renders", async ({ request }) => {
   const res = await request.get(`/api/og?slug=${slug}`);
   expect(res.status()).toBe(200);
   expect(res.headers()["content-type"]).toContain("image/png");
+});
+
+test("front pages paginate through the ?page= rewrite and stay canonical", async ({ page }) => {
+  const res = await page.goto("/?page=2");
+  expect(res?.status()).toBe(200);
+  await expect(page.getByRole("heading", { name: "Latest, page 2" })).toBeVisible();
+  await expect(page.locator("link[rel=canonical]")).toHaveAttribute("href", /\/\?page=2$/);
+  expect((await page.goto("/?page=99"))?.status()).toBe(404);
+  const school = await page.goto(`${SCHOOL}?page=2`);
+  expect(school?.status()).toBe(200);
+  await expect(page.getByRole("link", { name: /Newer/ })).toBeVisible();
+});
+
+test("school sub-nav carries the reader into filtered podcasts and tags", async ({ page }) => {
+  await page.goto(SCHOOL);
+  const subnav = () => page.locator("main").getByRole("navigation", { name: /sections$/ });
+  await subnav().getByRole("link", { name: "Podcasts" }).click();
+  await expect(page).toHaveURL(/\/podcasts\?school=/);
+  await expect(subnav().getByRole("link", { name: "Podcasts" })).toHaveAttribute("aria-current", "page");
+  await page.goto("/tags/recruiting");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Recruiting");
+});
+
+test("author, newsletter, and info pages render", async ({ page }) => {
+  for (const path of ["/authors/jon-smith", "/newsletter", "/about", "/privacy", "/videos"]) {
+    const res = await page.goto(path);
+    expect(res?.status(), path).toBe(200);
+    await expect(page.locator("h1").first()).toBeVisible();
+  }
+});
+
+test("search finds stories from the prebuilt index", async ({ page }) => {
+  await page.goto("/search?q=quarterback");
+  await expect(page.getByText(/\d+ stor(y|ies)/)).toBeVisible();
+  await expect(page.locator("ol li").first()).toBeVisible();
+});
+
+test("feeds, sitemap, and robots are served", async ({ request }) => {
+  const feed = await request.get("/feed.xml");
+  expect(feed.headers()["content-type"]).toContain("application/rss+xml");
+  expect(await feed.text()).toContain("<item>");
+  expect((await request.get(`${SCHOOL}/feed.xml`)).status()).toBe(200);
+  expect(await (await request.get("/sitemap.xml")).text()).toContain(ARTICLE);
+  expect(await (await request.get("/robots.txt")).text()).toContain("Sitemap:");
 });

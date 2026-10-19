@@ -135,7 +135,7 @@ export default async function ArticlePage({ params }: Props) {
   ]);
 
   return (
-    <article data-school={schoolSlug} className="py-8">
+    <article data-school={schoolSlug} className="shell py-8 sm:py-12">
       <SchoolTheme slug={schoolSlug} accentColor={school.accentColor} accentColorDark={school.accentColorDark} />
       <JsonLd data={jsonLd} />
       <JsonLd data={crumbs} />

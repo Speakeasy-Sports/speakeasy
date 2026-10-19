@@ -6,7 +6,7 @@
   --bg-elev: #ffffff;
   --fg: #141414; /* near-black */
   --fg-muted: #5b5b57;
-  --fg-subtle: #8a8984;
+  --fg-subtle: #6f6e6a; /* 4.9:1 on --bg, the floor for small meta text */
   --line: #e6e3dc;
   --brand: #141414; /* Speakeasy mark; update when assets arrive */
 

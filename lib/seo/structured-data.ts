@@ -38,6 +38,30 @@ export function newsArticleJsonLd(input: NewsArticleInput) {
   };
 }
 
+export function profilePageJsonLd(input: {
+  name: string;
+  path: string;
+  description?: string | null;
+  role?: string | null;
+  imageUrl?: string | null;
+  sameAs?: string[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    url: absoluteUrl(input.path),
+    mainEntity: {
+      "@type": "Person",
+      name: input.name,
+      description: input.description ?? undefined,
+      jobTitle: input.role ?? undefined,
+      image: input.imageUrl ?? undefined,
+      sameAs: input.sameAs?.length ? input.sameAs : undefined,
+      worksFor: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+    },
+  };
+}
+
 export type Crumb = { name: string; path: string };
 
 export function breadcrumbJsonLd(crumbs: Crumb[]) {

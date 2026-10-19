@@ -12,16 +12,21 @@ type Props = {
   className?: string;
   /** Alt override, for images whose alt lives on a parent (author photos). */
   alt?: string;
+  /**
+   * The image repeats information already in adjacent link text (a story card's photo next to its headline).
+   * Renders alt="" so screen readers do not read the same story twice. The CMS alt is still required.
+   */
+  decorative?: boolean;
 };
 
 /**
  * next/image over the Sanity CDN. Crops through the hotspot when an aspect is given.
  * Every image needs alt text; the schema enforces it, this component refuses to render without it.
  */
-export function SanityImage({ image, width, aspect, sizes, priority, className, alt }: Props) {
+export function SanityImage({ image, width, aspect, sizes, priority, className, alt, decorative }: Props) {
   if (!hasAsset(image)) return null;
-  const altText = alt ?? image.alt;
-  if (!altText) return null;
+  const altText = decorative ? "" : (alt ?? image.alt);
+  if (!decorative && !altText) return null;
 
   const dims = image.asset.metadata?.dimensions;
   const naturalRatio = dims?.width && dims?.height ? dims.width / dims.height : 16 / 9;
@@ -34,7 +39,7 @@ export function SanityImage({ image, width, aspect, sizes, priority, className, 
   return (
     <Image
       src={builder.url()}
-      alt={altText}
+      alt={altText ?? ""}
       width={width}
       height={height}
       sizes={sizes}

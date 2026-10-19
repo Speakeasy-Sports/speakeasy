@@ -201,7 +201,7 @@ export const article = defineType({
       group: "workflow",
       description: "1 is the homepage lead. 2 to 4 fill the secondary row.",
       hidden: ({ document }) => !document?.featured,
-      validation: (rule) =>
+      validation: (rule) => [
         rule
           .integer()
           .min(1)
@@ -210,6 +210,19 @@ export const article = defineType({
             if (context.document?.featured && !value) return "Pick a rank for featured articles";
             return true;
           }),
+        // Two stories on the same rank is legal (the newer one wins), but usually a mistake. Say so.
+        rule.custom(async (value, context) => {
+          if (!context.document?.featured || !value) return true;
+          const id = context.document._id.replace(/^drafts\./, "");
+          const other = await context
+            .getClient({ apiVersion: "2026-10-01" })
+            .fetch<string | null>(
+              `*[_type == "article" && featured == true && featuredRank == $rank && !(_id in [$id, "drafts." + $id]) && !(_id in path("drafts.**"))][0].title`,
+              { rank: value, id },
+            );
+          return other ? `"${other}" already holds rank ${value}. The more recent story wins the slot.` : true;
+        }).warning(),
+      ],
     }),
     defineField({
       name: "memberOnly",

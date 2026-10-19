@@ -41,11 +41,12 @@ pnpm build && pnpm check:secrets
 
 ## 4. Local smoke test without a Sanity project
 
-`scripts/mock-sanity.mjs` answers the site's GROQ queries from `scripts/fixtures/sanity.json`. Useful for Playwright and for checking the build in CI before the project exists.
+`scripts/mock-sanity.mjs` evaluates the site's real GROQ queries with groq-js against the documents in `scripts/fixtures/dataset.mjs`, and serves placeholder artwork for images. Useful for Playwright, for design review, and for checking the build in CI before the project exists.
 
 ```bash
 node scripts/mock-sanity.mjs 3999 &
 export SANITY_API_HOST=http://127.0.0.1:3999 NEXT_PUBLIC_SANITY_PROJECT_ID=mock1234
+export NEXT_PUBLIC_SANITY_IMAGE_ORIGIN=http://127.0.0.1:3999   # placeholder art instead of cdn.sanity.io; never set in a real deploy
 rm -rf .next   # the build fetch cache in .next/cache survives between builds and will replay old mock answers
 pnpm build && pnpm start &
 pnpm test:e2e

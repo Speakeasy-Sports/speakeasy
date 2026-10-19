@@ -5,6 +5,7 @@ import { tag } from "./tag";
 import { article } from "./article";
 import { sponsorSlot } from "./sponsorSlot";
 import { siteSettings } from "./siteSettings";
+import { infoPage } from "./infoPage";
 import { heroEmbed } from "./objects/heroEmbed";
 import { episodeTimestamp } from "./objects/episodeTimestamp";
 import { body } from "./objects/body";
@@ -18,6 +19,7 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   tag,
   sponsorSlot,
   siteSettings,
+  infoPage,
   // objects
   heroEmbed,
   episodeTimestamp,
