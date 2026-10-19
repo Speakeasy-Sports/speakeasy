@@ -71,7 +71,7 @@ Create both in sanity.io/manage, project, API, Webhooks. Both: dataset `producti
 
 | Webhook | Trigger on | Filter | Drafts | Versions |
 |---|---|---|---|---|
-| Site publish | Create, Update, Delete | `_type in ["article", "school", "author", "tag", "infoPage", "siteSettings", "sponsorSlot"]` | Off | Off |
+| Site publish | Create, Update, Delete | `_type in ["article", "school", "author", "tag", "infoPage", "siteSettings", "sponsorSlot"] && !(delta::operation() == "update" && delta::changedOnly(circleCommentCount))` | Off | Off |
 | Review notification | Create, Update | `_type == "article" && status == "review" && delta::changedAny(status)` | On | Off |
 
 What the handler does:
@@ -80,8 +80,24 @@ What the handler does:
 
 Needed env vars: `SANITY_WEBHOOK_SECRET`, `SANITY_API_WRITE_TOKEN` (Editor role token), `KV_REST_API_URL` and `KV_REST_API_TOKEN` (the lock), Postmark vars for the email. Circle sync stays off until `CIRCLE_SYNC_ENABLED=true`; turn it on after one test post (checklist in `docs/circle-api-notes.md`). Each step logs one JSON line (`sanity_webhook`, `article_finalized`, `circle_admin_api`, `review_notified`) in the Vercel function logs.
 
-## 6. Still to build
+The `changedOnly(circleCommentCount)` clause keeps comment-count writes from the Circle webhook (which revalidates the one article itself) from refreshing the whole site.
 
-- Circle Workflow webhook to `/api/webhooks/circle` with `CIRCLE_WEBHOOK_SECRET`.
-- Daily retry for articles with `circleSyncError`.
+## 6. Circle comment counts and the daily job
+
+Circle Workflow (Circle admin, Workflows, New workflow), once for each trigger "comment created" and "post updated" if offered:
+- Action: send a webhook to `https://speakeasysports.com/api/webhooks/circle`.
+- Auth: a header `x-webhook-secret: <CIRCLE_WEBHOOK_SECRET>`. If the action cannot set headers, append `?secret=<CIRCLE_WEBHOOK_SECRET>` to the URL instead.
+- Body: include the post id (`post_id` or `post.id`). A comment id alone also works and costs one extra Admin API call. If the first live event returns 400, the `circle_webhook_unrecognized` log line lists the keys Circle sent; adjust `extractIds` in `lib/webhooks/circle-payload.ts`.
+
+The handler ignores posts the site did not create, reads at most one count per post every 30 seconds, writes `circleCommentCount`, and revalidates that article.
+
+Daily job (`vercel.json`, 9:17 UTC, `/api/cron/circle-daily`, needs `CRON_SECRET`):
+- Retries articles with `circleSyncError`, and posts articles from the last 3 days that never got a Circle post (older ones are skipped so turning sync on never floods a space).
+- Refreshes comment counts for articles from the last 7 days, which catches anything a webhook missed.
+- Mondays: logs `circle_admin_api_weekly` with last week's Admin API calls by route (counted in KV).
+
+If Workflows cannot send webhooks (V5), change the cron schedule to every few hours; see V9 in AGENTS.md for the budget call.
+
+## 7. Still to build
+
 - Newsletter handler at `/api/newsletter`. The signup form already posts there.

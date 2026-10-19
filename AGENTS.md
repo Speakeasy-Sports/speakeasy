@@ -429,6 +429,7 @@ TURNSTILE_SITE_KEY=
 TURNSTILE_SECRET_KEY=
 KV_REST_API_URL=                  # idempotency locks (Upstash Redis via the Vercel integration)
 KV_REST_API_TOKEN=
+CRON_SECRET=                      # Vercel Cron auth for /api/cron/circle-daily
 # Phase 2
 AUTH_SECRET=
 AUTH_URL=https://speakeasysports.com

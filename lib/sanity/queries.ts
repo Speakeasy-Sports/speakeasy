@@ -328,3 +328,26 @@ export const REVIEW_NOTIFY_QUERY = defineQuery(`
     "school": primarySchool->shortName
   }
 `);
+
+export const ARTICLE_BY_CIRCLE_POST_QUERY = defineQuery(`
+  *[_type == "article" && circlePostId == $postId && !(_id in path("drafts.**")) && !(_id in path("versions.**"))][0]{
+    _id,
+    "slug": slug.current,
+    circleCommentCount,
+    "versions": *[sanity::versionOf(^._id) && _id != ^._id]._id
+  }
+`);
+
+// Daily job (AGENTS.md 7.2 step 4, 7.3): sync errors, recent articles never posted, and recent counts to refresh.
+export const CIRCLE_DAILY_QUERY = defineQuery(`
+  {
+    "retry": *[
+      _type == "article" && !(_id in path("drafts.**")) && !(_id in path("versions.**"))
+      && (defined(circleSyncError) || (!defined(circlePostId) && coalesce(publishedAt, _createdAt) > $postSince))
+    ] | order(coalesce(publishedAt, _createdAt) desc) [0...20]._id,
+    "counts": *[
+      _type == "article" && defined(circlePostId) && !(_id in path("drafts.**")) && !(_id in path("versions.**"))
+      && coalesce(publishedAt, _createdAt) > $countSince
+    ] | order(coalesce(publishedAt, _createdAt) desc) [0...50].circlePostId
+  }
+`);

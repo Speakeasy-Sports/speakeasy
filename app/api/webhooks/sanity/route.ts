@@ -52,7 +52,7 @@ export async function POST(req: Request) {
   if (payload._type === "article" && payload.operation !== "delete") {
     const { _id: id, textChanged } = payload;
     after(() =>
-      finalizePublishedArticle(id, { textChanged }, finalizeDeps()).catch((err) => log("article_finalize_failed", { id, error: String(err) })),
+      finalizePublishedArticle(id, { textChanged }, finalizeDeps("webhooks/sanity")).catch((err) => log("article_finalize_failed", { id, error: String(err) })),
     );
   }
 
