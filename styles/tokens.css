@@ -49,6 +49,9 @@
     --fg-muted: #b5b3ac;
     --fg-subtle: #8a8984;
     --line: #2a2a26;
+    /* Brand accent outside a school section: near-black would vanish on the dark background. */
+    --accent: #f2f0ea;
+    --accent-fg: #121210;
     color-scheme: dark;
   }
 }
@@ -59,6 +62,8 @@
   --fg-muted: #b5b3ac;
   --fg-subtle: #8a8984;
   --line: #2a2a26;
+  --accent: #f2f0ea;
+  --accent-fg: #121210;
   color-scheme: dark;
 }
 

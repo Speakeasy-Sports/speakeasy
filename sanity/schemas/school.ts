@@ -1,6 +1,7 @@
 import { defineField, defineType } from "sanity";
 import { HomeIcon } from "@sanity/icons/Home";
 import { isReservedSlug } from "../../lib/reserved-slugs";
+import { contrast, DARK_BG, isHex, LIGHT_BG } from "../../lib/color";
 import { hexColor } from "./shared/validation";
 
 export const school = defineType({
@@ -46,15 +47,29 @@ export const school = defineType({
       name: "accentColor",
       type: "string",
       group: "identity",
-      description: "Hex color, light mode. Must pass 4.5:1 on the warm white background.",
-      validation: (rule) => rule.required().custom(hexColor),
+      description: "Hex color, light mode. Must pass 4.5:1 on the warm white background (#FCFBF8).",
+      validation: (rule) =>
+        rule
+          .required()
+          .custom(hexColor)
+          .custom((value) => {
+            if (!isHex(value)) return true;
+            const ratio = contrast(value, LIGHT_BG);
+            return ratio >= 4.5 || `Only ${ratio.toFixed(1)}:1 on the light background. Pick a darker shade (4.5:1 needed).`;
+          }),
     }),
     defineField({
       name: "accentColorDark",
       type: "string",
       group: "identity",
-      description: "Hex color override for dark mode. Leave empty if the light color already passes 4.5:1 on #121210.",
-      validation: (rule) => rule.custom(hexColor),
+      description:
+        "Hex color for dark mode. Must pass 4.5:1 on #121210. If empty, the site lightens the light color until it passes.",
+      validation: (rule) =>
+        rule.custom(hexColor).custom((value) => {
+          if (!isHex(value)) return true;
+          const ratio = contrast(value, DARK_BG);
+          return ratio >= 4.5 || `Only ${ratio.toFixed(1)}:1 on the dark background. Pick a lighter shade (4.5:1 needed).`;
+        }),
     }),
     defineField({ name: "logo", type: "image", group: "identity", options: { hotspot: true } }),
     defineField({ name: "heroImage", type: "image", group: "identity", options: { hotspot: true } }),

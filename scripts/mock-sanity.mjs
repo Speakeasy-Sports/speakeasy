@@ -18,11 +18,14 @@ function resolve(query, params) {
     const a = fixtures.articles.find((x) => x.slug === params.slug);
     return a ? { title: a.title, dek: a.dek, contentType: a.contentType, school: a.school, authors: a.authors.map((x) => ({ name: x.name })) } : null;
   }
-  if (q.includes('slug.current == $slug && defined(primarySchool) && status != "draft"')) {
+  if (q.includes("slug.current == $slug][0]{ _id, _updatedAt,")) {
     return fixtures.articles.find((x) => x.slug === params.slug) ?? null;
   }
   if (q.includes('_type == "school" && slug.current == $slug')) {
     return fixtures.schools.find((s) => s.slug === params.slug) ?? null;
+  }
+  if (q.includes('_type == "school" && defined(slug.current)')) {
+    return fixtures.schools.map((s) => ({ slug: s.slug }));
   }
   if (q.includes("$schoolId in schools[]._ref")) {
     return fixtures.cards.filter((c) => c.school._id === params.schoolId);
@@ -67,7 +70,8 @@ const server = createServer((req, res) => {
     const params = parseParams(url.searchParams, body);
     const result = resolve(query, params);
     const label = query.replace(/\s+/g, " ").slice(0, 70);
-    console.log(`${req.method} ${result === null ? "null" : Array.isArray(result) ? `${result.length} items` : "doc"}  ${label}`);
+    const paramLabel = Object.keys(params).length ? ` ${JSON.stringify(params)}` : "";
+    console.log(`${req.method} ${result === null ? "null" : Array.isArray(result) ? `${result.length} items` : "doc"}  ${label}${paramLabel}`);
     res.writeHead(200, { "content-type": "application/json" });
     res.end(JSON.stringify({ result, ms: 1 }));
   });

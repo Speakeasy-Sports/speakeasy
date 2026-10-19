@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { stegaClean } from "@sanity/client/stega";
 import { sanityFetch } from "@/lib/sanity/fetch";
-import { ARTICLE_QUERY } from "@/lib/sanity/queries";
+import { client } from "@/lib/sanity/client";
+import { ARTICLE_QUERY, ARTICLE_SLUGS_QUERY } from "@/lib/sanity/queries";
 import { getSiteSettings } from "@/lib/sanity/loaders";
-import { tags } from "@/lib/sanity/tags";
+import { articlePageTags } from "@/lib/sanity/tags";
 import { urlFor } from "@/lib/sanity/image";
 import { isReservedSlug } from "@/lib/reserved-slugs";
 import { joinUrlFor } from "@/lib/circle-links";
@@ -26,18 +27,34 @@ import { RelatedStories } from "@/components/RelatedStories";
 import { SchoolTheme } from "@/components/SchoolTheme";
 import { JsonLd } from "@/components/JsonLd";
 
+// ISR: the newest articles are prerendered at build, the rest on first request, all revalidated every 60s
+// and on demand from the webhook. generateStaticParams is what makes Next treat the route as static.
 export const revalidate = 60;
+export const dynamicParams = true;
 
 type Props = { params: Promise<{ school: string; slug: string }> };
 
 const SLUG_RE = /^[a-z0-9-]+$/;
 
-async function getArticle(slug: string, stega = true) {
+export async function generateStaticParams() {
+  try {
+    const rows = await client.fetch(ARTICLE_SLUGS_QUERY, {}, { useCdn: false });
+    return rows
+      .filter((r): r is { slug: string; school: string } => Boolean(r.slug && r.school))
+      .map((r) => ({ school: r.school, slug: r.slug }));
+  } catch (err) {
+    // A Sanity outage at build time should not fail the deploy; pages render on first request instead.
+    console.warn("generateStaticParams(article): could not list slugs", err);
+    return [];
+  }
+}
+
+async function getArticle(slug: string, school: string, stega = true) {
   if (!SLUG_RE.test(slug)) return null;
   return sanityFetch({
     query: ARTICLE_QUERY,
     params: { slug },
-    tags: [tags.articleSlug(slug), tags.articles, tags.sponsors],
+    tags: articlePageTags(slug, school),
     stega,
   });
 }
@@ -61,7 +78,7 @@ function resolveCanonical<T extends { school: { slug: string | null } | null; sc
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { school, slug } = await params;
   if (isReservedSlug(school)) return {};
-  const article = await getArticle(slug, false);
+  const article = await getArticle(slug, school, false);
   if (!article?.school?.slug || article.school.slug !== school) return {};
 
   const image = article.ogImageOverride?.asset
@@ -89,7 +106,7 @@ export default async function ArticlePage({ params }: Props) {
   const { school: requestedSchool, slug } = await params;
   if (isReservedSlug(requestedSchool)) notFound();
 
-  const [fetched, settings] = await Promise.all([getArticle(slug), getSiteSettings()]);
+  const [fetched, settings] = await Promise.all([getArticle(slug, requestedSchool), getSiteSettings()]);
   const article = resolveCanonical(fetched, requestedSchool);
   const school = article.school!;
   const schoolSlug = stegaClean(school.slug) ?? requestedSchool;

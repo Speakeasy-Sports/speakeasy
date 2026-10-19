@@ -47,7 +47,12 @@ const CARD_FIELDS = /* groq */ `
   heroEmbed { provider, url, title }
 `;
 
-const PUBLISHED = /* groq */ `_type == "article" && status == "published" && defined(slug.current) && defined(primarySchool)`;
+// What counts as live: any article in the published perspective with a slug and a primary school.
+// Site queries never filter on `status`. It is a Studio workflow field; Sanity's publish action (immediate or scheduled)
+// is the only thing that moves a document into the published perspective, and draft mode reads the drafts perspective
+// so editors can preview any status. Filtering on status here is what broke preview and hid freshly published stories.
+const LIVE = /* groq */ `_type == "article" && defined(slug.current) && defined(primarySchool)`;
+const BY_DATE = /* groq */ `order(coalesce(publishedAt, _createdAt) desc)`;
 
 export const SITE_SETTINGS_QUERY = defineQuery(`
   *[_id == "siteSettings"][0]{
@@ -64,7 +69,11 @@ export const SITE_SETTINGS_QUERY = defineQuery(`
 `);
 
 export const HOME_LATEST_QUERY = defineQuery(`
-  *[${PUBLISHED}] | order(publishedAt desc) [0...20] { ${CARD_FIELDS} }
+  *[${LIVE}] | ${BY_DATE} [0...20] { ${CARD_FIELDS} }
+`);
+
+export const SCHOOL_SLUGS_QUERY = defineQuery(`
+  *[_type == "school" && defined(slug.current)]{ "slug": slug.current }
 `);
 
 export const SCHOOL_QUERY = defineQuery(`
@@ -80,11 +89,11 @@ export const SCHOOL_QUERY = defineQuery(`
 `);
 
 export const SCHOOL_LATEST_QUERY = defineQuery(`
-  *[${PUBLISHED} && $schoolId in schools[]._ref] | order(publishedAt desc) [0...20] { ${CARD_FIELDS} }
+  *[${LIVE} && $schoolId in schools[]._ref] | ${BY_DATE} [0...20] { ${CARD_FIELDS} }
 `);
 
 export const ARTICLE_QUERY = defineQuery(`
-  *[_type == "article" && slug.current == $slug && defined(primarySchool) && status != "draft"][0]{
+  *[${LIVE} && slug.current == $slug][0]{
     _id,
     _updatedAt,
     title,
@@ -117,8 +126,8 @@ export const ARTICLE_QUERY = defineQuery(`
     circlePostUrl,
     circleCommentCount,
     "related": *[
-      ${PUBLISHED} && _id != ^._id && primarySchool._ref == ^.primarySchool._ref
-    ] | order(count((tags[]._ref)[@ in ^.^.tags[]._ref]) desc, publishedAt desc) [0...3] { ${CARD_FIELDS} },
+      ${LIVE} && _id != ^._id && primarySchool._ref == ^.primarySchool._ref
+    ] | order(coalesce(count((tags[]._ref)[@ in ^.^.tags[]._ref]), 0) desc, coalesce(publishedAt, _createdAt) desc) [0...3] { ${CARD_FIELDS} },
     "sponsor": *[
       _type == "sponsorSlot" && active == true && placement == "articleBelowHero"
       && (!defined(startDate) || startDate <= now())
@@ -131,7 +140,7 @@ export const ARTICLE_QUERY = defineQuery(`
 `);
 
 export const ARTICLE_OG_QUERY = defineQuery(`
-  *[${PUBLISHED} && slug.current == $slug][0]{
+  *[${LIVE} && slug.current == $slug][0]{
     title,
     dek,
     contentType,
@@ -140,8 +149,9 @@ export const ARTICLE_OG_QUERY = defineQuery(`
   }
 `);
 
+// Prerendered at build time (generateStaticParams). Older articles render on first request and are then cached.
 export const ARTICLE_SLUGS_QUERY = defineQuery(`
-  *[${PUBLISHED}] | order(publishedAt desc) [0...200] {
+  *[${LIVE}] | ${BY_DATE} [0...100] {
     "slug": slug.current,
     "school": primarySchool->slug.current
   }

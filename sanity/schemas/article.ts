@@ -136,9 +136,12 @@ export const article = defineType({
       group: "media",
       hidden: ({ document }) => document?.heroType === "image",
       validation: (rule) =>
-        rule.custom((value: { url?: string } | undefined, context) => {
+        rule.custom((value: { url?: string; provider?: string } | undefined, context) => {
           const type = context.document?.heroType;
-          if ((type === "video" || type === "podcast") && !value?.url) return "A hero embed is required";
+          if (type !== "video" && type !== "podcast") return true;
+          if (!value?.url) return "A hero embed is required";
+          if (type === "video" && value.provider !== "youtube") return "Video leads use a YouTube URL";
+          if (type === "podcast" && value.provider === "youtube") return "Podcast leads use Spotify, Apple Podcasts, or another audio player";
           return true;
         }),
     }),

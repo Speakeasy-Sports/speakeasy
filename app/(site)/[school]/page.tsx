@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { stegaClean } from "@sanity/client/stega";
 import { sanityFetch } from "@/lib/sanity/fetch";
-import { SCHOOL_LATEST_QUERY, SCHOOL_QUERY } from "@/lib/sanity/queries";
+import { client } from "@/lib/sanity/client";
+import { SCHOOL_LATEST_QUERY, SCHOOL_QUERY, SCHOOL_SLUGS_QUERY } from "@/lib/sanity/queries";
 import { getSiteSettings } from "@/lib/sanity/loaders";
-import { tags } from "@/lib/sanity/tags";
+import { schoolPageTags } from "@/lib/sanity/tags";
 import { isReservedSlug } from "@/lib/reserved-slugs";
 import { joinUrlFor } from "@/lib/circle-links";
 import { buildMetadata, schoolPath } from "@/lib/seo";
@@ -13,13 +14,25 @@ import { SchoolTheme } from "@/components/SchoolTheme";
 import { StoryRow } from "@/components/StoryRow";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
 
+// ISR, see the article page for the pattern.
 export const revalidate = 60;
+export const dynamicParams = true;
 
 type Props = { params: Promise<{ school: string }> };
 
+export async function generateStaticParams() {
+  try {
+    const rows = await client.fetch(SCHOOL_SLUGS_QUERY, {}, { useCdn: false });
+    return rows.filter((r): r is { slug: string } => Boolean(r.slug)).map((r) => ({ school: r.slug }));
+  } catch (err) {
+    console.warn("generateStaticParams(school): could not list slugs", err);
+    return [];
+  }
+}
+
 async function getSchool(slug: string) {
   if (isReservedSlug(slug) || !/^[a-z0-9-]+$/.test(slug)) return null;
-  return sanityFetch({ query: SCHOOL_QUERY, params: { slug }, tags: [tags.school(slug), tags.schools] });
+  return sanityFetch({ query: SCHOOL_QUERY, params: { slug }, tags: schoolPageTags(slug) });
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -43,7 +56,7 @@ export default async function SchoolPage({ params }: Props) {
     sanityFetch({
       query: SCHOOL_LATEST_QUERY,
       params: { schoolId: school._id },
-      tags: [tags.school(slug), tags.articles],
+      tags: schoolPageTags(slug),
     }),
     getSiteSettings(),
   ]);

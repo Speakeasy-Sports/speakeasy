@@ -247,7 +247,8 @@ Headline, blurb, email form posting to `/api/newsletter`, sample issue link.
 
 ### 7.1 Sanity to site (content delivery)
 - `next-sanity` client with CDN enabled for published content, `perspective: 'published'`; draft mode uses `perspective: 'previewDrafts'` with a read token.
-- Every query tags its cache with `article:{id}`, `school:{slug}`, `author:{slug}`, `tag:{slug}`, plus `home`.
+- Site queries treat any article in the published perspective as live and never filter on `status`, which is a Studio workflow field. Draft mode reads the drafts perspective so editors can preview any status.
+- Every query tags its cache by what it knows before fetching: `article-slug:{slug}`, `school:{slug}`, `author:{slug}`, `tag:{slug}`, plus the collections `articles`, `schools`, `sponsors`, `settings`, and `home`. The full vocabulary, and which tags each handler revalidates, is in `lib/sanity/tags.ts`.
 - `/api/webhooks/sanity` verifies the Sanity signature, reads the changed document ids and types, calls `revalidateTag` for the affected tags, and returns 200 within 10 seconds. Everything else (Circle sync, email) runs after revalidation.
 
 ### 7.2 Site to Circle (auto-post on publish)
@@ -261,7 +262,7 @@ Headline, blurb, email form posting to `/api/newsletter`, sample issue link.
 - Budget: roughly 12 creates plus a handful of updates per week, under 100 requests per month.
 
 ### 7.3 Circle to site (comment counts)
-- Primary: Circle Workflow "comment created" (and "post updated") with a webhook action pointing at `/api/webhooks/circle` carrying the post id. Handler verifies a shared secret in a header, looks up the article by `circlePostId`, fetches the post via Admin API to read the current comment count, writes `circleCommentCount`, revalidates `article:{id}`.
+- Primary: Circle Workflow "comment created" (and "post updated") with a webhook action pointing at `/api/webhooks/circle` carrying the post id. Handler verifies a shared secret in a header, looks up the article by `circlePostId`, fetches the post via Admin API to read the current comment count, writes `circleCommentCount`, revalidates `article-slug:{slug}`.
 - Fallback if Workflows cannot send to a webhook: Vercel Cron hourly, fetch counts for articles published in the last 14 days (about 25 posts per hour, under 20,000 requests per month, still inside the 30,000 allowance; drop to every 2 hours if usage climbs).
 - The count is informational. If it is stale by an hour, nothing breaks.
 

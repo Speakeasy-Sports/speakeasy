@@ -13,6 +13,19 @@ Built and verified (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `p
 - Minimal home (Latest list) and school section so links resolve. Full layouts are week 2.
 - `scripts/mock-sanity.mjs` plus fixtures so the site builds and the smoke tests run without a Sanity project.
 
+### Review fixes (October 19, after the reviewer pass)
+
+- Site queries no longer filter on `status`: live means "exists in the published perspective". Fixes 404s when previewing new drafts and published stories missing from lists before the webhook flips status.
+- School and article routes use `generateStaticParams`, so they are SSG plus ISR instead of rendering on every request.
+- Related stories use `coalesce(count(shared tags), 0)` so untagged articles no longer sort first.
+- Cache tag vocabulary settled in `lib/sanity/tags.ts` (pages tag by slug and collection; handlers revalidate the same). AGENTS.md 7.1 and 7.3 updated to match.
+- Hero embed provider is validated against `heroType` (video needs YouTube, podcast must not be YouTube).
+- `/api/draft/disable?to=` only follows same-origin paths.
+- School accent colors are validated for 4.5:1 in the Studio, and the site derives a passing dark-mode accent when `accentColorDark` is empty. Root dark tokens now define a visible brand accent.
+- GROQ queries have a Vitest suite that runs the real queries in groq-js against fixture documents (`lib/sanity/queries.test.ts`).
+
+Still open from the review, for week 2: alt text is not build-enforced and `school.logo`, `school.heroImage`, `siteSettings.defaultOgImage`, and `article.ogImageOverride` have no alt field; `check:secrets` is not in CI (no workflow yet); OG image URLs are unversioned so a corrected headline can stay cached up to a day at the edge; Editors can still set "Published" by hand.
+
 ## Deferred to week 2 (per AGENTS.md section 12)
 
 - Home lead story, secondary row, pagination. School sub-nav and tag filters.

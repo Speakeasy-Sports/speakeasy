@@ -46,6 +46,7 @@ pnpm build && pnpm check:secrets
 ```bash
 node scripts/mock-sanity.mjs 3999 &
 export SANITY_API_HOST=http://127.0.0.1:3999 NEXT_PUBLIC_SANITY_PROJECT_ID=mock1234
+rm -rf .next   # the build fetch cache in .next/cache survives between builds and will replay old mock answers
 pnpm build && pnpm start &
 pnpm test:e2e
 ```
