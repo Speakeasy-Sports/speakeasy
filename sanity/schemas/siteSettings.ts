@@ -1,6 +1,7 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { CogIcon } from "@sanity/icons/Cog";
 import { SOCIAL_PLATFORMS } from "./author";
+import { altField } from "./shared/imageWithAlt";
 
 export const SITE_SETTINGS_ID = "siteSettings";
 
@@ -16,6 +17,7 @@ export const siteSettings = defineType({
       name: "defaultOgImage",
       type: "image",
       description: "1200x630. Used when a page has no image of its own.",
+      fields: [altField],
     }),
     defineField({
       name: "socialLinks",

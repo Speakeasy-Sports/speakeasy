@@ -24,3 +24,5 @@ sanity/schema.json
 *.pem
 *.tsbuildinfo
 .vercel
+
+mock-sanity.log

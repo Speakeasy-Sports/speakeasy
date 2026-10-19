@@ -1,6 +1,6 @@
 import { defineArrayMember, defineField, defineType, getPublishedId } from "sanity";
 import { DocumentTextIcon } from "@sanity/icons/DocumentText";
-import { imageWithAltFields } from "./shared/imageWithAlt";
+import { altField, imageWithAltFields } from "./shared/imageWithAlt";
 import { slugFormat } from "./shared/validation";
 import { StatusInput } from "../components/StatusInput";
 
@@ -243,6 +243,7 @@ export const article = defineType({
       type: "image",
       group: "seo",
       description: "Replaces the generated social card.",
+      fields: [altField],
     }),
     defineField({ name: "noIndex", type: "boolean", group: "seo", initialValue: false }),
 

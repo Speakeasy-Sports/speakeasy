@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # The build and smoke tests run against scripts/mock-sanity.mjs, so CI needs no Sanity project or secrets.
+    env:
+      SANITY_API_HOST: http://127.0.0.1:3999
+      NEXT_PUBLIC_SANITY_PROJECT_ID: mock1234
+      NEXT_PUBLIC_MOCK_ASSET_ORIGIN: http://127.0.0.1:3999
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Start mock Sanity
+        run: |
+          node scripts/mock-sanity.mjs 3999 > mock-sanity.log 2>&1 &
+          for i in $(seq 1 30); do curl -s -o /dev/null "http://127.0.0.1:3999/" && exit 0; sleep 1; done
+          echo "mock Sanity did not start"; cat mock-sanity.log; exit 1
+
+      - name: Build (includes the alt text check)
+        run: pnpm build
+
+      - name: No secrets in client bundles
+        run: pnpm check:secrets
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Smoke tests
+        run: pnpm test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+            mock-sanity.log
+          retention-days: 7

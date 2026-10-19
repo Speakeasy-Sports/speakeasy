@@ -24,7 +24,7 @@ Built and verified (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `p
 - School accent colors are validated for 4.5:1 in the Studio, and the site derives a passing dark-mode accent when `accentColorDark` is empty. Root dark tokens now define a visible brand accent.
 - GROQ queries have a Vitest suite that runs the real queries in groq-js against fixture documents (`lib/sanity/queries.test.ts`).
 
-Still open from the review, for week 2: alt text is not build-enforced and `school.logo`, `school.heroImage`, `siteSettings.defaultOgImage`, and `article.ogImageOverride` have no alt field; `check:secrets` is not in CI (no workflow yet); OG image URLs are unversioned so a corrected headline can stay cached up to a day at the edge; Editors can still set "Published" by hand.
+Still open from the review: OG image URLs are unversioned so a corrected headline can stay cached up to a day at the edge; Editors can still set "Published" by hand.
 
 ## Phase 1, week 2: pages (branch phase-1-week-2-pages)
 
@@ -61,6 +61,12 @@ Still for week 2: Sanity and Circle webhooks, `/api/newsletter`, WordPress redir
 - `/api/webhooks/circle`: shared secret (header, or query for senders without headers), finds the article by `circlePostId`, reads the count from the Admin API, writes `circleCommentCount` to the article and its drafts, revalidates `article-slug:{slug}`. Accepts a post id or a comment id; one count read per post per 30 seconds.
 - `/api/cron/circle-daily` (Vercel Cron): retries sync errors, posts recent articles that never got one, refreshes counts for the last 7 days, and logs a weekly Admin API usage summary on Mondays (calls counted per route in KV).
 - Both stay idle while `CIRCLE_SYNC_ENABLED` is off. The Workflow payload shape is not documented; the handler accepts the likely shapes and logs the keys of anything it cannot read.
+
+## CI and alt text (branch ci-and-alt-text)
+
+- GitHub Actions on every PR and push to main: lint, typecheck, unit tests, build against the mock dataset, `check:secrets` on the built bundles, and the Playwright smoke tests. No secrets or Sanity project needed.
+- `pnpm build` now runs `scripts/check-alt-text.mjs` first: it fails the build if any published article, info page, author, school, sponsor slot, or site settings image has no alt text. Skipped when no Sanity project is configured.
+- `school.logo`, `school.heroImage`, `siteSettings.defaultOgImage`, and `article.ogImageOverride` now have a required alt field; the article override's alt feeds `og:image:alt`.
 
 ## Remaining for week 2 (per AGENTS.md section 12)
 

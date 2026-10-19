@@ -82,7 +82,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!article?.school?.slug || article.school.slug !== school) return {};
 
   const image = article.ogImageOverride?.asset
-    ? { url: urlFor(article.ogImageOverride).width(1200).height(630).fit("crop").url(), width: 1200, height: 630 }
+    ? {
+        url: urlFor(article.ogImageOverride).width(1200).height(630).fit("crop").url(),
+        width: 1200,
+        height: 630,
+        alt: article.ogImageOverride.alt ?? undefined,
+      }
     : { url: ogImageUrl(article.slug ?? slug), width: 1200, height: 630 };
 
   return buildMetadata({
