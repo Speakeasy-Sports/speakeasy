@@ -78,7 +78,7 @@ What the handler does:
 - Site publish: revalidates the cache tags in `lib/sanity/tags.ts` before responding. For an article it then sets `status` to `published` (and `publishedAt` if empty) and syncs the Circle post, in one transaction that also copies the Circle fields onto any open draft or scheduled version. The echo delivery from that write changes nothing.
 - Review notification: emails `EDITOR_NOTIFY_EMAIL` through Postmark with a Studio link.
 
-Needed env vars: `SANITY_WEBHOOK_SECRET`, `SANITY_API_WRITE_TOKEN` (Editor role token), `KV_REST_API_URL` and `KV_REST_API_TOKEN` (the lock), Postmark vars for the email. Circle sync stays off until `CIRCLE_SYNC_ENABLED=true` (see `docs/circle-api-notes.md`). Each step logs one JSON line (`sanity_webhook`, `article_finalized`, `circle_admin_api`, `review_notified`) in the Vercel function logs.
+Needed env vars: `SANITY_WEBHOOK_SECRET`, `SANITY_API_WRITE_TOKEN` (Editor role token), `KV_REST_API_URL` and `KV_REST_API_TOKEN` (the lock), Postmark vars for the email. Circle sync stays off until `CIRCLE_SYNC_ENABLED=true`; turn it on after one test post (checklist in `docs/circle-api-notes.md`). Each step logs one JSON line (`sanity_webhook`, `article_finalized`, `circle_admin_api`, `review_notified`) in the Vercel function logs.
 
 ## 6. Still to build
 

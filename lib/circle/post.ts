@@ -24,14 +24,22 @@ export function buildPostContent(a: SyncableArticle): CirclePostContent | { erro
     title: a.title,
     dek: a.dek ?? "",
     url: absoluteUrl(articlePath(a.school.slug, a.slug)),
-    imageUrl: a.heroImageUrl ? `${a.heroImageUrl}?w=1200&h=630&fit=crop&auto=format` : null,
+    // JPEG at a fixed size: Circle stores the file as uploaded, so it gets a cover-sized image, not the original.
+    imageUrl: a.heroImageUrl ? `${a.heroImageUrl}?w=1200&h=630&fit=crop&fm=jpg&q=80` : null,
   };
 }
 
-const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+type TipTapText = { type: "text"; text: string; marks?: Array<{ type: "link"; attrs: { href: string; target: string } }> };
+export type TipTapDoc = { type: "doc"; content: Array<{ type: "paragraph"; content: TipTapText[] }> };
 
-/** Post body as simple HTML: the dek, then the link. */
-export function postBodyHtml(c: CirclePostContent): string {
-  const link = `<a href="${escapeHtml(c.url)}">${escapeHtml(c.url)}</a>`;
-  return `${c.dek ? `<p>${escapeHtml(c.dek)}</p>` : ""}<p>Read the full story: ${link}</p>`;
+/** Post body as TipTap JSON (Admin API v2 `tiptap_body.body`): the dek, then the link. Links need href and target. */
+export function postBodyDoc(c: CirclePostContent): TipTapDoc {
+  const link: TipTapText = { type: "text", text: c.url, marks: [{ type: "link", attrs: { href: c.url, target: "_blank" } }] };
+  return {
+    type: "doc",
+    content: [
+      ...(c.dek ? [{ type: "paragraph" as const, content: [{ type: "text" as const, text: c.dek }] }] : []),
+      { type: "paragraph", content: [{ type: "text", text: "Read the full story: " }, link] },
+    ],
+  };
 }

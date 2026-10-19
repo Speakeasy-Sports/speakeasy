@@ -53,7 +53,7 @@ Still for week 2: Sanity and Circle webhooks, `/api/newsletter`, WordPress redir
 - Loop safety: the echo delivery from the handler's own write changes nothing; a recorded Circle error is not retried on every delivery (the daily retry or a title or dek edit retries it).
 - 30-second lock per article over Upstash Redis REST (`KV_REST_API_URL`, `KV_REST_API_TOKEN`, replacing `KV_URL`).
 - Review notification: Postmark email to `EDITOR_NOTIFY_EMAIL` when a draft moves into review.
-- Circle sync is built but off (`CIRCLE_SYNC_ENABLED=false`): the Admin API request format is unverified (V4). See `docs/circle-api-notes.md`.
+- Circle sync matches the Admin API V2 Swagger (V4 verified: TipTap body, cover via direct upload) but stays off (`CIRCLE_SYNC_ENABLED=false`) until one test post against the live community looks right. See `docs/circle-api-notes.md`.
 - Webhook configuration (filters, projection) in `docs/setup.md` section 5.
 
 ## Remaining for week 2 (per AGENTS.md section 12)
