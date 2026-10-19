@@ -2,6 +2,9 @@ import { defineQuery } from "next-sanity";
 
 // One GROQ query per page, typed with Sanity TypeGen (pnpm typegen regenerates sanity.types.ts).
 // Fragments are plain strings so they stay inline for TypeGen.
+//
+// Paginated lists are written with a literal first-page slice (for example `[0...20]`) so TypeGen can type them.
+// lib/sanity/paginate.ts swaps that one slice for the requested page at runtime; keep each marker unique per query.
 
 const IMAGE_FIELDS = /* groq */ `
   asset->{ _id, url, metadata { lqip, dimensions { width, height } } },
@@ -23,13 +26,21 @@ const SCHOOL_REF_FIELDS = /* groq */ `
   accentColorDark
 `;
 
+const NAV_TAG_FIELDS = /* groq */ `
+  "navTags": navTags[]->{ _id, name, "slug": slug.current }
+`;
+
+const AUTHOR_PHOTO = /* groq */ `
+  photo { asset->{ _id, url, metadata { lqip } }, hotspot, crop, alt }
+`;
+
 const AUTHOR_REF_FIELDS = /* groq */ `
   _id,
   name,
   "slug": slug.current,
   role,
   bio,
-  photo { asset->{ _id, url, metadata { lqip } }, hotspot, crop, alt },
+  ${AUTHOR_PHOTO},
   socialLinks[]{ _key, platform, url }
 `;
 
@@ -42,7 +53,7 @@ const CARD_FIELDS = /* groq */ `
   heroType,
   publishedAt,
   "school": primarySchool->{ ${SCHOOL_REF_FIELDS} },
-  "authors": authors[]->{ _id, name, "slug": slug.current },
+  "authors": authors[]->{ _id, name, "slug": slug.current, ${AUTHOR_PHOTO} },
   heroImage { ${IMAGE_FIELDS} },
   heroEmbed { provider, url, title }
 `;
@@ -54,6 +65,13 @@ const CARD_FIELDS = /* groq */ `
 const LIVE = /* groq */ `_type == "article" && defined(slug.current) && defined(primarySchool)`;
 const BY_DATE = /* groq */ `order(coalesce(publishedAt, _createdAt) desc)`;
 
+// Front-page order: featured ranks 1 to 4 first (a newer story wins a tied rank), then everything else newest first.
+// The first four of this order are the "top stories"; with nothing featured they are simply the four newest.
+// The Latest list excludes exactly those four, on every page, so pagination never repeats or skips a story.
+const TOP_ORDER = /* groq */ `order(select(featured == true && featuredRank in 1..4 => featuredRank, 99) asc, coalesce(publishedAt, _createdAt) desc)`;
+
+const MEDIA_TYPES = /* groq */ `["podcast", "video"]`;
+
 export const SITE_SETTINGS_QUERY = defineQuery(`
   *[_id == "siteSettings"][0]{
     siteName,
@@ -64,33 +82,83 @@ export const SITE_SETTINGS_QUERY = defineQuery(`
     joinUrl,
     newsletterHeadline,
     newsletterBlurb,
+    newsletterSampleUrl,
     "navSchools": navSchools[]->{ ${SCHOOL_REF_FIELDS} }
   }
 `);
 
-export const HOME_LATEST_QUERY = defineQuery(`
-  *[${LIVE}] | ${BY_DATE} [0...20] { ${CARD_FIELDS} }
+export const HOME_QUERY = defineQuery(`
+  {
+    "top": (*[${LIVE}] | ${TOP_ORDER})[0...4]{ ${CARD_FIELDS} },
+    "latest": *[${LIVE} && !(_id in ((*[${LIVE}] | ${TOP_ORDER})[0...4]._id))] | ${BY_DATE} [0...20]{ ${CARD_FIELDS} },
+    "count": count(*[${LIVE}]),
+    "media": *[
+      ${LIVE} && contentType in ${MEDIA_TYPES}
+      && !(_id in ((*[${LIVE}] | ${TOP_ORDER})[0...4]._id))
+    ] | ${BY_DATE} [0...4]{ ${CARD_FIELDS} }
+  }
 `);
 
 export const SCHOOL_SLUGS_QUERY = defineQuery(`
   *[_type == "school" && defined(slug.current)]{ "slug": slug.current }
 `);
 
-export const SCHOOL_QUERY = defineQuery(`
+export const SCHOOL_FRONT_QUERY = defineQuery(`
   *[_type == "school" && slug.current == $slug][0]{
     ${SCHOOL_REF_FIELDS},
     mascot,
     description,
     seoTitle,
     seoDescription,
-    logo { asset->{ _id, url }, alt },
-    heroImage { asset->{ _id, url, metadata { lqip } }, hotspot, crop },
-    "navTags": navTags[]->{ _id, name, "slug": slug.current }
+    ${NAV_TAG_FIELDS},
+    "top": (*[${LIVE} && ^._id in schools[]._ref] | ${TOP_ORDER})[0...4]{ ${CARD_FIELDS} },
+    "latest": *[
+      ${LIVE} && ^._id in schools[]._ref
+      && !(_id in ((*[${LIVE} && ^.^._id in schools[]._ref] | ${TOP_ORDER})[0...4]._id))
+    ] | ${BY_DATE} [0...20]{ ${CARD_FIELDS} },
+    "count": count(*[${LIVE} && ^._id in schools[]._ref]),
+    "media": *[
+      ${LIVE} && ^._id in schools[]._ref && contentType in ${MEDIA_TYPES}
+      && !(_id in ((*[${LIVE} && ^.^._id in schools[]._ref] | ${TOP_ORDER})[0...4]._id))
+    ] | ${BY_DATE} [0...4]{ ${CARD_FIELDS} }
   }
 `);
 
-export const SCHOOL_LATEST_QUERY = defineQuery(`
-  *[${LIVE} && $schoolId in schools[]._ref] | ${BY_DATE} [0...20] { ${CARD_FIELDS} }
+export const AUTHOR_QUERY = defineQuery(`
+  *[_type == "author" && slug.current == $slug][0]{
+    ${AUTHOR_REF_FIELDS},
+    "schools": schools[]->{ ${SCHOOL_REF_FIELDS} },
+    "articles": *[${LIVE} && ^._id in authors[]._ref] | ${BY_DATE} [0...12]{ ${CARD_FIELDS} },
+    "count": count(*[${LIVE} && ^._id in authors[]._ref])
+  }
+`);
+
+// $school is a school slug or "" for all schools.
+export const TAG_QUERY = defineQuery(`
+  *[_type == "tag" && slug.current == $slug][0]{
+    _id,
+    name,
+    "slug": slug.current,
+    description,
+    "school": *[_type == "school" && slug.current == $school][0]{ ${SCHOOL_REF_FIELDS}, ${NAV_TAG_FIELDS} },
+    "schools": *[_type == "school" && count(*[${LIVE} && ^.^._id in tags[]._ref && ^._id in schools[]._ref]) > 0]
+      | order(order asc, name asc){ _id, name, shortName, "slug": slug.current },
+    "articles": *[${LIVE} && ^._id in tags[]._ref && ($school == "" || $school in schools[]->slug.current)]
+      | ${BY_DATE} [0...16]{ ${CARD_FIELDS} },
+    "count": count(*[${LIVE} && ^._id in tags[]._ref && ($school == "" || $school in schools[]->slug.current)])
+  }
+`);
+
+// $type is "podcast" or "video"; $school is a school slug or "".
+export const MEDIA_QUERY = defineQuery(`
+  {
+    "school": *[_type == "school" && slug.current == $school][0]{ ${SCHOOL_REF_FIELDS}, ${NAV_TAG_FIELDS} },
+    "schools": *[_type == "school" && count(*[${LIVE} && contentType == $type && ^._id in schools[]._ref]) > 0]
+      | order(order asc, name asc){ _id, name, shortName, "slug": slug.current },
+    "articles": *[${LIVE} && contentType == $type && ($school == "" || $school in schools[]->slug.current)]
+      | ${BY_DATE} [0...24]{ ${CARD_FIELDS}, episodeSummary },
+    "count": count(*[${LIVE} && contentType == $type && ($school == "" || $school in schools[]->slug.current)])
+  }
 `);
 
 export const ARTICLE_QUERY = defineQuery(`
@@ -155,5 +223,79 @@ export const ARTICLE_SLUGS_QUERY = defineQuery(`
   *[${LIVE}] | ${BY_DATE} [0...100] {
     "slug": slug.current,
     "school": primarySchool->slug.current
+  }
+`);
+
+export const NEWSLETTER_QUERY = defineQuery(`
+  *[${LIVE}] | ${BY_DATE} [0...3]{ ${CARD_FIELDS} }
+`);
+
+export const INFO_PAGE_QUERY = defineQuery(`
+  *[_type == "infoPage" && slug.current == $slug][0]{
+    _id,
+    _updatedAt,
+    title,
+    "slug": slug.current,
+    intro,
+    body[]{
+      ...,
+      _type == "imageBlock" => { ${IMAGE_FIELDS} },
+      markDefs[]{ ..., _type == "link" => { href } }
+    }
+  }
+`);
+
+// Client-side search index (AGENTS.md section 6). Short keys keep the JSON small: about 300 bytes per article.
+export const SEARCH_INDEX_QUERY = defineQuery(`
+  *[${LIVE} && noIndex != true] | ${BY_DATE} [0...5000]{
+    "t": title,
+    "d": dek,
+    "u": "/" + primarySchool->slug.current + "/" + slug.current,
+    "s": primarySchool->shortName,
+    "k": contentType,
+    "a": authors[]->name,
+    "g": tags[]->name,
+    "p": coalesce(publishedAt, _createdAt)
+  }
+`);
+
+const FEED_ITEM = /* groq */ `
+  _id,
+  title,
+  dek,
+  "slug": slug.current,
+  contentType,
+  "school": primarySchool->{ shortName, "slug": slug.current },
+  "authors": authors[]->name,
+  "tags": tags[]->name,
+  "published": coalesce(publishedAt, _createdAt),
+  "image": heroImage.asset->url
+`;
+
+export const FEED_QUERY = defineQuery(`
+  *[${LIVE} && noIndex != true] | ${BY_DATE} [0...50]{ ${FEED_ITEM} }
+`);
+
+export const SCHOOL_FEED_QUERY = defineQuery(`
+  *[_type == "school" && slug.current == $slug][0]{
+    name,
+    shortName,
+    description,
+    "slug": slug.current,
+    "items": *[${LIVE} && noIndex != true && ^._id in schools[]._ref] | ${BY_DATE} [0...50]{ ${FEED_ITEM} }
+  }
+`);
+
+export const SITEMAP_QUERY = defineQuery(`
+  {
+    "articles": *[${LIVE} && noIndex != true]{
+      "slug": slug.current,
+      "school": primarySchool->slug.current,
+      "updated": coalesce(updatedAt, _updatedAt)
+    },
+    "schools": *[_type == "school" && defined(slug.current)]{ "slug": slug.current, "updated": _updatedAt },
+    "authors": *[_type == "author" && defined(slug.current)]{ "slug": slug.current, "updated": _updatedAt },
+    "tags": *[_type == "tag" && defined(slug.current)]{ "slug": slug.current, "updated": _updatedAt },
+    "pages": *[_type == "infoPage" && defined(slug.current)]{ "slug": slug.current, "updated": _updatedAt }
   }
 `);

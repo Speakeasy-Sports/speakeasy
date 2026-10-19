@@ -25,20 +25,22 @@ export function SchoolLabel({
   );
 }
 
-/** "Type · School" pair used at the top of cards and articles. */
+/** "Type · School" pair used at the top of cards and articles. Inside a school's own section the school is implied. */
 export function LabelRow({
   type,
   school,
+  showSchool = true,
   className = "",
 }: {
   type: string | null | undefined;
   school: { slug: string | null; shortName?: string | null; name?: string | null } | null | undefined;
+  showSchool?: boolean;
   className?: string;
 }) {
   return (
-    <div className={`flex flex-wrap items-center gap-x-3 gap-y-1 ${className}`}>
+    <div className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 ${className}`}>
       <TypeLabel type={type} />
-      {school?.slug && (
+      {showSchool && school?.slug && (
         <>
           <span aria-hidden className="text-fg-subtle">
             &middot;

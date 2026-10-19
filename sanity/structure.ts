@@ -9,6 +9,7 @@ import { UserIcon } from "@sanity/icons/User";
 import { TagIcon } from "@sanity/icons/Tag";
 import { BillIcon } from "@sanity/icons/Bill";
 import { CogIcon } from "@sanity/icons/Cog";
+import { DocumentIcon } from "@sanity/icons/Document";
 import { SITE_SETTINGS_ID } from "./schemas/siteSettings";
 
 // Desk structure (AGENTS.md section 5): Articles by status, Schools, Authors, Tags, Sponsor slots, Settings.
@@ -72,6 +73,7 @@ export const structure: StructureResolver = (S) =>
       S.documentTypeListItem("author").title("Authors").icon(UserIcon),
       S.documentTypeListItem("tag").title("Tags").icon(TagIcon),
       S.documentTypeListItem("sponsorSlot").title("Sponsor slots").icon(BillIcon),
+      S.documentTypeListItem("infoPage").title("Pages").icon(DocumentIcon),
       S.divider(),
       S.listItem()
         .title("Settings")

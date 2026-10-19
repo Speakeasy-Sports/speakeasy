@@ -1,7 +1,7 @@
 // Plausible custom events (AGENTS.md 7.5). Safe to call from client components only.
 
 export type PlausibleEvent =
-  | { name: "join_click"; props: { location: "header" | "article_end" | "school_header" } }
+  | { name: "join_click"; props: { location: "header" | "article_end" | "school_header" | "rail" } }
   | { name: "newsletter_signup"; props?: { location?: string } }
   | { name: "discuss_click"; props?: { school?: string } }
   | { name: "video_play"; props?: { provider?: string } }

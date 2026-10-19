@@ -30,8 +30,11 @@ export function youtubeEmbedUrl(id: string): string {
   return `https://www.youtube-nocookie.com/embed/${id}?${params}`;
 }
 
+// Overridable only so local runs against scripts/mock-sanity.mjs show artwork with no network access.
+const YT_THUMB_ORIGIN = process.env.NEXT_PUBLIC_MOCK_ASSET_ORIGIN ?? "https://i.ytimg.com";
+
 export function youtubeThumbnail(id: string): string {
-  return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+  return `${YT_THUMB_ORIGIN}/vi/${id}/hqdefault.jpg`;
 }
 
 /**

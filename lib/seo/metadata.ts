@@ -16,6 +16,10 @@ type PageMeta = {
     section?: string | null;
     tags?: string[];
   };
+  /** A school's own RSS feed, advertised next to the site feed. */
+  schoolFeed?: { path: string; title: string } | null;
+  /** Use the title as-is instead of the "%s | Speakeasy Sports" template (the home page). */
+  absoluteTitle?: boolean;
 };
 
 /**
@@ -29,10 +33,13 @@ export function buildMetadata(meta: PageMeta): Metadata {
     ? [{ url: meta.image.url, width: meta.image.width ?? 1200, height: meta.image.height ?? 630, alt: meta.image.alt ?? meta.title }]
     : undefined;
 
+  const feeds = [{ url: absoluteUrl("/feed.xml"), title: SITE_NAME }];
+  if (meta.schoolFeed) feeds.push({ url: absoluteUrl(meta.schoolFeed.path), title: meta.schoolFeed.title });
+
   return {
-    title: meta.title,
+    title: meta.absoluteTitle ? { absolute: meta.title } : meta.title,
     description,
-    alternates: { canonical },
+    alternates: { canonical, types: { "application/rss+xml": feeds } },
     robots: meta.noIndex ? { index: false, follow: true } : undefined,
     openGraph: {
       type: meta.type ?? "website",

@@ -1,27 +1,56 @@
 import Link from "next/link";
 import type { ArticleCard } from "@/lib/types";
 import { articlePath } from "@/lib/seo";
-import { formatPublished } from "@/lib/format/date";
 import { LabelRow } from "./Labels";
+import { StoryImage } from "./StoryImage";
+import { StoryMeta } from "./StoryMeta";
 
-/** Compact list unit for "Latest": labels, headline, timestamp. */
-export function StoryRow({ article }: { article: ArticleCard }) {
+type Props = { article: ArticleCard; showSchool?: boolean; hideAuthors?: boolean };
+
+/** River unit for Latest and archive lists: labels, headline, dek, meta, with a small photo on the right. */
+export function StoryRow({ article, showSchool = true, hideAuthors }: Props) {
   if (!article.slug || !article.school?.slug) return null;
   const href = articlePath(article.school.slug, article.slug);
 
   return (
-    <article className="py-4" data-school={article.school.slug}>
-      <LabelRow type={article.contentType} school={article.school} />
-      <h3 className="mt-1 font-display text-lg font-semibold leading-snug md:text-xl">
-        <Link href={href} className="no-underline hover:underline">
-          {article.title}
-        </Link>
-      </h3>
-      {article.publishedAt && (
-        <p className="mt-1 font-ui text-sm text-fg-subtle">
-          <time dateTime={article.publishedAt}>{formatPublished(article.publishedAt)}</time>
-        </p>
-      )}
+    <article
+      data-school={article.school.slug}
+      className="group grid grid-cols-[1fr_6.5rem] items-start gap-4 py-6 sm:grid-cols-[1fr_11rem] sm:gap-8"
+    >
+      <div className="flex min-w-0 flex-col gap-2">
+        <LabelRow type={article.contentType} school={article.school} showSchool={showSchool} />
+        <h3 className="headline text-[1.1875rem] leading-[1.2] sm:text-[1.4375rem]">
+          <Link href={href} className="story-link">
+            {article.title}
+          </Link>
+        </h3>
+        {article.dek && <p className="hidden text-base leading-snug text-fg-muted sm:block">{article.dek}</p>}
+        <StoryMeta article={article} hideAuthors={hideAuthors} className="mt-1" />
+      </div>
+      <Link href={href} tabIndex={-1} aria-hidden="true" className="block">
+        <StoryImage article={article} width={360} sizes="(min-width: 640px) 176px, 104px" aspect="wide" artSize="sm" />
+      </Link>
+    </article>
+  );
+}
+
+/** Rail unit: small square picture, kicker, headline. */
+export function CompactRow({ article, showSchool = true }: { article: ArticleCard; showSchool?: boolean }) {
+  if (!article.slug || !article.school?.slug) return null;
+  const href = articlePath(article.school.slug, article.slug);
+  return (
+    <article data-school={article.school.slug} className="group grid grid-cols-[4.5rem_1fr] items-center gap-4 py-4">
+      <Link href={href} tabIndex={-1} aria-hidden="true" className="block">
+        <StoryImage article={article} width={160} sizes="72px" aspect="square" artSize="sm" />
+      </Link>
+      <div className="flex min-w-0 flex-col gap-1.5">
+        <LabelRow type={article.contentType} school={article.school} showSchool={showSchool} />
+        <h3 className="headline text-base leading-[1.25]">
+          <Link href={href} className="story-link">
+            {article.title}
+          </Link>
+        </h3>
+      </div>
     </article>
   );
 }

@@ -4,31 +4,31 @@ import { useId, useState } from "react";
 import { track } from "@/lib/analytics/plausible";
 
 type Props = {
-  variant?: "inline" | "page";
+  /** inline: boxed, end of article. band: full-width two-column, above the footer. page: the /newsletter page. */
+  variant?: "inline" | "band" | "page";
   headline?: string | null;
   blurb?: string | null;
   /** School slug to record as interest. */
   school?: string | null;
   location?: string;
+  sampleUrl?: string | null;
 };
 
 type State = "idle" | "submitting" | "done" | "error";
 
 /**
- * Posts to /api/newsletter (handler lands in week 2). Shows a "check your inbox" state on success,
- * since Circle handles double opt-in.
+ * Posts to /api/newsletter (AGENTS.md 7.4). Shows a "check your inbox" state on success, since Circle handles
+ * double opt-in.
  */
-export function NewsletterSignup({ variant = "inline", headline, blurb, school, location = "article_end" }: Props) {
+export function NewsletterSignup({ variant = "inline", headline, blurb, school, location = "article_end", sampleUrl }: Props) {
   const id = useId();
   const [state, setState] = useState<State>("idle");
-  const [error, setError] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const data = new FormData(form);
     setState("submitting");
-    setError(null);
     try {
       const res = await fetch("/api/newsletter", {
         method: "POST",
@@ -39,63 +39,116 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
           website: data.get("website") || "", // honeypot
         }),
       });
-      if (!res.ok) throw new Error(`Signup failed (${res.status})`);
+      if (!res.ok) throw new Error(String(res.status));
       setState("done");
       track({ name: "newsletter_signup", props: { location } });
       form.reset();
-    } catch (err) {
+    } catch {
       setState("error");
-      setError(err instanceof Error ? err.message : "Something went wrong");
     }
   }
 
-  const isPage = variant === "page";
+  const title = headline ?? "The Speakeasy newsletter";
+
+  const form =
+    state === "done" ? (
+      <p className="font-ui text-base text-fg" role="status">
+        Check your inbox. Confirm your address and you are on the list.
+      </p>
+    ) : (
+      <form onSubmit={onSubmit} className="flex flex-col gap-3 font-ui sm:flex-row">
+        <label htmlFor={`${id}-email`} className="sr-only">
+          Email address
+        </label>
+        <input
+          id={`${id}-email`}
+          name="email"
+          type="email"
+          required
+          autoComplete="email"
+          inputMode="email"
+          placeholder="Email address"
+          className="h-12 min-w-0 flex-1 rounded-base border border-line bg-bg px-4 text-base text-fg placeholder:text-fg-subtle focus:outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
+        />
+        {school && <input type="hidden" name="school" value={school} />}
+        {/* Honeypot. Hidden from people, filled by bots. */}
+        <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
+        <button
+          type="submit"
+          disabled={state === "submitting"}
+          className="h-12 shrink-0 rounded-base bg-fg px-6 text-sm font-semibold text-bg transition-opacity hover:opacity-90 disabled:opacity-60"
+        >
+          {state === "submitting" ? "Signing up" : "Sign up"}
+        </button>
+      </form>
+    );
+
+  const error =
+    state === "error" ? (
+      <p className="font-ui text-sm text-fg-muted" role="alert">
+        That did not go through. Try again in a moment.
+      </p>
+    ) : null;
+
+  const fine = (
+    <p className="font-ui text-[0.8125rem] text-fg-subtle">
+      Free. Unsubscribe anytime.
+      {sampleUrl && (
+        <>
+          {" "}
+          <a href={sampleUrl} className="text-fg underline decoration-line underline-offset-4 hover:decoration-fg">
+            Read a sample issue
+          </a>
+          .
+        </>
+      )}
+    </p>
+  );
+
+  if (variant === "band") {
+    return (
+      <section aria-labelledby={`${id}-h`} className="border-y border-line bg-bg-elev">
+        <div className="shell grid gap-8 py-14 md:grid-cols-12 md:items-end md:gap-10 md:py-20">
+          <div className="flex flex-col gap-3 md:col-span-6">
+            <p className="label-caps text-fg-muted">Newsletter</p>
+            <h2 id={`${id}-h`} className="headline text-[2rem] leading-[1.05] sm:text-[2.75rem] sm:tracking-[-0.025em]">
+              {title}
+            </h2>
+            {blurb && <p className="max-w-md text-lg leading-snug text-fg-muted">{blurb}</p>}
+          </div>
+          <div className="flex flex-col gap-3 md:col-span-6">
+            {form}
+            {error}
+            {fine}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (variant === "page") {
+    return (
+      <section aria-labelledby={`${id}-h`} className="flex flex-col gap-4">
+        <h2 id={`${id}-h`} className="sr-only">
+          Sign up
+        </h2>
+        {form}
+        {error}
+        {fine}
+      </section>
+    );
+  }
 
   return (
-    <section
-      aria-labelledby={`${id}-h`}
-      className={`rounded-base border border-line bg-bg-elev font-ui ${isPage ? "p-8" : "p-5"}`}
-    >
-      <h2 id={`${id}-h`} className={`font-display font-semibold ${isPage ? "text-3xl" : "text-xl"}`}>
-        {headline ?? "Get the newsletter"}
+    <section aria-labelledby={`${id}-h`} className="flex flex-col gap-4 border border-line bg-bg-elev p-6 sm:p-8">
+      <p className="label-caps text-fg-muted">Newsletter</p>
+      <h2 id={`${id}-h`} className="headline text-2xl leading-tight sm:text-[1.75rem]">
+        {title}
       </h2>
-      {blurb && <p className="mt-1 text-sm text-fg-muted">{blurb}</p>}
-
-      {state === "done" ? (
-        <p className="mt-4 text-base" role="status">
-          Check your inbox to confirm your subscription.
-        </p>
-      ) : (
-        <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
-          <label className="flex grow flex-col gap-1 text-sm">
-            <span>Email</span>
-            <input
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              inputMode="email"
-              placeholder="you@example.com"
-              className="rounded-base border border-line bg-bg px-3 py-2 text-base text-fg"
-            />
-          </label>
-          {school && <input type="hidden" name="school" value={school} />}
-          {/* Honeypot. Hidden from people, filled by bots. */}
-          <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
-          <button
-            type="submit"
-            disabled={state === "submitting"}
-            className="rounded-base bg-fg px-4 py-2 text-sm font-semibold text-bg disabled:opacity-60"
-          >
-            {state === "submitting" ? "Sending" : "Subscribe"}
-          </button>
-        </form>
-      )}
-      {state === "error" && (
-        <p className="mt-2 text-sm text-fg-muted" role="alert">
-          {error}. Try again in a moment.
-        </p>
-      )}
+      {blurb && <p className="text-base leading-snug text-fg-muted">{blurb}</p>}
+      {form}
+      {error}
+      {fine}
     </section>
   );
 }

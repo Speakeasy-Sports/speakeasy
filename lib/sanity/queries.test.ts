@@ -4,9 +4,8 @@ import {
   ARTICLE_OG_QUERY,
   ARTICLE_QUERY,
   ARTICLE_SLUGS_QUERY,
-  HOME_LATEST_QUERY,
-  SCHOOL_LATEST_QUERY,
-  SCHOOL_QUERY,
+  HOME_QUERY,
+  SCHOOL_FRONT_QUERY,
   SITE_SETTINGS_QUERY,
 } from "./queries";
 
@@ -84,18 +83,20 @@ async function run<T = unknown>(query: string, params: Record<string, unknown> =
 
 type Card = { _id: string; slug: string; school: { slug: string } | null };
 
-describe("HOME_LATEST_QUERY", () => {
-  it("lists every live article newest first, regardless of status, and skips unusable ones", async () => {
-    const rows = await run<Card[]>(HOME_LATEST_QUERY);
-    expect(rows.map((r) => r._id)).toEqual(["a-review", "a-subject", "a-none", "a-bama", "a-one", "a-both", "a-nodate"]);
-    expect(rows.find((r) => r._id === "a-broken")).toBeUndefined();
+describe("HOME_QUERY", () => {
+  it("with nothing featured, tops the page with the four newest, then lists the rest, regardless of status", async () => {
+    const home = await run<{ top: Card[]; latest: Card[]; count: number }>(HOME_QUERY);
+    expect(home.top.map((r) => r._id)).toEqual(["a-review", "a-subject", "a-none", "a-bama"]);
+    expect(home.latest.map((r) => r._id)).toEqual(["a-one", "a-both", "a-nodate"]);
+    expect(home.count).toBe(7);
+    expect([...home.top, ...home.latest].find((r) => r._id === "a-broken")).toBeUndefined();
   });
 });
 
-describe("SCHOOL_LATEST_QUERY", () => {
+describe("SCHOOL_FRONT_QUERY", () => {
   it("includes articles that list the school as primary or secondary", async () => {
-    const rows = await run<Card[]>(SCHOOL_LATEST_QUERY, { schoolId: "school-alabama" });
-    expect(rows.map((r) => r._id)).toEqual(["a-subject", "a-bama"]);
+    const s = await run<{ top: Card[]; latest: Card[] }>(SCHOOL_FRONT_QUERY, { slug: "alabama" });
+    expect([...s.top, ...s.latest].map((r) => r._id)).toEqual(["a-subject", "a-bama"]);
   });
 });
 
@@ -150,9 +151,9 @@ describe("ARTICLE_OG_QUERY and slugs", () => {
   });
 });
 
-describe("SCHOOL_QUERY and SITE_SETTINGS_QUERY", () => {
+describe("SCHOOL_FRONT_QUERY and SITE_SETTINGS_QUERY", () => {
   it("resolve by slug and singleton id", async () => {
-    const s = await run<{ _id: string } | null>(SCHOOL_QUERY, { slug: "georgia" });
+    const s = await run<{ _id: string } | null>(SCHOOL_FRONT_QUERY, { slug: "georgia" });
     expect(s?._id).toBe("school-georgia");
     const settings = await run<{ siteName: string; navSchools: { slug: string }[] }>(SITE_SETTINGS_QUERY);
     expect(settings.navSchools[0]?.slug).toBe("georgia");
