@@ -1,6 +1,6 @@
 # Speakeasy Sports content site: build spec
 
-Status: v1.0, October 19, 2026
+Status: v1.1, October 19, 2026
 Owner: Jon Smith
 Purpose: Build spec and working agreement for the Speakeasy Sports content site. Lives at the repo root as `AGENTS.md`. Every contributor treats the Decisions section as fixed and everything else as the plan of record.
 
@@ -171,7 +171,7 @@ Circle sync (read-only in Studio, written by the webhook handler)
 
 ### Studio configuration
 - Desk structure: Articles (by status: Needs review, Scheduled, Published, Drafts), Schools, Authors, Tags, Sponsor slots, Settings.
-- Scheduled drafts (Sanity Growth feature) handle timed publishing. The `status` field flips to `published` by the publish action, not by hand.
+- Scheduled drafts (Sanity Growth feature) handle timed publishing. Sanity does not set custom fields when it publishes, including scheduled publishes, so the site sets `status` itself: when `/api/webhooks/sanity` receives a published article whose `status` is not `published`, it patches the published document with `status: "published"` and `publishedAt` (if empty, set to now) using the write token. That patch fires the webhook again; the second delivery sees `published` and changes nothing. Nobody sets `published` by hand, and the option is hidden from Contributors.
 - Validation: `dek` required, hero alt required, at least one school and one author, `primarySchool` in `schools`.
 - Preview: visual editing with `next-sanity` and draft mode. Editors can preview any status.
 - Review notification: Sanity webhook on `status` changing to `review` posts to `/api/webhooks/sanity` which sends a Postmark email to the editor (Phase 1 can be a simple email; Phase 2 can post to a private Circle editorial space).
@@ -179,7 +179,7 @@ Circle sync (read-only in Studio, written by the webhook handler)
 ### Roles and the review flow
 1. Contributor writes in Studio, sets `status` = `review`. Contributors cannot publish.
 2. Editor reviews, edits, sets `publishedAt` (now or scheduled), publishes or schedules.
-3. Publish triggers the Sanity webhook, which revalidates the site and creates the Circle post.
+3. Publish (immediate or scheduled) triggers the Sanity webhook, which sets `status` to `published`, revalidates the site, and creates the Circle post.
 4. Any later edit to a published article sets `updatedAt` and republishes. Corrections go in `correction`, never silent.
 
 ---
@@ -251,7 +251,7 @@ Headline, blurb, email form posting to `/api/newsletter`, sample issue link.
 - `/api/webhooks/sanity` verifies the Sanity signature, reads the changed document ids and types, calls `revalidateTag` for the affected tags, and returns 200 within 10 seconds. Everything else (Circle sync, email) runs after revalidation.
 
 ### 7.2 Site to Circle (auto-post on publish)
-- Trigger: Sanity webhook with filter `_type == "article" && status == "published"` on create and update.
+- Trigger: Sanity webhook with filter `_type == "article"` on create and update, drafts and versions excluded (the default), so it fires on every publish. Do not filter on `status`: it is still `scheduled` or `review` at the moment of publish and is set by this handler (see section 5, Studio configuration).
 - Handler: `lib/circle/syncArticle(articleId)`
   1. Fetch the article (published perspective).
   2. If `circlePostId` is empty: `POST` a new post in `primarySchool.circleSpaceId` with title = article title, body = dek + "Read the full story: {canonical url}" + hero image. Store `circlePostId`, `circlePostUrl`, `circleSyncedAt` on the article using a Sanity write token (server-side only).
@@ -340,9 +340,13 @@ Headline, blurb, email form posting to `/api/newsletter`, sample issue link.
 
 /* Georgia section */
 [data-school="georgia"] { --accent: #BA0C2F; --accent-fg: #FFFFFF; }
-[data-school="georgia"][data-theme="dark"],
-:root:not([data-theme="light"]) [data-school="georgia"] { --accent: #E03A5B; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) [data-school="georgia"] { --accent: #E44A64; --accent-fg: #121210; }
+}
+:root[data-theme="dark"] [data-school="georgia"] { --accent: #E44A64; --accent-fg: #121210; }
 ```
+
+Dark-mode school overrides must sit inside the `prefers-color-scheme: dark` query (or under `:root[data-theme="dark"]`). A bare `:root:not([data-theme="light"])` selector matches in light mode too. Georgia dark values: `#E44A64` is 4.9:1 on `--bg` and 4.5:1 on `--bg-elev`; `--accent-fg` flips to near-black because white on that red is only 4.3:1.
 
 Rules:
 - Accent is used for labels, links, section headers, and the join button only. Never as a page background.
@@ -470,6 +474,7 @@ Acceptance: inline thread matches the Circle post, MAU usage visible in a monthl
 | V6 | Current WordPress URLs worth redirecting | Section 6 redirects | Jon |
 | V7 | Brand assets and type choices | Tokens and fonts | Jon |
 | V8 | Photo rights plan for hero images | Content ops, not code | Jon |
+| V9 | Admin API budget target vs. comment-count fallback. Section 3 says design for under 5,000 requests per month; the hourly cron fallback in 7.3 uses about 18,000. Decide: raise the target, or run the fallback every 4 hours (about 4,500) | Only matters if V5 fails and the cron fallback is used | Jon |
 
 ---
 
