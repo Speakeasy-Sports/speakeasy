@@ -27,7 +27,10 @@ Built and verified (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `p
 - Creating the Vercel project and env vars.
 - Brand fonts and mark (V7). `lib/fonts.ts` and `app/icon.svg` are placeholders.
 
+## Decided
+
+- JS budget (AGENTS.md section 10, v1.2): 200KB gzipped total on the article page, site code under 40KB. Measured 187KB and 35KB on October 19, 2026.
+
 ## Open decisions
 
-1. **JS budget.** AGENTS.md section 10 asks for under 90KB gzipped on the article page. The measured page ships 187KB gzipped: about 150KB is the React 19 and Next.js 16 runtime, which no page can avoid, and about 35KB is site code (embeds, newsletter form, analytics). The 90KB number predates this stack. Recommendation: set the budget to 200KB total and 40KB for site code, and hold the line there.
-3. **V9** (Admin API budget vs. the hourly comment-count fallback) is still open in AGENTS.md section 13.
+1. **V9** (Admin API budget vs. the hourly comment-count fallback) is still open in AGENTS.md section 13.

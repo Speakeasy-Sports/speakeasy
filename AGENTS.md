@@ -1,6 +1,6 @@
 # Speakeasy Sports content site: build spec
 
-Status: v1.1, October 19, 2026
+Status: v1.2, October 19, 2026
 Owner: Jon Smith
 Purpose: Build spec and working agreement for the Speakeasy Sports content site. Lives at the repo root as `AGENTS.md`. Every contributor treats the Decisions section as fixed and everything else as the plan of record.
 
@@ -386,7 +386,7 @@ Rules:
 ## 10. Performance and quality budgets
 
 - LCP under 2.5s on a mid-tier phone over 4G for the article page. CLS 0. INP under 200ms.
-- Article page JS under 90KB gzipped before any embed is activated.
+- Article page JS under 200KB gzipped before any embed is activated, of which site code (everything outside the React and Next.js runtime) stays under 40KB. Measured October 19, 2026: 187KB total, about 150KB runtime, about 35KB site code. Draft-mode tooling must never ship to readers; it loads as an async chunk only when draft mode is on.
 - Images: `next/image`, AVIF/WebP, hero sized to 1200px max, cards to 600px. Every image has alt text (enforced in Sanity).
 - Fonts: 2 families, subsetted, under 120KB total.
 - Lighthouse 95+ on Performance, Accessibility, Best Practices, SEO for home, school, and article.
