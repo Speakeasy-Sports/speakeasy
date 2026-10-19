@@ -416,6 +416,8 @@ SANITY_API_WRITE_TOKEN=           # circle sync writes, server only
 SANITY_WEBHOOK_SECRET=
 SANITY_REVALIDATE_SECRET=
 CIRCLE_ADMIN_API_TOKEN=           # server only
+CIRCLE_ADMIN_API_BASE=            # optional, defaults to https://app.circle.so/api/admin/v2
+CIRCLE_SYNC_ENABLED=false         # true after one test post looks right
 CIRCLE_COMMUNITY_ID=
 CIRCLE_WEBHOOK_SECRET=            # shared secret for /api/webhooks/circle
 CIRCLE_BASE_URL=https://club.speakeasysports.com
@@ -425,7 +427,8 @@ EDITOR_NOTIFY_EMAIL=
 NEXT_PUBLIC_PLAUSIBLE_DOMAIN=speakeasysports.com
 TURNSTILE_SITE_KEY=
 TURNSTILE_SECRET_KEY=
-KV_URL=                           # idempotency locks (Vercel KV or Upstash)
+KV_REST_API_URL=                  # idempotency locks (Upstash Redis via the Vercel integration)
+KV_REST_API_TOKEN=
 # Phase 2
 AUTH_SECRET=
 AUTH_URL=https://speakeasysports.com
@@ -479,8 +482,8 @@ Acceptance: inline thread matches the Circle post, MAU usage visible in a monthl
 | V1 | Custom SSO is enabled on the Circle Plus plan | Phase 2 design depends on it | Jon, CSM |
 | V2 | Branded app honors custom SSO | One-login promise | Jon, CSM |
 | V3 | Admin API can create Email Hub contacts | Newsletter signup integration vs. embed fallback | Jon, CSM |
-| V4 | Admin API v2 base URL, create-post body format (TipTap JSON vs. plain), image attachment on posts | Section 7.2 | Engineering, from the Admin v2 Swagger at api-headless.circle.so (Admin APIs) |
-| V5 | Circle Workflows can call an external webhook on "comment created" | Section 7.3 primary vs. fallback | Engineering, Circle admin |
+| V4 | Admin API v2 base URL, create-post body format (TipTap JSON vs. plain), image attachment on posts | Section 7.2 | Done October 19, 2026: TipTap JSON, cover via direct upload. See `docs/circle-api-notes.md` |
+| V5 | Circle Workflows can call an external webhook on "comment created" | Section 7.3 primary vs. fallback | Engineering, Circle admin. Docs confirm webhook actions exist; the "comment created" trigger still needs checking in the admin |
 | V6 | Current WordPress URLs worth redirecting | Section 6 redirects | Jon |
 | V7 | Brand assets and type choices | Tokens and fonts | Jon |
 | V8 | Photo rights plan for hero images | Content ops, not code | Jon |

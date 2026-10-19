@@ -113,3 +113,9 @@ test("feeds, sitemap, and robots are served", async ({ request }) => {
   expect(await (await request.get("/sitemap.xml")).text()).toContain(ARTICLE);
   expect(await (await request.get("/robots.txt")).text()).toContain("Sitemap:");
 });
+
+test("sanity webhook rejects unsigned requests", async ({ request }) => {
+  const res = await request.post("/api/webhooks/sanity", { data: { _id: "a1", _type: "article" } });
+  // 401 with a secret configured, 500 when the server has none. Never 200.
+  expect([401, 500]).toContain(res.status());
+});
