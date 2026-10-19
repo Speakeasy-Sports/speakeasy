@@ -487,6 +487,7 @@ Acceptance: inline thread matches the Circle post, MAU usage visible in a monthl
 - Every image needs alt text. Fail the build on missing alt in Portable Text blocks.
 - Keep the Admin API call count visible: log each call with a route label; add a weekly summary to the Vercel cron.
 - Commit style: `feat:`, `fix:`, `chore:`, `content:`. One PR per feature. Preview deploy link in every PR.
+- Branch names describe the work (`phase-1-week-1`, `fix-og-cache`). Rename any auto-generated branch name before the first push.
 - Copy in UI uses American English, no em-dashes, no emojis.
 - When unsure about a Circle endpoint, open the Swagger spec rather than guessing, and record what was found in `/docs/circle-api-notes.md`.
 - No tool or vendor attribution in commits, PR descriptions, code comments, or docs.
