@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // Stand-in for the Sanity query API so the site builds and runs without a project.
 // Evaluates the site's real GROQ with groq-js against scripts/fixtures/dataset.mjs, and serves placeholder
-// artwork for image URLs when the site points NEXT_PUBLIC_SANITY_IMAGE_ORIGIN at it.
+// artwork for image URLs when the site points NEXT_PUBLIC_MOCK_ASSET_ORIGIN at it.
 //
 //   node scripts/mock-sanity.mjs 3999
 //   SANITY_API_HOST=http://127.0.0.1:3999 NEXT_PUBLIC_SANITY_PROJECT_ID=mock1234 \
-//   NEXT_PUBLIC_SANITY_IMAGE_ORIGIN=http://127.0.0.1:3999 pnpm build
+//   NEXT_PUBLIC_MOCK_ASSET_ORIGIN=http://127.0.0.1:3999 pnpm build
 import { createServer } from "node:http";
 import { evaluate, parse } from "groq-js";
 import { dataset } from "./fixtures/dataset.mjs";

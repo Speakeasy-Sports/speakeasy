@@ -92,7 +92,10 @@ export const HOME_QUERY = defineQuery(`
     "top": (*[${LIVE}] | ${TOP_ORDER})[0...4]{ ${CARD_FIELDS} },
     "latest": *[${LIVE} && !(_id in ((*[${LIVE}] | ${TOP_ORDER})[0...4]._id))] | ${BY_DATE} [0...20]{ ${CARD_FIELDS} },
     "count": count(*[${LIVE}]),
-    "media": *[${LIVE} && contentType in ${MEDIA_TYPES}] | ${BY_DATE} [0...4]{ ${CARD_FIELDS} }
+    "media": *[
+      ${LIVE} && contentType in ${MEDIA_TYPES}
+      && !(_id in ((*[${LIVE}] | ${TOP_ORDER})[0...4]._id))
+    ] | ${BY_DATE} [0...4]{ ${CARD_FIELDS} }
   }
 `);
 
@@ -114,7 +117,10 @@ export const SCHOOL_FRONT_QUERY = defineQuery(`
       && !(_id in ((*[${LIVE} && ^.^._id in schools[]._ref] | ${TOP_ORDER})[0...4]._id))
     ] | ${BY_DATE} [0...20]{ ${CARD_FIELDS} },
     "count": count(*[${LIVE} && ^._id in schools[]._ref]),
-    "media": *[${LIVE} && ^._id in schools[]._ref && contentType in ${MEDIA_TYPES}] | ${BY_DATE} [0...4]{ ${CARD_FIELDS} }
+    "media": *[
+      ${LIVE} && ^._id in schools[]._ref && contentType in ${MEDIA_TYPES}
+      && !(_id in ((*[${LIVE} && ^.^._id in schools[]._ref] | ${TOP_ORDER})[0...4]._id))
+    ] | ${BY_DATE} [0...4]{ ${CARD_FIELDS} }
   }
 `);
 

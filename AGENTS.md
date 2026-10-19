@@ -197,7 +197,7 @@ Circle sync (read-only in Studio, written by the webhook handler)
 - Secondary: `featuredRank` 2 to 4 in a row of three.
 - "Latest" list: most recent 20 published articles across all schools, with school label, type label, headline, timestamp. Load more via pagination at `/?page=2`.
 - Top stories are the first four of: featured ranks 1 to 4, then everything else newest first. With nothing featured they are the four newest. Latest excludes exactly those four on every page, so pages never repeat or skip a story.
-- `/?page=N` and `/{school}?page=N` are rewritten in `next.config.ts` to internal routes (`/latest/N`, `/{school}/latest/N`) so the front pages never read search params and stay fully static. The internal routes set their canonical back to the `?page=N` form.
+- `/?page=N` and `/{school}?page=N` are rewritten in `next.config.ts` to internal routes (`/latest/N`, `/{school}/latest/N`) so the front pages never read search params and stay fully static. The internal routes set their canonical back to the `?page=N` form. The same applies to `?school=` and `?page=` on `/podcasts`, `/videos`, `/tags/{slug}` (internal `.../f/{school or all}/{page}`) and `?page=` on `/authors/{slug}` (internal `.../p/{page}`).
 - Newsletter block between Latest and footer.
 - Persistent "Join the Club" in header.
 - ISR revalidate 60s, plus tag-based revalidation from the webhook.
@@ -206,7 +206,7 @@ Circle sync (read-only in Studio, written by the webhook handler)
 - Same layout as home scoped to the school, using the school accent token.
 - Section header: school name, `communityName`, join CTA to `circleJoinUrl`.
 - Sub-nav: Latest, Podcasts, Videos, then the school's `navTags` in order (curated in the school document, up to 6).
-- Reserved slugs (not valid school slugs): `authors`, `tags`, `podcasts`, `videos`, `search`, `newsletter`, `about`, `contact`, `terms`, `privacy`, `studio`, `api`, `feed.xml`, `latest`, `search-index.json`, `sitemap.xml`, `robots.txt`.
+- Reserved slugs (not valid school slugs): `authors`, `tags`, `podcasts`, `videos`, `search`, `newsletter`, `about`, `contact`, `terms`, `privacy`, `studio`, `api`, `feed.xml`, `latest`, `all`, `search-index.json`, `sitemap.xml`, `robots.txt`.
 - Podcasts, Videos, and tag links in the sub-nav go to the site-wide pages filtered with `?school={slug}`; those pages render with the school's header, accent, and sub-nav, so the reader stays in the section.
 
 ### `/[school]/[slug]` Article

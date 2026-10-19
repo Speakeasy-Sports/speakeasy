@@ -24,7 +24,7 @@ export default function sanityImageLoader({ src, width, quality }: ImageLoaderPr
   url.searchParams.set("q", String(quality ?? 75));
   url.searchParams.set("auto", "format");
   // Local runs against scripts/mock-sanity.mjs swap the CDN for the mock's placeholder art. Unset in every real deploy.
-  const mockOrigin = process.env.NEXT_PUBLIC_SANITY_IMAGE_ORIGIN;
+  const mockOrigin = process.env.NEXT_PUBLIC_MOCK_ASSET_ORIGIN;
   if (mockOrigin) return `${mockOrigin}${url.pathname}${url.search}`;
   return url.toString();
 }

@@ -68,7 +68,7 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
           autoComplete="email"
           inputMode="email"
           placeholder="Email address"
-          className="h-12 min-w-0 flex-1 rounded-base border border-line bg-bg px-4 text-base text-fg placeholder:text-fg-subtle focus:border-fg focus:outline-none"
+          className="h-12 min-w-0 flex-1 rounded-base border border-line bg-bg px-4 text-base text-fg placeholder:text-fg-subtle focus:outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
         />
         {school && <input type="hidden" name="school" value={school} />}
         {/* Honeypot. Hidden from people, filled by bots. */}

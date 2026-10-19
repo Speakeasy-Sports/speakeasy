@@ -11,7 +11,9 @@
  *   tag page           tag:{slug}, taxonomy, articles, schools
  *   podcasts, videos   articles, schools
  *   info pages         page:{slug}, pages
- *   feeds, sitemap     articles, schools, authors, taxonomy, pages
+ *   site feed          articles
+ *   school feed        school:{slug}, articles
+ *   sitemap            articles, schools, authors, taxonomy, pages
  *   search index       articles
  *   settings           settings, schools
  *   og image           article-slug:{slug}

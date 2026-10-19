@@ -50,10 +50,16 @@ describe("HOME_QUERY", () => {
     expect(home.count).toBe(live.length);
   });
 
-  it("lists recent podcasts and videos for the rail", async () => {
-    const home = await run<{ media: Card[] }>(HOME_QUERY);
+  it("lists recent podcasts and videos for the rail, never repeating a top story", async () => {
+    const home = await run<{ media: Card[]; top: Card[] }>(HOME_QUERY);
     expect(home.media).toHaveLength(4);
     expect(home.media.every((a) => a.contentType === "podcast" || a.contentType === "video")).toBe(true);
+    const topIds = new Set(home.top.map((a) => a._id));
+    expect(home.media.some((a) => topIds.has(a._id))).toBe(false);
+    const ga = await run<{ media: Card[]; top: Card[] }>(SCHOOL_FRONT_QUERY, { slug: "georgia" });
+    const gaTop = new Set(ga.top.map((a) => a._id));
+    expect(ga.media.length).toBeGreaterThan(0);
+    expect(ga.media.some((a) => gaTop.has(a._id))).toBe(false);
   });
 });
 

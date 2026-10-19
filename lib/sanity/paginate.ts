@@ -24,3 +24,13 @@ export function parsePage(raw: string | string[] | undefined): number | null {
 export function totalPages(count: number, perPage: number): number {
   return Math.max(1, Math.ceil(count / perPage));
 }
+
+/** "all" in an internal filter path means no school filter. See the query rewrites in next.config.ts. */
+export const ALL_SCHOOLS = "all";
+
+/** Parses the [school]/[page] segments of an internal filter route. Null means 404. */
+export function parseFilter(school: string, page: string): { school: string; page: number } | null {
+  const n = parsePage(page);
+  if (!n || !/^[a-z0-9-]+$/.test(school)) return null;
+  return { school: school === ALL_SCHOOLS ? "" : school, page: n };
+}

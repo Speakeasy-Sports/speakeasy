@@ -15,6 +15,7 @@ export const RESERVED_SLUGS = [
   "feed.xml",
   // Internal targets of the ?page= rewrites in next.config.ts, and generated files.
   "latest",
+  "all", // the "no school filter" value in internal filter paths
   "search-index.json",
   "sitemap.xml",
   "robots.txt",

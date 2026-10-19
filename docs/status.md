@@ -37,6 +37,14 @@ Still open from the review, for week 2: alt text is not build-enforced and `scho
 - Mock server now evaluates real GROQ against a 27-article fixture dataset with placeholder art.
 - Verified: 52 unit tests, 24 smoke tests (phone and desktop), lint, typecheck, build, secret scan. Article page JS 188KB gzipped.
 
+### Review fixes (week 2 pages)
+
+- Author, tag, podcasts, and videos pages no longer read search params. `?school=` and `?page=` are rewritten to internal routes (`.../f/{school or all}/{page}`, `/authors/{slug}/p/{page}`), so every public page is static or ISR. `all` is now a reserved slug.
+- Listen and watch rail no longer repeats a top story.
+- Tag and media pages keep heading order (no h1 to h3 jump). Search and newsletter inputs show a visible focus state.
+- Duplicate featured-rank warning compares published documents only, so a scheduled version no longer flags itself.
+- robots.txt no longer blocks `/search` (its `noindex` must be crawlable). The mock-only asset origin is now `NEXT_PUBLIC_MOCK_ASSET_ORIGIN`.
+
 Still for week 2: Sanity and Circle webhooks, `/api/newsletter`, WordPress redirect map (needs V6), Postmark review email.
 
 ## Remaining for week 2 (per AGENTS.md section 12)

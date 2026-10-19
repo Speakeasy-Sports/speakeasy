@@ -68,7 +68,7 @@ export function SearchClient() {
           placeholder="Players, opponents, topics, writers"
           autoComplete="off"
           spellCheck={false}
-          className="h-16 w-full border-0 border-b-2 border-fg bg-transparent pl-10 font-display text-2xl tracking-tight text-fg placeholder:text-fg-subtle focus:outline-none sm:h-20 sm:text-[2rem]"
+          className="h-16 w-full border-0 border-b-2 border-fg bg-transparent pl-10 font-display text-2xl tracking-tight text-fg placeholder:text-fg-subtle focus:outline-none focus-visible:border-accent focus-visible:border-b-4 sm:h-20 sm:text-[2rem]"
         />
       </form>
 

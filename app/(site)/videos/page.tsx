@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { MediaIndexView, mediaMetadata, type MediaSearch } from "../_views/MediaIndexView";
+import { MediaIndexView, mediaMetadata } from "../_views/MediaIndexView";
 
-type Props = { searchParams: Promise<MediaSearch> };
+// Static. "?school=" and "?page=" are rewritten in next.config.ts to ./f/[school]/[page].
+export const revalidate = 60;
 
-export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  return mediaMetadata("video", await searchParams);
+export function generateMetadata(): Promise<Metadata> {
+  return mediaMetadata("video", { school: "", page: 1 });
 }
 
-export default async function VideosPage({ searchParams }: Props) {
-  return <MediaIndexView kind="video" searchParams={await searchParams} />;
+export default function VideosPage() {
+  return <MediaIndexView kind="video" filter={{ school: "", page: 1 }} />;
 }

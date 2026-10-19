@@ -4,7 +4,7 @@ import { stegaClean } from "@sanity/client/stega";
 import { sanityFetch } from "@/lib/sanity/fetch";
 import { MEDIA_QUERY } from "@/lib/sanity/queries";
 import { getSiteSettings } from "@/lib/sanity/loaders";
-import { pageQuery, parsePage, totalPages } from "@/lib/sanity/paginate";
+import { pageQuery, totalPages } from "@/lib/sanity/paginate";
 import { tags } from "@/lib/sanity/tags";
 import { joinUrlFor } from "@/lib/circle-links";
 import { buildMetadata } from "@/lib/seo";
@@ -17,25 +17,16 @@ import { SchoolHeader } from "@/components/SchoolHeader";
 import { SchoolTheme } from "@/components/SchoolTheme";
 
 const PER_PAGE = 24;
-const SLUG_RE = /^[a-z0-9-]+$/;
 
-export type MediaSearch = { page?: string | string[]; school?: string | string[] };
-type Kind = "podcast" | "video";
+export type MediaKind = "podcast" | "video";
+type Kind = MediaKind;
 
 const COPY: Record<Kind, { title: string; kicker: string; intro: string; path: string; empty: string }> = {
   podcast: { title: "Podcasts", kicker: "Listen", intro: "Every episode, newest first.", path: "/podcasts", empty: "No episodes yet." },
   video: { title: "Videos", kicker: "Watch", intro: "Film breakdowns, press conferences, and the rest, newest first.", path: "/videos", empty: "No videos yet." },
 };
 
-function readParams(sp: MediaSearch): { school: string; page: number } | null {
-  const raw = Array.isArray(sp.school) ? sp.school[0] : sp.school;
-  const school = raw ?? "";
-  const page = parsePage(sp.page);
-  if (!page || (school && !SLUG_RE.test(school))) return null;
-  return { school, page };
-}
-
-function href(kind: Kind, school: string, page: number) {
+export function mediaHref(kind: Kind, school: string, page: number) {
   const q = new URLSearchParams();
   if (school) q.set("school", school);
   if (page > 1) q.set("page", String(page));
@@ -51,22 +42,24 @@ function getMedia(kind: Kind, school: string, page: number) {
   });
 }
 
-export async function mediaMetadata(kind: Kind, sp: MediaSearch): Promise<Metadata> {
-  const p = readParams(sp);
-  if (!p) return {};
+type Filter = { school: string; page: number };
+
+export async function mediaMetadata(kind: Kind, p: Filter): Promise<Metadata> {
   const data = await getMedia(kind, p.school, p.page);
   const scope = data.school?.shortName ? `${data.school.shortName} ` : "";
   return buildMetadata({
     title: `${scope}${COPY[kind].title}${p.page > 1 ? `, page ${p.page}` : ""}`,
     description: `${scope}${COPY[kind].title.toLowerCase()} from Speakeasy Sports. ${COPY[kind].intro}`,
-    path: href(kind, p.school, p.page),
+    path: mediaHref(kind, p.school, p.page),
   });
 }
 
-/** /podcasts and /videos: the newest as a lead, the rest as a grid, with school filter chips (AGENTS.md section 6). */
-export async function MediaIndexView({ kind, searchParams }: { kind: Kind; searchParams: MediaSearch }) {
-  const p = readParams(searchParams);
-  if (!p) notFound();
+/**
+ * /podcasts and /videos: the newest as a lead, the rest as a grid, with school filter chips (AGENTS.md section 6).
+ * The page itself never reads search params; "?school=" and "?page=" are rewritten to an internal route so every
+ * variant is cached like the front pages.
+ */
+export async function MediaIndexView({ kind, filter: p }: { kind: Kind; filter: Filter }) {
   const [data, settings] = await Promise.all([getMedia(kind, p.school, p.page), getSiteSettings()]);
   if (p.school && !data.school?.slug) notFound();
   const pages = totalPages(data.count, PER_PAGE);
@@ -86,6 +79,11 @@ export async function MediaIndexView({ kind, searchParams }: { kind: Kind; searc
           <LeadStory article={lead} showSchool={showSchool} />
         </div>
       )}
+      {grid.length > 0 && !lead && (
+        <h2 className="sr-only">
+          {copy.title}, page {p.page}
+        </h2>
+      )}
       {grid.length > 0 && (
         <div className={`grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 ${lead ? "mt-14 border-t border-line pt-10" : "pt-10"}`}>
           {grid.map((a) => (
@@ -94,7 +92,7 @@ export async function MediaIndexView({ kind, searchParams }: { kind: Kind; searc
         </div>
       )}
       <div className="mt-12">
-        <Pagination page={p.page} total={pages} href={(n) => href(kind, p.school, n)} />
+        <Pagination page={p.page} total={pages} href={(n) => mediaHref(kind, p.school, n)} />
       </div>
     </>
   );
@@ -118,10 +116,10 @@ export async function MediaIndexView({ kind, searchParams }: { kind: Kind; searc
   }
 
   const chips = [
-    { key: "all", label: "All schools", href: href(kind, "", 1), active: true },
+    { key: "all", label: "All schools", href: mediaHref(kind, "", 1), active: true },
     ...data.schools
       .filter((s) => s.slug)
-      .map((s) => ({ key: s._id, label: s.shortName ?? s.name ?? "", href: href(kind, s.slug!, 1), active: false, school: s.slug })),
+      .map((s) => ({ key: s._id, label: s.shortName ?? s.name ?? "", href: mediaHref(kind, s.slug!, 1), active: false, school: s.slug })),
   ];
 
   return (

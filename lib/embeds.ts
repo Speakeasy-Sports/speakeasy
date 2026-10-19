@@ -31,7 +31,7 @@ export function youtubeEmbedUrl(id: string): string {
 }
 
 // Overridable only so local runs against scripts/mock-sanity.mjs show artwork with no network access.
-const YT_THUMB_ORIGIN = process.env.NEXT_PUBLIC_SANITY_IMAGE_ORIGIN ?? "https://i.ytimg.com";
+const YT_THUMB_ORIGIN = process.env.NEXT_PUBLIC_MOCK_ASSET_ORIGIN ?? "https://i.ytimg.com";
 
 export function youtubeThumbnail(id: string): string {
   return `${YT_THUMB_ORIGIN}/vi/${id}/hqdefault.jpg`;
