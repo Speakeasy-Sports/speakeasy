@@ -52,10 +52,36 @@ pnpm build && pnpm start &
 pnpm test:e2e
 ```
 
-## 5. Week 2 hooks (not yet built)
+## 5. Sanity webhooks
 
-- Sanity webhook to `/api/webhooks/sanity` (revalidation, status flip, Circle post). Filter `_type == "article"`, secret in `SANITY_WEBHOOK_SECRET`.
+Create both in sanity.io/manage, project, API, Webhooks. Both: dataset `production`, HTTP method POST, URL `https://speakeasysports.com/api/webhooks/sanity`, API version `v2025-02-19` or later, secret = `SANITY_WEBHOOK_SECRET`, and this projection:
+
+```groq
+{
+  "_id": _id,
+  "_type": _type,
+  "operation": delta::operation(),
+  "slug": coalesce(after().slug.current, before().slug.current),
+  "previousSlug": before().slug.current,
+  "status": after().status,
+  "previousStatus": before().status,
+  "textChanged": delta::changedAny((title, dek))
+}
+```
+
+| Webhook | Trigger on | Filter | Drafts | Versions |
+|---|---|---|---|---|
+| Site publish | Create, Update, Delete | `_type in ["article", "school", "author", "tag", "infoPage", "siteSettings", "sponsorSlot"]` | Off | Off |
+| Review notification | Create, Update | `_type == "article" && status == "review" && delta::changedAny(status)` | On | Off |
+
+What the handler does:
+- Site publish: revalidates the cache tags in `lib/sanity/tags.ts` before responding. For an article it then sets `status` to `published` (and `publishedAt` if empty) and syncs the Circle post, in one transaction that also copies the Circle fields onto any open draft or scheduled version. The echo delivery from that write changes nothing.
+- Review notification: emails `EDITOR_NOTIFY_EMAIL` through Postmark with a Studio link.
+
+Needed env vars: `SANITY_WEBHOOK_SECRET`, `SANITY_API_WRITE_TOKEN` (Editor role token), `KV_REST_API_URL` and `KV_REST_API_TOKEN` (the lock), Postmark vars for the email. Circle sync stays off until `CIRCLE_SYNC_ENABLED=true` (see `docs/circle-api-notes.md`). Each step logs one JSON line (`sanity_webhook`, `article_finalized`, `circle_admin_api`, `review_notified`) in the Vercel function logs.
+
+## 6. Still to build
+
 - Circle Workflow webhook to `/api/webhooks/circle` with `CIRCLE_WEBHOOK_SECRET`.
+- Daily retry for articles with `circleSyncError`.
 - Newsletter handler at `/api/newsletter`. The signup form already posts there.
-
-Cache tag vocabulary the webhook must use is in `lib/sanity/tags.ts`.

@@ -299,3 +299,32 @@ export const SITEMAP_QUERY = defineQuery(`
     "pages": *[_type == "infoPage" && defined(slug.current)]{ "slug": slug.current, "updated": _updatedAt }
   }
 `);
+
+// Webhook handler reads (raw perspective, by exact id, write client). Not used by any page.
+export const ARTICLE_SYNC_QUERY = defineQuery(`
+  {
+    "article": *[_type == "article" && _id == $id][0]{
+      _id,
+      title,
+      dek,
+      "slug": slug.current,
+      status,
+      publishedAt,
+      circlePostId,
+      circleSyncError,
+      "school": primarySchool->{ "slug": slug.current, circleSpaceId },
+      "heroImageUrl": heroImage.asset->url
+    },
+    "versions": *[sanity::versionOf($id) && _id != $id]._id
+  }
+`);
+
+export const REVIEW_NOTIFY_QUERY = defineQuery(`
+  *[_type == "article" && _id == $id][0]{
+    _id,
+    title,
+    dek,
+    "authors": authors[]->name,
+    "school": primarySchool->shortName
+  }
+`);

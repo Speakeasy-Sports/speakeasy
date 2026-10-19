@@ -1977,6 +1977,39 @@ export type SITEMAP_QUERY_RESULT = {
   }>;
 };
 
+// Source: lib/sanity/queries.ts
+// Variable: ARTICLE_SYNC_QUERY
+// Query: {    "article": *[_type == "article" && _id == $id][0]{      _id,      title,      dek,      "slug": slug.current,      status,      publishedAt,      circlePostId,      circleSyncError,      "school": primarySchool->{ "slug": slug.current, circleSpaceId },      "heroImageUrl": heroImage.asset->url    },    "versions": *[sanity::versionOf($id) && _id != $id]._id  }
+export type ARTICLE_SYNC_QUERY_RESULT = {
+  article: {
+    _id: string;
+    title: string | null;
+    dek: string | null;
+    slug: string | null;
+    status: "draft" | "published" | "review" | "scheduled" | null;
+    publishedAt: string | null;
+    circlePostId: string | null;
+    circleSyncError: string | null;
+    school: {
+      slug: string | null;
+      circleSpaceId: string | null;
+    } | null;
+    heroImageUrl: string | null;
+  } | null;
+  versions: Array<string>;
+};
+
+// Source: lib/sanity/queries.ts
+// Variable: REVIEW_NOTIFY_QUERY
+// Query: *[_type == "article" && _id == $id][0]{    _id,    title,    dek,    "authors": authors[]->name,    "school": primarySchool->shortName  }
+export type REVIEW_NOTIFY_QUERY_RESULT = {
+  _id: string;
+  title: string | null;
+  dek: string | null;
+  authors: Array<string | null> | null;
+  school: string | null;
+} | null;
+
 // Query TypeMap
 declare global {
   interface SanityQueries {
@@ -1996,6 +2029,8 @@ declare global {
     '\n  *[_type == "article" && defined(slug.current) && defined(primarySchool) && noIndex != true] | order(coalesce(publishedAt, _createdAt) desc) [0...50]{ \n  _id,\n  title,\n  dek,\n  "slug": slug.current,\n  contentType,\n  "school": primarySchool->{ shortName, "slug": slug.current },\n  "authors": authors[]->name,\n  "tags": tags[]->name,\n  "published": coalesce(publishedAt, _createdAt),\n  "image": heroImage.asset->url\n }\n': FEED_QUERY_RESULT;
     '\n  *[_type == "school" && slug.current == $slug][0]{\n    name,\n    shortName,\n    description,\n    "slug": slug.current,\n    "items": *[_type == "article" && defined(slug.current) && defined(primarySchool) && noIndex != true && ^._id in schools[]._ref] | order(coalesce(publishedAt, _createdAt) desc) [0...50]{ \n  _id,\n  title,\n  dek,\n  "slug": slug.current,\n  contentType,\n  "school": primarySchool->{ shortName, "slug": slug.current },\n  "authors": authors[]->name,\n  "tags": tags[]->name,\n  "published": coalesce(publishedAt, _createdAt),\n  "image": heroImage.asset->url\n }\n  }\n': SCHOOL_FEED_QUERY_RESULT;
     '\n  {\n    "articles": *[_type == "article" && defined(slug.current) && defined(primarySchool) && noIndex != true]{\n      "slug": slug.current,\n      "school": primarySchool->slug.current,\n      "updated": coalesce(updatedAt, _updatedAt)\n    },\n    "schools": *[_type == "school" && defined(slug.current)]{ "slug": slug.current, "updated": _updatedAt },\n    "authors": *[_type == "author" && defined(slug.current)]{ "slug": slug.current, "updated": _updatedAt },\n    "tags": *[_type == "tag" && defined(slug.current)]{ "slug": slug.current, "updated": _updatedAt },\n    "pages": *[_type == "infoPage" && defined(slug.current)]{ "slug": slug.current, "updated": _updatedAt }\n  }\n': SITEMAP_QUERY_RESULT;
+    '\n  {\n    "article": *[_type == "article" && _id == $id][0]{\n      _id,\n      title,\n      dek,\n      "slug": slug.current,\n      status,\n      publishedAt,\n      circlePostId,\n      circleSyncError,\n      "school": primarySchool->{ "slug": slug.current, circleSpaceId },\n      "heroImageUrl": heroImage.asset->url\n    },\n    "versions": *[sanity::versionOf($id) && _id != $id]._id\n  }\n': ARTICLE_SYNC_QUERY_RESULT;
+    '\n  *[_type == "article" && _id == $id][0]{\n    _id,\n    title,\n    dek,\n    "authors": authors[]->name,\n    "school": primarySchool->shortName\n  }\n': REVIEW_NOTIFY_QUERY_RESULT;
   }
 }
 // Lets @sanity/client releases that predate the global registry read it too
