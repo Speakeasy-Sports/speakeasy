@@ -119,3 +119,9 @@ test("sanity webhook rejects unsigned requests", async ({ request }) => {
   // 401 with a secret configured, 500 when the server has none. Never 200.
   expect([401, 500]).toContain(res.status());
 });
+
+test("circle webhook and daily job reject unauthenticated requests", async ({ request }) => {
+  const hook = await request.post("/api/webhooks/circle", { data: { post_id: 1 } });
+  expect([401, 500]).toContain(hook.status());
+  expect((await request.get("/api/cron/circle-daily")).status()).toBe(401);
+});

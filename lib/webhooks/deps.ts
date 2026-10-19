@@ -1,8 +1,10 @@
 import "server-only";
+import { revalidateTag } from "next/cache";
 import { circlePosts, circleSyncEnabled } from "@/lib/circle/admin";
 import { acquireLock } from "@/lib/kv/lock";
 import { getWriteClient } from "@/lib/sanity/write-client";
-import { ARTICLE_SYNC_QUERY } from "@/lib/sanity/queries";
+import { ARTICLE_BY_CIRCLE_POST_QUERY, ARTICLE_SYNC_QUERY } from "@/lib/sanity/queries";
+import type { CountDeps } from "./comment-count";
 import type { FinalizeDeps, Patch } from "./finalize-article";
 
 const log = (event: string, data: Record<string, unknown>) => console.log(JSON.stringify({ event, ...data }));
@@ -19,8 +21,8 @@ function apply(patch: Patch) {
 
 const isEmpty = (p: Patch) => !Object.keys(p.set).length && !Object.keys(p.setIfMissing).length && !p.unset.length;
 
-/** Production wiring for finalizePublishedArticle. */
-export function finalizeDeps(): FinalizeDeps {
+/** Production wiring for finalizePublishedArticle. `route` labels the Admin API calls in the logs and usage counts. */
+export function finalizeDeps(route: string): FinalizeDeps {
   const client = getWriteClient();
   return {
     async fetchArticle(id) {
@@ -33,8 +35,32 @@ export function finalizeDeps(): FinalizeDeps {
       await tx.commit({ autoGenerateArrayKeys: true });
     },
     lock: acquireLock,
-    circle: { enabled: circleSyncEnabled(), create: circlePosts.create, update: circlePosts.update },
+    circle: {
+      enabled: circleSyncEnabled(),
+      create: (c) => circlePosts.create(c, route),
+      update: (id, c) => circlePosts.update(id, c, route),
+    },
     now: () => new Date().toISOString(),
+    log,
+  };
+}
+
+/** Production wiring for refreshCommentCount. `route` labels the Admin API calls in the logs and usage counts. */
+export function countDeps(route: string): CountDeps {
+  const client = getWriteClient();
+  return {
+    async findArticle(postId) {
+      return client.fetch(ARTICLE_BY_CIRCLE_POST_QUERY, { postId });
+    },
+    async writeCount(ids, count) {
+      let tx = client.transaction();
+      for (const id of ids) tx = tx.patch(id, (p) => p.set({ circleCommentCount: count }));
+      await tx.commit();
+    },
+    commentCount: (postId) => circlePosts.commentCount(postId, route),
+    postIdForComment: (commentId) => circlePosts.postIdForComment(commentId, route),
+    lock: acquireLock,
+    revalidate: (tag) => revalidateTag(tag, { expire: 0 }),
     log,
   };
 }

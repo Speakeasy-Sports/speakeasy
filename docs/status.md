@@ -56,6 +56,12 @@ Still for week 2: Sanity and Circle webhooks, `/api/newsletter`, WordPress redir
 - Circle sync matches the Admin API V2 Swagger (V4 verified: TipTap body, cover via direct upload) but stays off (`CIRCLE_SYNC_ENABLED=false`) until one test post against the live community looks right. See `docs/circle-api-notes.md`.
 - Webhook configuration (filters, projection) in `docs/setup.md` section 5.
 
+## Phase 1, week 2: Circle comment counts and daily job (branch phase-1-circle-comments)
+
+- `/api/webhooks/circle`: shared secret (header, or query for senders without headers), finds the article by `circlePostId`, reads the count from the Admin API, writes `circleCommentCount` to the article and its drafts, revalidates `article-slug:{slug}`. Accepts a post id or a comment id; one count read per post per 30 seconds.
+- `/api/cron/circle-daily` (Vercel Cron): retries sync errors, posts recent articles that never got one, refreshes counts for the last 7 days, and logs a weekly Admin API usage summary on Mondays (calls counted per route in KV).
+- Both stay idle while `CIRCLE_SYNC_ENABLED` is off. The Workflow payload shape is not documented; the handler accepts the likely shapes and logs the keys of anything it cannot read.
+
 ## Remaining for week 2 (per AGENTS.md section 12)
 
 - `/api/webhooks/sanity` (revalidation, `status` flip, Circle post), `/api/webhooks/circle`, `/api/newsletter` (the form already posts there and shows an error until it exists).

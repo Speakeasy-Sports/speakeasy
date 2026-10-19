@@ -2010,6 +2010,24 @@ export type REVIEW_NOTIFY_QUERY_RESULT = {
   school: string | null;
 } | null;
 
+// Source: lib/sanity/queries.ts
+// Variable: ARTICLE_BY_CIRCLE_POST_QUERY
+// Query: *[_type == "article" && circlePostId == $postId && !(_id in path("drafts.**")) && !(_id in path("versions.**"))][0]{    _id,    "slug": slug.current,    circleCommentCount,    "versions": *[sanity::versionOf(^._id) && _id != ^._id]._id  }
+export type ARTICLE_BY_CIRCLE_POST_QUERY_RESULT = {
+  _id: string;
+  slug: string | null;
+  circleCommentCount: number | null;
+  versions: Array<string>;
+} | null;
+
+// Source: lib/sanity/queries.ts
+// Variable: CIRCLE_DAILY_QUERY
+// Query: {    "retry": *[      _type == "article" && !(_id in path("drafts.**")) && !(_id in path("versions.**"))      && (defined(circleSyncError) || (!defined(circlePostId) && coalesce(publishedAt, _createdAt) > $postSince))    ] | order(coalesce(publishedAt, _createdAt) desc) [0...20]._id,    "counts": *[      _type == "article" && defined(circlePostId) && !(_id in path("drafts.**")) && !(_id in path("versions.**"))      && coalesce(publishedAt, _createdAt) > $countSince    ] | order(coalesce(publishedAt, _createdAt) desc) [0...50].circlePostId  }
+export type CIRCLE_DAILY_QUERY_RESULT = {
+  retry: Array<string>;
+  counts: Array<string | null>;
+};
+
 // Query TypeMap
 declare global {
   interface SanityQueries {
@@ -2031,6 +2049,8 @@ declare global {
     '\n  {\n    "articles": *[_type == "article" && defined(slug.current) && defined(primarySchool) && noIndex != true]{\n      "slug": slug.current,\n      "school": primarySchool->slug.current,\n      "updated": coalesce(updatedAt, _updatedAt)\n    },\n    "schools": *[_type == "school" && defined(slug.current)]{ "slug": slug.current, "updated": _updatedAt },\n    "authors": *[_type == "author" && defined(slug.current)]{ "slug": slug.current, "updated": _updatedAt },\n    "tags": *[_type == "tag" && defined(slug.current)]{ "slug": slug.current, "updated": _updatedAt },\n    "pages": *[_type == "infoPage" && defined(slug.current)]{ "slug": slug.current, "updated": _updatedAt }\n  }\n': SITEMAP_QUERY_RESULT;
     '\n  {\n    "article": *[_type == "article" && _id == $id][0]{\n      _id,\n      title,\n      dek,\n      "slug": slug.current,\n      status,\n      publishedAt,\n      circlePostId,\n      circleSyncError,\n      "school": primarySchool->{ "slug": slug.current, circleSpaceId },\n      "heroImageUrl": heroImage.asset->url\n    },\n    "versions": *[sanity::versionOf($id) && _id != $id]._id\n  }\n': ARTICLE_SYNC_QUERY_RESULT;
     '\n  *[_type == "article" && _id == $id][0]{\n    _id,\n    title,\n    dek,\n    "authors": authors[]->name,\n    "school": primarySchool->shortName\n  }\n': REVIEW_NOTIFY_QUERY_RESULT;
+    '\n  *[_type == "article" && circlePostId == $postId && !(_id in path("drafts.**")) && !(_id in path("versions.**"))][0]{\n    _id,\n    "slug": slug.current,\n    circleCommentCount,\n    "versions": *[sanity::versionOf(^._id) && _id != ^._id]._id\n  }\n': ARTICLE_BY_CIRCLE_POST_QUERY_RESULT;
+    '\n  {\n    "retry": *[\n      _type == "article" && !(_id in path("drafts.**")) && !(_id in path("versions.**"))\n      && (defined(circleSyncError) || (!defined(circlePostId) && coalesce(publishedAt, _createdAt) > $postSince))\n    ] | order(coalesce(publishedAt, _createdAt) desc) [0...20]._id,\n    "counts": *[\n      _type == "article" && defined(circlePostId) && !(_id in path("drafts.**")) && !(_id in path("versions.**"))\n      && coalesce(publishedAt, _createdAt) > $countSince\n    ] | order(coalesce(publishedAt, _createdAt) desc) [0...50].circlePostId\n  }\n': CIRCLE_DAILY_QUERY_RESULT;
   }
 }
 // Lets @sanity/client releases that predate the global registry read it too
