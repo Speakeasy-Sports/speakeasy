@@ -84,7 +84,8 @@ export const SCHOOL_QUERY = defineQuery(`
     seoTitle,
     seoDescription,
     logo { asset->{ _id, url }, alt },
-    heroImage { asset->{ _id, url, metadata { lqip } }, hotspot, crop }
+    heroImage { asset->{ _id, url, metadata { lqip } }, hotspot, crop },
+    "navTags": navTags[]->{ _id, name, "slug": slug.current }
   }
 `);
 

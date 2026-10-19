@@ -119,6 +119,7 @@ Conventions: server components unless a component needs state or browser APIs; c
 - `logo` (image), `heroImage` (image, optional)
 - `description` (text), `seoTitle`, `seoDescription`
 - `order` (number)
+- `navTags` (array of tag refs, up to 6, ordered; the section sub-nav tags, curated by an editor rather than computed)
 
 ### author
 - `name`, `slug`, `photo` (image with alt), `bio` (text, short), `role` (string, e.g. "Columnist")
@@ -197,7 +198,7 @@ Circle sync (read-only in Studio, written by the webhook handler)
 ### `/[school]` School section
 - Same layout as home scoped to the school, using the school accent token.
 - Section header: school name, `communityName`, join CTA to `circleJoinUrl`.
-- Sub-nav: Latest, Podcasts, Videos, by tag (top 6 tags for the school).
+- Sub-nav: Latest, Podcasts, Videos, then the school's `navTags` in order (curated in the school document, up to 6).
 - Reserved slugs (not valid school slugs): `authors`, `tags`, `podcasts`, `videos`, `search`, `newsletter`, `about`, `contact`, `terms`, `privacy`, `studio`, `api`, `feed.xml`.
 
 ### `/[school]/[slug]` Article

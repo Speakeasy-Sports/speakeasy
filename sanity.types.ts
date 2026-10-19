@@ -395,6 +395,11 @@ export type School = {
   };
   description?: string;
   order?: number;
+  navTags?: Array<
+    {
+      _key: string;
+    } & TagReference
+  >;
   communityName?: string;
   circleSpaceId?: string;
   circleJoinUrl?: string;
@@ -679,7 +684,7 @@ export type SCHOOL_SLUGS_QUERY_RESULT = Array<{
 
 // Source: lib/sanity/queries.ts
 // Variable: SCHOOL_QUERY
-// Query: *[_type == "school" && slug.current == $slug][0]{      _id,  name,  shortName,  "slug": slug.current,  communityName,  circleJoinUrl,  accentColor,  accentColorDark,    mascot,    description,    seoTitle,    seoDescription,    logo { asset->{ _id, url }, alt },    heroImage { asset->{ _id, url, metadata { lqip } }, hotspot, crop }  }
+// Query: *[_type == "school" && slug.current == $slug][0]{      _id,  name,  shortName,  "slug": slug.current,  communityName,  circleJoinUrl,  accentColor,  accentColorDark,    mascot,    description,    seoTitle,    seoDescription,    logo { asset->{ _id, url }, alt },    heroImage { asset->{ _id, url, metadata { lqip } }, hotspot, crop },    "navTags": navTags[]->{ _id, name, "slug": slug.current }  }
 export type SCHOOL_QUERY_RESULT = {
   _id: string;
   name: string | null;
@@ -711,6 +716,11 @@ export type SCHOOL_QUERY_RESULT = {
     hotspot: SanityImageHotspot | null;
     crop: SanityImageCrop | null;
   } | null;
+  navTags: Array<{
+    _id: string;
+    name: string | null;
+    slug: string | null;
+  }> | null;
 } | null;
 
 // Source: lib/sanity/queries.ts
@@ -1080,7 +1090,7 @@ declare global {
     '\n  *[_id == "siteSettings"][0]{\n    siteName,\n    tagline,\n    defaultOgImage { asset->{ _id, url } },\n    socialLinks[]{ _key, platform, url },\n    footerText,\n    joinUrl,\n    newsletterHeadline,\n    newsletterBlurb,\n    "navSchools": navSchools[]->{ \n  _id,\n  name,\n  shortName,\n  "slug": slug.current,\n  communityName,\n  circleJoinUrl,\n  accentColor,\n  accentColorDark\n }\n  }\n': SITE_SETTINGS_QUERY_RESULT;
     '\n  *[_type == "article" && defined(slug.current) && defined(primarySchool)] | order(coalesce(publishedAt, _createdAt) desc) [0...20] { \n  _id,\n  title,\n  "slug": slug.current,\n  dek,\n  contentType,\n  heroType,\n  publishedAt,\n  "school": primarySchool->{ \n  _id,\n  name,\n  shortName,\n  "slug": slug.current,\n  communityName,\n  circleJoinUrl,\n  accentColor,\n  accentColorDark\n },\n  "authors": authors[]->{ _id, name, "slug": slug.current },\n  heroImage { \n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop,\n  alt,\n  caption,\n  credit\n },\n  heroEmbed { provider, url, title }\n }\n': HOME_LATEST_QUERY_RESULT;
     '\n  *[_type == "school" && defined(slug.current)]{ "slug": slug.current }\n': SCHOOL_SLUGS_QUERY_RESULT;
-    '\n  *[_type == "school" && slug.current == $slug][0]{\n    \n  _id,\n  name,\n  shortName,\n  "slug": slug.current,\n  communityName,\n  circleJoinUrl,\n  accentColor,\n  accentColorDark\n,\n    mascot,\n    description,\n    seoTitle,\n    seoDescription,\n    logo { asset->{ _id, url }, alt },\n    heroImage { asset->{ _id, url, metadata { lqip } }, hotspot, crop }\n  }\n': SCHOOL_QUERY_RESULT;
+    '\n  *[_type == "school" && slug.current == $slug][0]{\n    \n  _id,\n  name,\n  shortName,\n  "slug": slug.current,\n  communityName,\n  circleJoinUrl,\n  accentColor,\n  accentColorDark\n,\n    mascot,\n    description,\n    seoTitle,\n    seoDescription,\n    logo { asset->{ _id, url }, alt },\n    heroImage { asset->{ _id, url, metadata { lqip } }, hotspot, crop },\n    "navTags": navTags[]->{ _id, name, "slug": slug.current }\n  }\n': SCHOOL_QUERY_RESULT;
     '\n  *[_type == "article" && defined(slug.current) && defined(primarySchool) && $schoolId in schools[]._ref] | order(coalesce(publishedAt, _createdAt) desc) [0...20] { \n  _id,\n  title,\n  "slug": slug.current,\n  dek,\n  contentType,\n  heroType,\n  publishedAt,\n  "school": primarySchool->{ \n  _id,\n  name,\n  shortName,\n  "slug": slug.current,\n  communityName,\n  circleJoinUrl,\n  accentColor,\n  accentColorDark\n },\n  "authors": authors[]->{ _id, name, "slug": slug.current },\n  heroImage { \n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop,\n  alt,\n  caption,\n  credit\n },\n  heroEmbed { provider, url, title }\n }\n': SCHOOL_LATEST_QUERY_RESULT;
     '\n  *[_type == "article" && defined(slug.current) && defined(primarySchool) && slug.current == $slug][0]{\n    _id,\n    _updatedAt,\n    title,\n    "slug": slug.current,\n    dek,\n    contentType,\n    status,\n    publishedAt,\n    updatedAt,\n    correction,\n    memberOnly,\n    noIndex,\n    seoTitle,\n    seoDescription,\n    ogImageOverride { asset->{ _id, url } },\n    "school": primarySchool->{ \n  _id,\n  name,\n  shortName,\n  "slug": slug.current,\n  communityName,\n  circleJoinUrl,\n  accentColor,\n  accentColorDark\n },\n    "schools": schools[]->{ _id, "slug": slug.current },\n    "authors": authors[]->{ \n  _id,\n  name,\n  "slug": slug.current,\n  role,\n  bio,\n  photo { asset->{ _id, url, metadata { lqip } }, hotspot, crop, alt },\n  socialLinks[]{ _key, platform, url }\n },\n    "tags": tags[]->{ _id, name, "slug": slug.current },\n    heroType,\n    heroImage { \n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop,\n  alt,\n  caption,\n  credit\n },\n    heroEmbed { provider, url, title },\n    episodeSummary,\n    episodeTimestamps[]{ _key, time, label },\n    body[]{\n      ...,\n      _type == "imageBlock" => { \n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop,\n  alt,\n  caption,\n  credit\n },\n      markDefs[]{ ..., _type == "link" => { href } }\n    },\n    circlePostUrl,\n    circleCommentCount,\n    "related": *[\n      _type == "article" && defined(slug.current) && defined(primarySchool) && _id != ^._id && primarySchool._ref == ^.primarySchool._ref\n    ] | order(coalesce(count((tags[]._ref)[@ in ^.^.tags[]._ref]), 0) desc, coalesce(publishedAt, _createdAt) desc) [0...3] { \n  _id,\n  title,\n  "slug": slug.current,\n  dek,\n  contentType,\n  heroType,\n  publishedAt,\n  "school": primarySchool->{ \n  _id,\n  name,\n  shortName,\n  "slug": slug.current,\n  communityName,\n  circleJoinUrl,\n  accentColor,\n  accentColorDark\n },\n  "authors": authors[]->{ _id, name, "slug": slug.current },\n  heroImage { \n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop,\n  alt,\n  caption,\n  credit\n },\n  heroEmbed { provider, url, title }\n },\n    "sponsor": *[\n      _type == "sponsorSlot" && active == true && placement == "articleBelowHero"\n      && (!defined(startDate) || startDate <= now())\n      && (!defined(endDate) || endDate >= now())\n      && (count(schools) == 0 || !defined(schools) || ^.primarySchool._ref in schools[]._ref)\n    ] | order(_updatedAt desc) [0] {\n      _id, sponsorName, headline, url, label, logo { asset->{ _id, url }, alt }\n    }\n  }\n': ARTICLE_QUERY_RESULT;
     '\n  *[_type == "article" && defined(slug.current) && defined(primarySchool) && slug.current == $slug][0]{\n    title,\n    dek,\n    contentType,\n    "school": primarySchool->{ shortName, accentColor, "slug": slug.current },\n    "authors": authors[]->{ name }\n  }\n': ARTICLE_OG_QUERY_RESULT;

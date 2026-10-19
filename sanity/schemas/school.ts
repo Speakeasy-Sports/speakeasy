@@ -1,4 +1,4 @@
-import { defineField, defineType } from "sanity";
+import { defineArrayMember, defineField, defineType } from "sanity";
 import { HomeIcon } from "@sanity/icons/Home";
 import { isReservedSlug } from "../../lib/reserved-slugs";
 import { contrast, DARK_BG, isHex, LIGHT_BG } from "../../lib/color";
@@ -82,6 +82,15 @@ export const school = defineType({
       initialValue: 10,
     }),
 
+    defineField({
+      name: "navTags",
+      title: "Section tags",
+      type: "array",
+      group: "identity",
+      description: "Tags shown in the section sub-nav after Latest, Podcasts, and Videos. Up to six, in this order.",
+      of: [defineArrayMember({ type: "reference", to: [{ type: "tag" }] })],
+      validation: (rule) => rule.max(6).unique(),
+    }),
     defineField({
       name: "communityName",
       type: "string",
