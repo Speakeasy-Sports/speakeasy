@@ -13,7 +13,7 @@
  *   info pages         page:{slug}, pages
  *   site feed          articles
  *   school feed        school:{slug}, articles
- *   sitemap            articles, schools, authors, taxonomy, pages
+ *   sitemap            articles, schools, authors, taxonomy, pages  (route handler, app/sitemap.xml)
  *   search index       articles
  *   settings           settings, schools
  *   og image           article-slug:{slug}
