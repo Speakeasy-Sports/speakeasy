@@ -146,17 +146,19 @@ export default async function ArticlePage({ params }: Props) {
       <JsonLd data={crumbs} />
 
       <div className="mx-auto max-w-4xl">
-        {/* 1. Labels */}
-        <LabelRow type={article.contentType} school={school} />
+        <header className="measure">
+          {/* 1. Labels */}
+          <LabelRow type={article.contentType} school={school} />
 
-        {/* 2. Headline and dek */}
-        <h1 className="mt-3 font-display text-4xl font-semibold leading-[1.1] tracking-tight md:text-5xl">{article.title}</h1>
-        {article.dek && <p className="mt-4 text-xl leading-snug text-fg-muted md:text-2xl">{article.dek}</p>}
+          {/* 2. Headline and dek */}
+          <h1 className="headline mt-3 text-4xl leading-[1.08] md:text-5xl">{article.title}</h1>
+          {article.dek && <p className="mt-4 text-xl leading-snug text-fg-muted md:text-2xl">{article.dek}</p>}
 
-        {/* 3. Byline */}
-        <div className="mt-6">
-          <Byline authors={authors} publishedAt={article.publishedAt} updatedAt={article.updatedAt} />
-        </div>
+          {/* 3. Byline */}
+          <div className="mt-6">
+            <Byline authors={authors} publishedAt={article.publishedAt} updatedAt={article.updatedAt} />
+          </div>
+        </header>
 
         {/* 4. Hero */}
         {heroType === "image" && <HeroImage image={article.heroImage} />}
@@ -188,7 +190,7 @@ export default async function ArticlePage({ params }: Props) {
         <CorrectionNote text={article.correction} />
 
         {/* 8. End block */}
-        <footer className="measure mt-12 flex flex-col gap-8 border-t border-line pt-8">
+        <footer className="measure mt-12 flex flex-col divide-y divide-line border-t border-line [&>*]:py-8 [&>*:last-child]:pb-0">
           <DiscussInClub
             communityName={stegaClean(school.communityName) ?? "the Club"}
             postUrl={article.circlePostUrl}

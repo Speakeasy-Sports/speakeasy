@@ -54,7 +54,7 @@ Body: `--text-body` 18px on phones, 20px from 768px, `--leading-body` 1.6, `--me
 |---|---|---|
 | School front title | 48 / 72 / 88px | `headline`, leading 0.95, tracking -0.035em |
 | Index page title (`PageHeader`) | 44 / 64px | leading 0.98, tracking -0.03em |
-| Article H1 | 36 / 48px (md) | semibold, leading 1.1 |
+| Article H1 | 36 / 48px (md) | `headline`, leading 1.08 |
 | Lead story | 32 / 40 / 46px | leading 1.06 |
 | Newsletter band | 32 / 44px | |
 | Wordmark | 22 / 26px (md) | bold, tracking -0.03em |
@@ -64,7 +64,7 @@ Body: `--text-body` 18px on phones, 20px from 768px, `--leading-body` 1.6, `--me
 | Article dek | 20 / 24px (md) | `text-fg-muted` |
 | Lead dek | 18 / 20px (lg) | |
 | Body H2, H3 | 1.5em, 1.2em | display face, margin-top 2em |
-| Pull quote | 24 / 30px (md) | |
+| Pull quote | 24 / 32px (md) | display italic, 500 |
 | UI text | 14 to 15px | buttons, nav, footer links |
 | Meta | 13px | `StoryMeta`, fine print |
 | Labels | 12px | `label-caps` |
@@ -75,8 +75,8 @@ Headline weight is 600 throughout; the wordmark is 700.
 
 - Spacing tokens `--space-1` to `--space-16` (4 to 64px). Tailwind's default spacing scale is used in components; prefer its 4px steps.
 - Page width: `shell` (76rem max, 16px gutters on phones, 24px from 640px). Header, fronts, article, and footer share it.
-- Article column: `max-w-4xl` (56rem) for the header, hero, and players; body and end block at `--measure`.
-- Fronts: a 12-column grid at `lg`. Lead story 7/5, secondary row of three divided by vertical hairlines, then Latest (8 columns) beside a sticky rail (4 columns).
+- Article column: one centered reading column at `--measure` for the header, body, and end block. The hero photo and players run wider (`max-w-4xl`, 56rem), centered over it. The end block (discuss, author, newsletter) is a stack of sections divided by hairlines.
+- Fronts: a 12-column grid at `lg`. Lead story 7/5, secondary row of three equal columns divided by vertical hairlines (`column-rules`), then Latest (8 columns) beside a sticky rail (4 columns).
 - Breakpoints: Tailwind defaults plus `xs` at 390px. The header collapses to wordmark, Join, and menu below `md`. Check every change at 390px.
 - Rhythm between front sections: 56px on phones, 80px at `lg`. Story rows are 24px top and bottom, divided by `--line`.
 
@@ -91,7 +91,8 @@ Defined in `styles/globals.css` with `@utility`, so they compose with Tailwind c
 | `story-link` | No underline at rest; a thin underline fades in on hover and focus | Headline links in story units |
 | `rule-heading` | 12px caps label followed by a hairline to the edge | Section heads: Latest, Listen and watch |
 | `photo-zoom` | 3% scale over 600ms when the parent `.group` is hovered; off under reduced motion | Images inside story units |
-| `measure` | `max-width: var(--measure)` | Reading-width blocks outside the body |
+| `measure` | `max-width: var(--measure)`, centered | The article header, end block, and reading-width blocks outside the body |
+| `column-rules` | A hairline centered in each gap of a grid set with `gap-x-16`. Columns stay equal width | The secondary row on the fronts |
 | `label-caps` | UI face, 12px, 600, 0.08em tracking, uppercase | Kickers, labels, footer column heads |
 
 `.article-body` (plain CSS, so Portable Text output stays bare HTML) sets body rhythm: 1.25em between blocks, accent links with a 40% accent underline, a 3px accent rule on blockquotes, and UI-face captions.
@@ -107,7 +108,7 @@ Grouped by where they appear. Server components unless marked client.
 - **`SchoolNav`**: Latest, Podcasts, Videos, a short vertical hairline, then up to six curated tags. 48px tall, scrolls sideways on phones, current item in semibold with a 3px accent underline.
 - **`SchoolTheme`**: emits the scoped accent tokens for a CMS school, contrast-corrected.
 - **`PageHeader`**: index page title with optional accent kicker and intro, closed by a hairline.
-- **`Footer`**: a full-strength `--fg` top rule, wordmark and tagline, link columns in UI face, then a hairline and fine print with the "Built for fans" line.
+- **`Footer`**: a full-strength `--fg` top rule, 96px below the content, or directly under the newsletter band when the page ends in one. Wordmark and tagline, link columns in UI face, then a hairline and fine print with the "Built for fans" line.
 
 ### Front units
 - **`FrontPage`**: assembles lead, secondary row, Latest river with `Pagination`, and the rail (`JoinCard`, `MediaRail`). Pages 2 and up show the river only.
@@ -115,7 +116,7 @@ Grouped by where they appear. Server components unless marked client.
 - **`StoryCard`**: 16:9 photo above labels, headline, dek, meta. With `compactOnPhone`, becomes a text-left, thumbnail-right row on phones.
 - **`StoryRow`**: river unit. Text left, small 16:9 photo right (104px phone, 176px desktop). Dek hidden on phones. `CompactRow` is the rail version with a 72px square.
 - **`StoryImage`**: the picture for any story unit. Hero photo, else the YouTube frame, else `MediaArt`. Fixed aspect box, decorative (`alt=""`, hidden from assistive tech), optional Listen or Watch pill.
-- **`MediaArt`**: SVG waveform seeded from the title, for media stories without a photo. No requests.
+- **`MediaArt`**: SVG waveform seeded from the title, for media stories without a photo. Neutral panel (5% `--fg` on `--bg`) with the accent only on the bars and play button. The school label shows only when the frame is at least 16rem wide, a container query, so thumbnails stay clean. No requests.
 - **`MediaRail`**: "Listen and watch" `rule-heading` and compact rows, links to all podcasts and videos.
 - **`JoinCard`**: rail promo for the Circle community on an elevated surface with a 3px accent top rule.
 - **`TypeLabel`, `SchoolLabel`, `LabelRow`** (`Labels.tsx`): accent `label-caps`, "Type · School". The school is dropped inside its own section.
@@ -125,20 +126,20 @@ Grouped by where they appear. Server components unless marked client.
 
 ### Article
 - **`Byline`**: overlapping 40px round author photos, linked names, `<time>` for publish and update.
-- **`HeroImage`**: 16:9 priority image with caption in `--fg-muted` and credit in `--fg-subtle`.
-- **`MediaFrame`**: fixed 16:9 or fixed-height box that holds a player so nothing shifts.
+- **`HeroImage`**: 16:9 priority image, square corners, with caption in `--fg-muted` and credit in `--fg-subtle`.
+- **`MediaFrame`**: fixed 16:9 or fixed-height box, square corners, that holds a player so nothing shifts.
 - **`YouTubeEmbed`** (client): thumbnail facade with an accent play button; the iframe loads on click and fires `video_play`.
 - **`PodcastEmbed`** (client): Spotify or Apple iframe in a `MediaFrame`, lazy below the fold, fires `podcast_play`.
 - **`EpisodeNotes`**: summary and a hairline-ruled timestamp list with accent times, under podcast and video heroes.
 - **`SocialEmbed`** (client): official X, Instagram, or TikTok script near the viewport; the plain link renders first and stays as the fallback.
 - **`PortableTextRenderer`**: maps the section 5 blocks to `.article-body` HTML and the components here.
-- **`PullQuote`**: display face at 24 to 30px between two hairlines.
-- **`Callout`**: info variant tinted with the accent, note variant on `--bg-elev`, both bordered.
-- **`SponsorSlot`**: renders only when a slot matches. "Presented by" label, logo, name, headline in a bordered row.
+- **`PullQuote`**: a short 3px accent rule, then the display italic at 24 to 32px, attribution in `label-caps`.
+- **`Callout`**: UI face between rules: the info variant opens with a 3px accent rule, the note variant with a hairline. Both close with a hairline. No fill.
+- **`SponsorSlot`**: renders only when a slot matches. "Presented by" label, logo, name, headline between two hairlines.
 - **`CorrectionNote`**: 2px left rule, UI face, "Correction" label.
 - **`DiscussInClub`** (client): accent button to the Circle post with the comment count; falls back to the join URL. Fires `discuss_click`.
-- **`AuthorCard`**: photo, name, role, bio, socials in a bordered elevated card.
-- **`NewsletterSignup`** (client): `inline` (bordered panel, article end), `band` (full width above the footer), `page` (form only). "Check your inbox" state on success. Fires `newsletter_signup`.
+- **`AuthorCard`**: photo, name, role, bio, socials. No box; the end block's hairlines separate it.
+- **`NewsletterSignup`** (client): `inline` (article end, no box), `band` (full width on `--bg-elev`, directly above the footer), `page` (form only). "Check your inbox" state on success. Fires `newsletter_signup`.
 - **`RelatedStories`**: "More to read" under a hairline, three `StoryCard`s.
 - **`JoinButton`** (client): the one filled accent control, 40px tall. Fires `join_click` with its location.
 
@@ -147,15 +148,11 @@ Grouped by where they appear. Server components unless marked client.
 
 ## Where the build departs from the direction
 
-Candidates for the next look-and-feel pass. None are bugs; they predate this document.
+What is left after the October 20, 2026 cleanup (square photo corners, hairlines in place of boxes, no accent fills, one headline style).
 
 | Where | Departure | Direction says |
 |---|---|---|
-| `HeroImage`, `MediaFrame`, body `imageBlock` | Photos and players use `rounded-base` | Square photo corners |
-| `AuthorCard`, `SponsorSlot`, `NewsletterSignup` inline, `Callout` | Bordered boxes on `--bg-elev` | Hairlines, not boxes |
-| `Callout` info variant, `MediaArt` | Accent tint as a fill (`bg-accent/5`, 13% mix) | Accent never as a background |
 | `MobileMenu` | Drop shadow | No shadows |
-| Article H1 | Sets its own type instead of the `headline` utility | One headline style |
 | `Pagination`, `FilterChips` | Boxed buttons and pills | Probably fine as controls; decide |
 
 ## Checklist for design changes

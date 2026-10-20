@@ -7,10 +7,10 @@ export function SponsorSlot({ sponsor }: { sponsor: Sponsor | null | undefined }
   return (
     <aside
       aria-label="Sponsor"
-      className="measure my-8 flex items-center gap-4 rounded-base border border-line bg-bg-elev px-4 py-3 font-ui"
+      className="measure my-8 flex items-center gap-4 border-y border-line py-3 font-ui"
     >
       {sponsor.logo?.asset && (
-        <span className="h-10 w-10 shrink-0 overflow-hidden rounded-base">
+        <span className="h-10 w-10 shrink-0 overflow-hidden">
           <SanityImage image={sponsor.logo} width={40} aspect={1} sizes="40px" className="h-full w-full object-contain" />
         </span>
       )}

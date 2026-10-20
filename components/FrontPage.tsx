@@ -52,7 +52,7 @@ export function FrontPage({ top, latest, count, media, page, basePath, schoolSlu
         <section aria-label="Top stories" className="pt-8 sm:pt-12">
           <LeadStory article={lead} showSchool={showSchool} />
           {secondary.length > 0 && (
-            <div className="mt-10 grid gap-6 border-t border-line pt-8 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 lg:mt-14 lg:grid-cols-3 lg:gap-0 lg:divide-x lg:divide-line [&>*+*]:border-t [&>*+*]:border-line [&>*+*]:pt-6 sm:[&>*+*]:border-t-0 sm:[&>*+*]:pt-0 lg:[&>*]:px-8 lg:[&>*:first-child]:pl-0 lg:[&>*:last-child]:pr-0">
+            <div className="mt-10 grid gap-6 border-t border-line pt-8 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 lg:mt-14 lg:grid-cols-3 lg:gap-x-16 lg:column-rules [&>*+*]:border-t [&>*+*]:border-line [&>*+*]:pt-6 sm:[&>*+*]:border-t-0 sm:[&>*+*]:pt-0">
               {secondary.map((a) => (
                 <StoryCard key={a._id} article={a} showSchool={showSchool} compactOnPhone />
               ))}
