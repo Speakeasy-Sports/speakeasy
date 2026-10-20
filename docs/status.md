@@ -71,7 +71,6 @@ Still for week 2: Sanity and Circle webhooks, `/api/newsletter`, WordPress redir
 ## Remaining for week 2 (per AGENTS.md section 12)
 
 - `/api/webhooks/sanity` (revalidation, `status` flip, Circle post), `/api/webhooks/circle`, `/api/newsletter` (the form already posts there and shows an error until it exists).
-- WordPress redirect map (needs V6).
 - Postmark review notifications.
 
 ## Not possible from the repo
