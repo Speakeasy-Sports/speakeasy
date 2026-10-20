@@ -42,7 +42,7 @@ const nextConfig: NextConfig = {
       ],
     };
   },
-  // Legacy WordPress paths are mapped here once captured (AGENTS.md section 6, item V6).
+  // School domains, if owned, redirect here (AGENTS.md section 6). No legacy paths to map (V6).
   async redirects() {
     return [];
   },

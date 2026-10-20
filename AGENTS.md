@@ -90,7 +90,7 @@ Principles:
     /draft/route.ts                preview mode enable/disable
   /feed.xml/route.ts
   /[school]/feed.xml/route.ts
-  /sitemap.ts, /robots.ts
+  /sitemap.xml/route.ts, /robots.ts
 /components                        see section 9
 /lib
   /sanity   client, queries (GROQ), image builder, schema types
@@ -243,11 +243,11 @@ Headline, blurb, email form posting to `/api/newsletter`, sample issue link.
 ### Feeds and sitemap
 - `/feed.xml`: all articles, full text excluded (dek + link), 50 most recent.
 - `/[school]/feed.xml`: per school.
-- `/sitemap.ts`: articles, schools, authors, tags. Exclude `noIndex`.
+- `/sitemap.xml`: route handler (not `app/sitemap.ts`, which stayed at its build-time output on Vercel). Articles, schools, authors, tags. Exclude `noIndex`.
 
 ### Redirects
 - `www` to apex. `http` to `https`.
-- Legacy WordPress URLs: capture current paths before cutover and map in `next.config` redirects.
+- No legacy redirects: the previous site had no content, and the domain is already live on Vercel.
 - School domains (if owned) 301 to `/{school}`.
 
 ---
@@ -449,7 +449,7 @@ Week 1, October 20 to 26
 
 Week 2, October 27 to November 2
 - Home, school section, author, tag, podcasts, videos, search, newsletter pages
-- Feeds, sitemap, redirects map from WordPress
+- Feeds, sitemap
 - Sanity webhook: revalidation plus Circle auto-post, with tests
 - Circle Workflow for comment counts (or hourly cron fallback)
 - Plausible, Postmark review notifications
@@ -458,7 +458,7 @@ Week 3, November 3 to 9
 - Load 15 to 20 articles with contributors so the front page is real on day one
 - QA pass on phone, Lighthouse, accessibility checks, dark mode
 - Flodesk export and Email Hub import, first newsletter from Email Hub
-- DNS cutover Monday, November 9, morning. Keep WordPress reachable on a temporary subdomain for one week.
+- Launch Monday, November 9. The domain is already live on Vercel, so there is no DNS cutover.
 
 Acceptance: a contributor can draft, an editor can schedule, the article appears on the site and as a Circle post within one minute of publish, and the article page scores 95+ on Lighthouse mobile.
 
@@ -485,7 +485,7 @@ Acceptance: inline thread matches the Circle post, MAU usage visible in a monthl
 | V3 | Admin API can create Email Hub contacts | Newsletter signup integration vs. embed fallback | Jon, CSM |
 | V4 | Admin API v2 base URL, create-post body format (TipTap JSON vs. plain), image attachment on posts | Section 7.2 | Done October 19, 2026: TipTap JSON, cover via direct upload. See `docs/circle-api-notes.md` |
 | V5 | Circle Workflows can call an external webhook on "comment created" | Section 7.3 primary vs. fallback | Engineering, Circle admin. Docs confirm webhook actions exist; the "comment created" trigger still needs checking in the admin |
-| V6 | Current WordPress URLs worth redirecting | Section 6 redirects | Jon |
+| V6 | Current WordPress URLs worth redirecting | Section 6 redirects | Done October 20, 2026: No legacy content; no redirects needed |
 | V7 | Brand assets and type choices | Tokens and fonts | Jon |
 | V8 | Photo rights plan for hero images | Content ops, not code | Jon |
 | V9 | Admin API budget target vs. comment-count fallback. Section 3 says design for under 5,000 requests per month; the hourly cron fallback in 7.3 uses about 18,000. Decide: raise the target, or run the fallback every 4 hours (about 4,500) | Only matters if V5 fails and the cron fallback is used | Jon |
