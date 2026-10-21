@@ -307,6 +307,8 @@ Headline, blurb, email form posting to `/api/newsletter`, sample issue link.
 
 ## 8. Design tokens
 
+How these tokens are used (direction, type scale, utilities, and each component as built) is in `docs/design.md`. Change values here and in `styles/tokens.css` together.
+
 `styles/tokens.css`:
 
 ```css
