@@ -18,7 +18,7 @@ export function AuthorCard({ author }: { author: AuthorRef }) {
   const socials = (author.socialLinks ?? []).filter((s) => s.url);
 
   return (
-    <div className="flex gap-4 rounded-base border border-line bg-bg-elev p-5 font-ui">
+    <div className="flex gap-4 font-ui">
       {author.photo?.asset && (
         <span className="h-16 w-16 shrink-0 overflow-hidden rounded-full">
           <SanityImage image={author.photo} alt={author.name} width={64} aspect={1} sizes="64px" className="h-full w-full object-cover" />

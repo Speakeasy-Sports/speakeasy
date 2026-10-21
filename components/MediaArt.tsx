@@ -13,8 +13,10 @@ function hash(s: string): number {
 }
 
 /**
- * Artwork for stories with no photo (podcast and video leads, mostly): an accent-tinted panel with a waveform
+ * Artwork for stories with no photo (podcast and video leads, mostly): a neutral panel with an accent waveform
  * drawn from the title, so a grid of episodes reads as a set rather than a row of gray boxes. Pure SVG, no requests.
+ * The accent stays on the marks, never the fill. The label only shows when the frame is wide enough to keep it
+ * clear of the waveform, which leaves thumbnails to the kicker beside them.
  */
 export function MediaArt({ kind, seed, label, size = "md" }: Props) {
   const h = hash(seed);
@@ -27,8 +29,8 @@ export function MediaArt({ kind, seed, label, size = "md" }: Props) {
 
   return (
     <div
-      className="relative h-full w-full overflow-hidden"
-      style={{ background: "color-mix(in srgb, var(--accent) 13%, var(--bg-elev))" }}
+      className="@container relative h-full w-full overflow-hidden"
+      style={{ background: "color-mix(in srgb, var(--fg) 5%, var(--bg))" }}
     >
       <svg
         aria-hidden="true"
@@ -45,13 +47,13 @@ export function MediaArt({ kind, seed, label, size = "md" }: Props) {
             height={v * 96}
             rx={1.5}
             fill="var(--accent)"
-            opacity={kind === "video" ? 0.22 : 0.5}
+            opacity={kind === "video" ? 0.25 : 0.7}
           />
         ))}
       </svg>
       {kind === "video" && (
         <span className="absolute inset-0 flex items-center justify-center" aria-hidden="true">
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-fg shadow-sm">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-accent-fg @[20rem]:h-14 @[20rem]:w-14">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M8 5.5v13l10.5-6.5z" />
             </svg>
@@ -60,7 +62,7 @@ export function MediaArt({ kind, seed, label, size = "md" }: Props) {
       )}
       {label && (
         <span
-          className={`absolute left-0 top-0 font-display font-semibold tracking-tight text-accent ${
+          className={`absolute left-0 top-0 hidden font-display font-semibold tracking-tight text-accent @[16rem]:block ${
             size === "lg" ? "p-6 text-4xl" : size === "sm" ? "p-2 text-sm" : "p-4 text-xl"
           }`}
         >

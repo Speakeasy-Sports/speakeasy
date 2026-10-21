@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 import { track } from "@/lib/analytics/plausible";
 
 type Props = {
-  /** inline: boxed, end of article. band: full-width two-column, above the footer. page: the /newsletter page. */
+  /** inline: end of article. band: full-width two-column, directly above the footer. page: the /newsletter page. */
   variant?: "inline" | "band" | "page";
   headline?: string | null;
   blurb?: string | null;
@@ -107,7 +107,7 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
 
   if (variant === "band") {
     return (
-      <section aria-labelledby={`${id}-h`} className="border-y border-line bg-bg-elev">
+      <section aria-labelledby={`${id}-h`} data-newsletter-band className="border-t border-line bg-bg-elev">
         <div className="shell grid gap-8 py-14 md:grid-cols-12 md:items-end md:gap-10 md:py-20">
           <div className="flex flex-col gap-3 md:col-span-6">
             <p className="label-caps text-fg-muted">Newsletter</p>
@@ -140,7 +140,7 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
   }
 
   return (
-    <section aria-labelledby={`${id}-h`} className="flex flex-col gap-4 border border-line bg-bg-elev p-6 sm:p-8">
+    <section aria-labelledby={`${id}-h`} className="flex flex-col gap-4">
       <p className="label-caps text-fg-muted">Newsletter</p>
       <h2 id={`${id}-h`} className="headline text-2xl leading-tight sm:text-[1.75rem]">
         {title}

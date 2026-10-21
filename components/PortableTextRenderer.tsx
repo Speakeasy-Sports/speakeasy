@@ -46,7 +46,7 @@ const components: PortableTextComponents = {
       if (!image.asset || !image.alt) return null;
       return (
         <figure>
-          <SanityImage image={image} width={896} sizes="(min-width: 1024px) 896px, 100vw" className="w-full rounded-base" />
+          <SanityImage image={image} width={896} sizes="(min-width: 1024px) 896px, 100vw" className="w-full" />
           {(image.caption || image.credit) && (
             <figcaption>
               {image.caption}
