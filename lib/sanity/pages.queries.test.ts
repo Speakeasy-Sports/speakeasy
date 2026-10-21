@@ -11,6 +11,7 @@ import {
   SCHOOL_FRONT_QUERY,
   SEARCH_INDEX_QUERY,
   SITEMAP_QUERY,
+  SITE_SIGNALS_QUERY,
   TAG_QUERY,
 } from "./queries";
 import { pageQuery } from "./paginate";
@@ -129,7 +130,15 @@ describe("feeds, sitemap, search, pages", () => {
     expect(sm.schools).toHaveLength(2);
     expect(sm.authors).toHaveLength(3);
     expect(sm.tags).toHaveLength(6);
-    expect(sm.pages).toHaveLength(4);
+    expect(sm.pages).toHaveLength(5);
+  });
+
+  it("counts what the launch-stage switches need", async () => {
+    const counts = await run<{ articles: number; podcasts: number; videos: number; authors: number }>(SITE_SIGNALS_QUERY);
+    expect(counts.articles).toBe(live.length);
+    expect(counts.podcasts).toBe(live.filter((d) => (d as { contentType?: string }).contentType === "podcast").length);
+    expect(counts.videos).toBe(live.filter((d) => (d as { contentType?: string }).contentType === "video").length);
+    expect(counts.authors).toBe(new Set(live.flatMap((d) => ((d as { authors?: { _ref: string }[] }).authors ?? []).map((a) => a._ref))).size);
   });
 
   it("finds info pages by slug", async () => {

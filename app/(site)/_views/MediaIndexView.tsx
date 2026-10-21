@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { stegaClean } from "@sanity/client/stega";
 import { sanityFetch } from "@/lib/sanity/fetch";
 import { MEDIA_QUERY } from "@/lib/sanity/queries";
-import { getSiteSettings } from "@/lib/sanity/loaders";
+import { getSiteSettings, getSiteSignals } from "@/lib/sanity/loaders";
 import { pageQuery, totalPages } from "@/lib/sanity/paginate";
 import { tags } from "@/lib/sanity/tags";
 import { joinUrlFor } from "@/lib/circle-links";
@@ -60,7 +60,7 @@ export async function mediaMetadata(kind: Kind, p: Filter): Promise<Metadata> {
  * variant is cached like the front pages.
  */
 export async function MediaIndexView({ kind, filter: p }: { kind: Kind; filter: Filter }) {
-  const [data, settings] = await Promise.all([getMedia(kind, p.school, p.page), getSiteSettings()]);
+  const [data, settings, signals] = await Promise.all([getMedia(kind, p.school, p.page), getSiteSettings(), getSiteSignals()]);
   if (p.school && !data.school?.slug) notFound();
   const pages = totalPages(data.count, PER_PAGE);
   if (p.page > pages) notFound();
@@ -76,7 +76,7 @@ export async function MediaIndexView({ kind, filter: p }: { kind: Kind; filter: 
       {!first && <p className="py-16 font-ui text-fg-muted">{copy.empty}</p>}
       {lead && (
         <div className="pt-10">
-          <LeadStory article={lead} showSchool={showSchool} />
+          <LeadStory article={lead} showSchool={showSchool} hideAuthors={signals.singleAuthor} />
         </div>
       )}
       {grid.length > 0 && !lead && (
@@ -87,7 +87,7 @@ export async function MediaIndexView({ kind, filter: p }: { kind: Kind; filter: 
       {grid.length > 0 && (
         <div className={`grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 ${lead ? "mt-14 border-t border-line pt-10" : "pt-10"}`}>
           {grid.map((a) => (
-            <StoryCard key={a._id} article={a} showSchool={showSchool} />
+            <StoryCard key={a._id} article={a} showSchool={showSchool} hideAuthors={signals.singleAuthor} />
           ))}
         </div>
       )}
@@ -107,6 +107,7 @@ export async function MediaIndexView({ kind, filter: p }: { kind: Kind; filter: 
           navTags={data.school.navTags}
           joinUrl={joinUrlFor(s, settings)}
           active={kind === "podcast" ? "podcasts" : "videos"}
+          media={{ podcasts: signals.hasPodcasts, videos: signals.hasVideos }}
           variant="compact"
           title={copy.title}
         />

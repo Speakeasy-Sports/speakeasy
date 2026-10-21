@@ -1,25 +1,26 @@
 import Link from "next/link";
 import type { SiteSettings } from "@/lib/types";
-import { HeaderNav, MobileMenu } from "./HeaderNav";
+import { HeaderNav, MobileMenu, type MediaSections } from "./HeaderNav";
 import { JoinButton } from "./JoinButton";
 
 type Props = {
   settings: SiteSettings | null;
   joinUrl: string;
+  media: MediaSections;
 };
 
 /**
  * Masthead. Desktop: sections left, wordmark centered, search and Join right.
  * Phones (AGENTS.md section 9): wordmark, Join, menu.
  */
-export function SiteHeader({ settings, joinUrl }: Props) {
+export function SiteHeader({ settings, joinUrl, media }: Props) {
   const schools = settings?.navSchools ?? [];
   const siteName = settings?.siteName ?? "Speakeasy Sports";
 
   return (
     <header className="border-b border-line bg-bg">
       <div className="shell grid h-16 grid-cols-[1fr_auto] items-center gap-4 md:grid-cols-[1fr_auto_1fr]">
-        <HeaderNav schools={schools} />
+        <HeaderNav schools={schools} media={media} />
         <Link
           href="/"
           className="font-display text-[1.375rem] font-bold leading-none tracking-[-0.03em] no-underline md:justify-self-center md:text-[1.625rem]"
@@ -38,7 +39,7 @@ export function SiteHeader({ settings, joinUrl }: Props) {
             </svg>
           </Link>
           <JoinButton href={joinUrl} location="header" />
-          <MobileMenu schools={schools} />
+          <MobileMenu schools={schools} media={media} />
         </div>
       </div>
     </header>

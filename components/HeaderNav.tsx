@@ -6,17 +6,22 @@ import { useEffect, useRef } from "react";
 
 type School = { _id: string; slug: string | null; shortName: string | null; name: string | null };
 
-const SECTIONS = [
-  { href: "/podcasts", segment: "podcasts", label: "Podcasts" },
-  { href: "/videos", segment: "videos", label: "Videos" },
-];
+/** Which media sections have anything published. Their links stay hidden until they do. */
+export type MediaSections = { podcasts: boolean; videos: boolean };
+
+function mediaLinks(media: MediaSections) {
+  return [
+    ...(media.podcasts ? [{ href: "/podcasts", segment: "podcasts", label: "Podcasts" }] : []),
+    ...(media.videos ? [{ href: "/videos", segment: "videos", label: "Videos" }] : []),
+  ];
+}
 
 /** Desktop section links. The current school or section is marked with aria-current and an accent rule. */
-export function HeaderNav({ schools }: { schools: School[] }) {
+export function HeaderNav({ schools, media }: { schools: School[]; media: MediaSections }) {
   const segment = useSelectedLayoutSegment();
   const items = [
     ...schools.filter((s) => s.slug).map((s) => ({ href: `/${s.slug}`, segment: s.slug, label: s.shortName ?? s.name, school: s.slug })),
-    ...SECTIONS.map((s) => ({ ...s, school: null })),
+    ...mediaLinks(media).map((s) => ({ ...s, school: null })),
   ];
 
   return (
@@ -44,7 +49,7 @@ export function HeaderNav({ schools }: { schools: School[] }) {
 }
 
 /** Phone menu. A native <details> so it works before hydration; it closes itself after navigation. */
-export function MobileMenu({ schools }: { schools: School[] }) {
+export function MobileMenu({ schools, media }: { schools: School[]; media: MediaSections }) {
   const ref = useRef<HTMLDetailsElement>(null);
   const pathname = usePathname();
 
@@ -54,8 +59,7 @@ export function MobileMenu({ schools }: { schools: School[] }) {
 
   const links = [
     ...schools.filter((s) => s.slug).map((s) => ({ href: `/${s.slug}`, label: s.name ?? s.shortName ?? "" })),
-    { href: "/podcasts", label: "Podcasts" },
-    { href: "/videos", label: "Videos" },
+    ...mediaLinks(media),
     { href: "/search", label: "Search" },
     { href: "/newsletter", label: "Newsletter" },
   ];

@@ -244,6 +244,7 @@ const infoPages = [
   ["contact", "Contact", "Tips, corrections, partnerships, and everything else."],
   ["terms", "Terms of use", "[Terms to come from counsel before launch.]"],
   ["privacy", "Privacy", "[Privacy policy to come from counsel before launch.]"],
+  ["write-for-us", "Write for us", "We are looking for fans who know the game and can explain it."],
 ].map(([slug, title, intro]) => ({
   _id: `infoPage-${slug}`,
   _type: "infoPage",
