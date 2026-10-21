@@ -6,9 +6,10 @@ export const INFO_PAGE_SLUGS = [
   { title: "Contact", value: "contact" },
   { title: "Terms of use", value: "terms" },
   { title: "Privacy", value: "privacy" },
+  { title: "Write for us", value: "write-for-us" },
 ] as const;
 
-// The four standing pages linked from the footer. One document each; the site has a route per slug.
+// The standing pages linked from the footer. One document each; the site has a route per slug.
 export const infoPage = defineType({
   name: "infoPage",
   title: "Page",

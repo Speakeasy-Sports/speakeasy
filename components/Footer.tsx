@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { SiteSettings } from "@/lib/types";
 import { schoolPath } from "@/lib/seo";
+import type { MediaSections } from "./HeaderNav";
 
 const PLATFORM_LABELS: Record<string, string> = {
   x: "X",
@@ -38,7 +39,7 @@ function Item({ href, children, external }: { href: string; children: React.Reac
   );
 }
 
-export function Footer({ settings }: { settings: SiteSettings | null }) {
+export function Footer({ settings, media }: { settings: SiteSettings | null; media: MediaSections }) {
   const year = new Date().getFullYear();
   const siteName = settings?.siteName ?? "Speakeasy Sports";
   const schools = (settings?.navSchools ?? []).filter((s) => s.slug);
@@ -62,14 +63,15 @@ export function Footer({ settings }: { settings: SiteSettings | null }) {
                   {s.name}
                 </Item>
               ))}
-              <Item href="/podcasts">Podcasts</Item>
-              <Item href="/videos">Videos</Item>
+              {media.podcasts && <Item href="/podcasts">Podcasts</Item>}
+              {media.videos && <Item href="/videos">Videos</Item>}
               <Item href="/search">Search</Item>
             </Column>
             <Column title="Speakeasy">
               <Item href="/about">About</Item>
               <Item href="/contact">Contact</Item>
               <Item href="/newsletter">Newsletter</Item>
+              <Item href="/write-for-us">Write for us</Item>
               <Item href="/feed.xml">RSS</Item>
             </Column>
             {socials.length > 0 && (

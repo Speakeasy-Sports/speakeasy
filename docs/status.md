@@ -68,6 +68,12 @@ Still for week 2: Sanity and Circle webhooks, `/api/newsletter`, WordPress redir
 - `pnpm build` now runs `scripts/check-alt-text.mjs` first: it fails the build if any published article, info page, author, school, sponsor slot, or site settings image has no alt text. Skipped when no Sanity project is configured.
 - `school.logo`, `school.heroImage`, `siteSettings.defaultOgImage`, and `article.ogImageOverride` now have a required alt field; the article override's alt feeds `og:image:alt`.
 
+## Launch mode and Write for us (branch launch-v1-and-write-for-us)
+
+- Launch-stage switches derived from what is published (`lib/site-signals.ts`): Podcasts and Videos links hide until one exists, story cards drop the byline while one person writes everything, the section sub-nav hides when it would only say "Latest", and a front with fewer than 8 stories is the lead plus one list. Each switches back on by itself.
+- `/write-for-us`: Studio copy plus an application form that emails `EDITOR_NOTIFY_EMAIL` through Postmark (Reply-To is the applicant). Linked from the footer and the article end block. Honeypot, timing check, and a 5 per hour per IP limit.
+- Verified against a five-article, one-author dataset locally, plus the full mock dataset in the smoke tests.
+
 ## Remaining for week 2 (per AGENTS.md section 12)
 
 - `/api/webhooks/sanity` (revalidation, `status` flip, Circle post), `/api/webhooks/circle`, `/api/newsletter` (the form already posts there and shows an error until it exists).

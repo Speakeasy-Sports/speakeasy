@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { stegaClean } from "@sanity/client/stega";
 import { sanityFetch } from "@/lib/sanity/fetch";
 import { TAG_QUERY } from "@/lib/sanity/queries";
-import { getSiteSettings } from "@/lib/sanity/loaders";
+import { getSiteSettings, getSiteSignals } from "@/lib/sanity/loaders";
 import { pageQuery, totalPages } from "@/lib/sanity/paginate";
 import { tags } from "@/lib/sanity/tags";
 import { joinUrlFor } from "@/lib/circle-links";
@@ -53,7 +53,7 @@ export async function tagMetadata(slug: string, { school, page }: Filter): Promi
  * to an internal route in next.config.ts so every variant is cached.
  */
 export async function TagView({ slug, filter: { school, page } }: { slug: string; filter: Filter }) {
-  const [tag, settings] = await Promise.all([getTag(slug, school, page), getSiteSettings()]);
+  const [tag, settings, signals] = await Promise.all([getTag(slug, school, page), getSiteSettings(), getSiteSignals()]);
   if (!tag?.name) notFound();
   if (school && !tag.school?.slug) notFound();
   const pages = totalPages(tag.count, PER_PAGE);
@@ -67,7 +67,7 @@ export async function TagView({ slug, filter: { school, page } }: { slug: string
       {tag.articles.length > 0 ? (
         <div className="divide-y divide-line">
           {tag.articles.map((a) => (
-            <StoryRow key={a._id} article={a} showSchool={!school} />
+            <StoryRow key={a._id} article={a} showSchool={!school} hideAuthors={signals.singleAuthor} />
           ))}
         </div>
       ) : (
@@ -87,6 +87,7 @@ export async function TagView({ slug, filter: { school, page } }: { slug: string
           navTags={tag.school.navTags}
           joinUrl={joinUrlFor(s, settings)}
           active={slug}
+          media={{ podcasts: signals.hasPodcasts, videos: signals.hasVideos }}
           variant="compact"
           title={tag.name}
         />

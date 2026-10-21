@@ -1,6 +1,6 @@
 # Speakeasy Sports content site: build spec
 
-Status: v1.3, October 19, 2026
+Status: v1.4, October 21, 2026
 Owner: Jon Smith
 Purpose: Build spec and working agreement for the Speakeasy Sports content site. Lives at the repo root as `AGENTS.md`. Every contributor treats the Decisions section as fixed and everything else as the plan of record.
 
@@ -80,13 +80,14 @@ Principles:
     /videos/page.tsx               all video-type articles
     /search/page.tsx
     /newsletter/page.tsx
-    /about/page.tsx, /contact, /terms, /privacy
+    /about/page.tsx, /contact, /terms, /privacy, /write-for-us
   /studio/[[...tool]]/page.tsx     Sanity Studio
   /api
     /webhooks/sanity/route.ts
     /webhooks/circle/route.ts
     /og/route.tsx                  Open Graph image generation
     /newsletter/route.ts           signup handler
+    /write-for-us/route.ts         contributor applications, emailed to the editor
     /draft/route.ts                preview mode enable/disable
   /feed.xml/route.ts
   /[school]/feed.xml/route.ts
@@ -171,8 +172,8 @@ Circle sync (read-only in Studio, written by the webhook handler)
 - `navSchools` (ordered refs)
 
 ### infoPage
-- `title`, `slug` (one of `about`, `contact`, `terms`, `privacy`), `intro` (text, max 200), `body` (same Portable Text as articles)
-- One document per footer page. A missing page 404s rather than showing filler.
+- `title`, `slug` (one of `about`, `contact`, `terms`, `privacy`, `write-for-us`), `intro` (text, max 200), `body` (same Portable Text as articles)
+- One document per footer page. A missing page 404s rather than showing filler. On `write-for-us` the application form renders under the body.
 
 ### Studio configuration
 - Desk structure: Articles (by status: Needs review, Scheduled, Published, Drafts), Schools, Authors, Tags, Sponsor slots, Pages, Settings.
@@ -197,6 +198,7 @@ Circle sync (read-only in Studio, written by the webhook handler)
 - Secondary: `featuredRank` 2 to 4 in a row of three.
 - "Latest" list: most recent 20 published articles across all schools, with school label, type label, headline, timestamp. Load more via pagination at `/?page=2`.
 - Top stories are the first four of: featured ranks 1 to 4, then everything else newest first. With nothing featured they are the four newest. Latest excludes exactly those four on every page, so pages never repeat or skip a story.
+- Launch mode: with fewer than 8 live stories in scope, the front is the lead plus one Latest list (secondary stories fold into Latest, newest first), so a thin front never shows a row of three over one stray row. The full layout returns on its own at 8.
 - `/?page=N` and `/{school}?page=N` are rewritten in `next.config.ts` to internal routes (`/latest/N`, `/{school}/latest/N`) so the front pages never read search params and stay fully static. The internal routes set their canonical back to the `?page=N` form. The same applies to `?school=` and `?page=` on `/podcasts`, `/videos`, `/tags/{slug}` (internal `.../f/{school or all}/{page}`) and `?page=` on `/authors/{slug}` (internal `.../p/{page}`).
 - Newsletter block between Latest and footer.
 - Persistent "Join the Club" in header.
@@ -205,8 +207,8 @@ Circle sync (read-only in Studio, written by the webhook handler)
 ### `/[school]` School section
 - Same layout as home scoped to the school, using the school accent token.
 - Section header: school name, `communityName`, join CTA to `circleJoinUrl`.
-- Sub-nav: Latest, Podcasts, Videos, then the school's `navTags` in order (curated in the school document, up to 6).
-- Reserved slugs (not valid school slugs): `authors`, `tags`, `podcasts`, `videos`, `search`, `newsletter`, `about`, `contact`, `terms`, `privacy`, `studio`, `api`, `feed.xml`, `latest`, `all`, `search-index.json`, `sitemap.xml`, `robots.txt`.
+- Sub-nav: Latest, Podcasts, Videos, then the school's `navTags` in order (curated in the school document, up to 6). Podcasts and Videos appear once the site has published at least one of each (the page you are on always shows), and a sub-nav that would only say "Latest" is not rendered.
+- Reserved slugs (not valid school slugs): `authors`, `tags`, `podcasts`, `videos`, `search`, `newsletter`, `about`, `contact`, `terms`, `privacy`, `write-for-us`, `studio`, `api`, `feed.xml`, `latest`, `all`, `search-index.json`, `sitemap.xml`, `robots.txt`.
 - Podcasts, Videos, and tag links in the sub-nav go to the site-wide pages filtered with `?school={slug}`; those pages render with the school's header, accent, and sub-nav, so the reader stays in the section.
 
 ### `/[school]/[slug]` Article
@@ -218,7 +220,7 @@ Top to bottom:
 5. Sponsor slot `articleBelowHero` if an active slot matches school and date; otherwise nothing (no empty box)
 6. Body (Portable Text renderer with the custom blocks)
 7. Correction note (if present)
-8. End block: "Discuss in {communityName}" button to `circlePostUrl` with `{circleCommentCount} comments`, author card, newsletter signup
+8. End block: "Discuss in {communityName}" button to `circlePostUrl` with `{circleCommentCount} comments`, author card, a one-line "Want to cover {school}? Write for Speakeasy." link to `/write-for-us`, newsletter signup
 9. Related: 3 articles, same `primarySchool` and sharing a tag, else same school most recent
 - Canonical: `/{primarySchool}/{slug}`. Requests at `/{otherSchool}/{slug}` where the article lists that school 301 to canonical.
 - Member-only (Phase 2): body truncated after 2 paragraphs with a join wall; full text for signed-in members with a qualifying tier.
@@ -239,6 +241,14 @@ Client-side search over a prebuilt JSON index (title, dek, tags, school, author)
 
 ### `/newsletter`
 Headline, blurb, email form posting to `/api/newsletter`, sample issue link.
+
+### `/write-for-us`
+Info page copy from the Studio, then the application form (section 7.9). Linked from the footer and the article end block.
+
+### Launch-stage switches
+Derived from what is published (`lib/site-signals.ts`, one cached query tagged `articles` and `authors`), so nothing needs turning back on by hand:
+- Podcasts and Videos links in the header, phone menu, footer, and section sub-nav appear with the first published podcast or video.
+- Story cards (lead, cards, rows, related) show the date only while every live article has the same single author; bylines return when a second author publishes. The article page always shows the full byline and author card.
 
 ### Feeds and sitemap
 - `/feed.xml`: all articles, full text excluded (dek + link), 50 most recent.
@@ -288,7 +298,7 @@ Headline, blurb, email form posting to `/api/newsletter`, sample issue link.
 
 ### 7.6 Email
 - Postmark message stream `speakeasy-transactional`, sending domain `mail.speakeasysports.com` (DKIM, return-path CNAME).
-- Phase 1 use: review notifications to editors. Phase 2: magic links.
+- Phase 1 use: review notifications and Write for us applications to the editor. Phase 2: magic links.
 
 ### 7.7 Phase 2: identity
 - Auth.js with email provider (magic link via Postmark). Session in JWT cookie on `speakeasysports.com`.
@@ -302,6 +312,12 @@ Headline, blurb, email form posting to `/api/newsletter`, sample issue link.
 - Inline comment thread rendered from the Circle post, with reply box. Server-side cache of threads for 5 minutes to cut per-visitor reads.
 - Circle UI Kit (React, alpha) evaluated first; custom components if it is not stable.
 - MAU math reviewed monthly: 500 included, $0.30 each above.
+
+### 7.9 Write for us applications
+- Form on `/write-for-us` posts JSON to `/api/write-for-us`: name, email, what they would cover, one or two sample links (http or https), optional social handle, optional "what would make it worth your time", and an 18+ confirmation (contributors must be adults even though readers can be 13+).
+- Spam: hidden honeypot field, a 3-second minimum from page load to submit, and 5 submissions per IP per hour (KV counter; allows everything when KV is not set). Honeypot and too-fast submissions get the normal success response.
+- Delivery: one Postmark email to `EDITOR_NOTIFY_EMAIL` with Reply-To set to the applicant. Nothing is stored in Sanity or elsewhere. Without Postmark or `EDITOR_NOTIFY_EMAIL` the endpoint answers 503 and the form says applications are not open yet.
+- What contributors get (pay, perks) is page copy in the Studio, not code. Adding a form field is a code change.
 
 ---
 
@@ -388,6 +404,7 @@ Rules:
 | `DiscussInClub` | Button to Circle post with comment count; falls back to the school join url if no post yet. Fires `discuss_click` |
 | `AuthorCard` | End-of-article |
 | `NewsletterSignup` | Inline and page variants. Fires `newsletter_signup` |
+| `WriteForUsForm` | Contributor application on `/write-for-us` (section 7.9) |
 | `RelatedStories` | |
 | `CorrectionNote` | |
 | `JoinWall` | Phase 2 |
@@ -508,3 +525,13 @@ Acceptance: inline thread matches the Circle post, MAU usage visible in a monthl
 - When unsure about a Circle endpoint, open the Swagger spec rather than guessing, and record what was found in `/docs/circle-api-notes.md`.
 - No tool or vendor attribution in commits, PR descriptions, code comments, or docs.
 
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

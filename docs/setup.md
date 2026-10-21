@@ -98,6 +98,12 @@ Daily job (`vercel.json`, 9:17 UTC, `/api/cron/circle-daily`, needs `CRON_SECRET
 
 If Workflows cannot send webhooks (V5), change the cron schedule to every few hours; see V9 in AGENTS.md for the budget call.
 
-## 7. Still to build
+## 7. Write for us
+
+1. In the Studio, Pages, create a page with slug `write-for-us` (title "Write for us", an intro, and the body copy). Until it exists `/write-for-us` is a 404, though the footer already links to it.
+2. Applications email `EDITOR_NOTIFY_EMAIL` from `POSTMARK_FROM`. With either unset, the form tells applicants applications are not open yet.
+3. Reply to the email to answer the applicant; Reply-To is their address. Nothing is stored anywhere else.
+
+## 8. Still to build
 
 - Newsletter handler at `/api/newsletter`. The signup form already posts there.

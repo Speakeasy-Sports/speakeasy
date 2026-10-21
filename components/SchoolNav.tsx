@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { schoolPath, tagPath } from "@/lib/seo";
+import type { MediaSections } from "./HeaderNav";
 
 type NavTag = { _id: string; name: string | null; slug: string | null };
 
@@ -8,21 +9,24 @@ type Props = {
   navTags?: NavTag[] | null;
   /** "latest", "podcasts", "videos", or a tag slug. */
   active: string;
+  media: MediaSections;
 };
 
 /**
  * Section sub-nav (AGENTS.md section 6): Latest, Podcasts, Videos, then the school's curated tags.
  * Podcasts, videos, and tags are site-wide pages filtered to the school, so the reader stays inside the section.
- * Scrolls sideways on phones rather than wrapping.
+ * Scrolls sideways on phones rather than wrapping. Podcasts and Videos appear once the site has any (the current one
+ * always shows), and a nav that would only say "Latest" is not rendered at all.
  */
-export function SchoolNav({ school, navTags, active }: Props) {
+export function SchoolNav({ school, navTags, active, media }: Props) {
   const q = `?school=${school.slug}`;
   const items = [
     { key: "latest", label: "Latest", href: schoolPath(school.slug) },
-    { key: "podcasts", label: "Podcasts", href: `/podcasts${q}` },
-    { key: "videos", label: "Videos", href: `/videos${q}` },
+    ...(media.podcasts || active === "podcasts" ? [{ key: "podcasts", label: "Podcasts", href: `/podcasts${q}` }] : []),
+    ...(media.videos || active === "videos" ? [{ key: "videos", label: "Videos", href: `/videos${q}` }] : []),
   ];
   const tags = (navTags ?? []).filter((t) => t.slug && t.name).slice(0, 6);
+  if (items.length === 1 && tags.length === 0) return null;
 
   const linkClass = (current: boolean) =>
     `relative flex h-12 shrink-0 items-center whitespace-nowrap font-ui text-[0.875rem] no-underline transition-colors ${

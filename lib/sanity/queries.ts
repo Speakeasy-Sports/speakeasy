@@ -87,6 +87,17 @@ export const SITE_SETTINGS_QUERY = defineQuery(`
   }
 `);
 
+// What the site has published so far, so launch-stage pages hide what would be empty (AGENTS.md section 6, Launch mode).
+// Podcasts and Videos links appear with the first episode; card bylines return when a second author publishes.
+export const SITE_SIGNALS_QUERY = defineQuery(`
+  {
+    "articles": count(*[${LIVE}]),
+    "podcasts": count(*[${LIVE} && contentType == "podcast"]),
+    "videos": count(*[${LIVE} && contentType == "video"]),
+    "authors": count(*[_type == "author" && count(*[${LIVE} && references(^._id)]) > 0])
+  }
+`);
+
 export const HOME_QUERY = defineQuery(`
   {
     "top": (*[${LIVE}] | ${TOP_ORDER})[0...4]{ ${CARD_FIELDS} },

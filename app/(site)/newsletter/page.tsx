@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { sanityFetch } from "@/lib/sanity/fetch";
 import { NEWSLETTER_QUERY } from "@/lib/sanity/queries";
-import { getSiteSettings } from "@/lib/sanity/loaders";
+import { getSiteSettings, getSiteSignals } from "@/lib/sanity/loaders";
 import { tags } from "@/lib/sanity/tags";
 import { buildMetadata } from "@/lib/seo";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
@@ -19,8 +19,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function NewsletterPage() {
-  const [settings, recent] = await Promise.all([
+  const [settings, signals, recent] = await Promise.all([
     getSiteSettings(),
+    getSiteSignals(),
     sanityFetch({ query: NEWSLETTER_QUERY, tags: [tags.articles], revalidate: 300 }),
   ]);
   const headline = settings?.newsletterHeadline ?? "The Speakeasy newsletter";
@@ -43,7 +44,7 @@ export default async function NewsletterPage() {
           </h2>
           <div className="mt-8 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
             {recent.map((a) => (
-              <StoryCard key={a._id} article={a} />
+              <StoryCard key={a._id} article={a} hideAuthors={signals.singleAuthor} />
             ))}
           </div>
         </section>

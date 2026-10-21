@@ -15,6 +15,8 @@ type Props = {
   showDek?: boolean;
   /** Phones show secondary stories as thumbnail rows so the lead stays the only big picture. */
   compactOnPhone?: boolean;
+  /** Date only, for while every story is by the same person. */
+  hideAuthors?: boolean;
 };
 
 export function StoryCard({
@@ -25,6 +27,7 @@ export function StoryCard({
   showSchool = true,
   showDek = true,
   compactOnPhone = false,
+  hideAuthors,
 }: Props) {
   if (!article.slug || !article.school?.slug) return null;
   const href = articlePath(article.school.slug, article.slug);
@@ -47,7 +50,7 @@ export function StoryCard({
         {showDek && article.dek && (
           <p className={`text-base leading-snug text-fg-muted ${compactOnPhone ? "hidden sm:block" : ""}`}>{article.dek}</p>
         )}
-        <StoryMeta article={article} className="mt-1" />
+        <StoryMeta article={article} hideAuthors={hideAuthors} className="mt-1" />
       </div>
     </article>
   );

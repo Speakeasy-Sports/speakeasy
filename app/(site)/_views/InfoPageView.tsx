@@ -8,7 +8,7 @@ import { buildMetadata } from "@/lib/seo";
 import { PortableTextRenderer } from "@/components/PortableTextRenderer";
 import type { ArticleBody } from "@/lib/types";
 
-export type InfoSlug = "about" | "contact" | "terms" | "privacy";
+export type InfoSlug = "about" | "contact" | "terms" | "privacy" | "write-for-us";
 
 function getPage(slug: InfoSlug) {
   return sanityFetch({ query: INFO_PAGE_QUERY, params: { slug }, tags: [tags.page(slug), tags.pages], revalidate: 3600 });
@@ -20,8 +20,11 @@ export async function infoPageMetadata(slug: InfoSlug): Promise<Metadata> {
   return buildMetadata({ title: page.title, description: page.intro, path: `/${slug}` });
 }
 
-/** About, Contact, Terms, Privacy. Copy lives in the Studio under Pages; a missing page is a 404, not filler. */
-export async function InfoPageView({ slug }: { slug: InfoSlug }) {
+/**
+ * About, Contact, Terms, Privacy, Write for us. Copy lives in the Studio under Pages; a missing page is a 404, not
+ * filler. `after` renders under the body (the Write for us form) and replaces the "Last updated" line.
+ */
+export async function InfoPageView({ slug, after }: { slug: InfoSlug; after?: React.ReactNode }) {
   const page = await getPage(slug);
   if (!page?.title) notFound();
 
@@ -34,9 +37,11 @@ export async function InfoPageView({ slug }: { slug: InfoSlug }) {
       </header>
       <div className="mx-auto max-w-[42rem] pt-10">
         <PortableTextRenderer value={page.body as ArticleBody | null} />
-        <p className="mt-12 border-t border-line pt-6 font-ui text-[0.8125rem] text-fg-subtle">
-          Last updated <time dateTime={page._updatedAt}>{formatLongDate(page._updatedAt)}</time>
-        </p>
+        {after ?? (
+          <p className="mt-12 border-t border-line pt-6 font-ui text-[0.8125rem] text-fg-subtle">
+            Last updated <time dateTime={page._updatedAt}>{formatLongDate(page._updatedAt)}</time>
+          </p>
+        )}
       </div>
     </article>
   );

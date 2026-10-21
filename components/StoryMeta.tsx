@@ -4,7 +4,7 @@ import { SanityImage } from "./SanityImage";
 
 type Props = {
   article: Pick<ArticleCard, "authors" | "publishedAt">;
-  /** Show the first author's photo. Used on lead stories only. */
+  /** Show the first author's photo. Used on lead stories only; dropped with the names. */
   withPhoto?: boolean;
   /** Omit author names, for lists where every story is by the same person. */
   hideAuthors?: boolean;
@@ -19,7 +19,7 @@ export function StoryMeta({ article, withPhoto, hideAuthors, className = "" }: P
 
   return (
     <p className={`flex items-center gap-2.5 font-ui text-[0.8125rem] leading-none text-fg-subtle ${className}`}>
-      {withPhoto && first?.photo?.asset && (
+      {withPhoto && !hideAuthors && first?.photo?.asset && (
         <span className="h-7 w-7 shrink-0 overflow-hidden rounded-full bg-line">
           <SanityImage image={first.photo} decorative width={56} aspect={1} sizes="28px" className="h-full w-full object-cover" />
         </span>

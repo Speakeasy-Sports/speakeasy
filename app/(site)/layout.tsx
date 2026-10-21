@@ -1,4 +1,4 @@
-import { getSiteSettings } from "@/lib/sanity/loaders";
+import { getSiteSettings, getSiteSignals } from "@/lib/sanity/loaders";
 import { joinUrlFor } from "@/lib/circle-links";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Footer } from "@/components/Footer";
@@ -6,7 +6,8 @@ import { SchoolTheme } from "@/components/SchoolTheme";
 
 // Pages set their own width (`shell`) so full-bleed bands such as the newsletter can run edge to edge.
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const settings = await getSiteSettings();
+  const [settings, signals] = await Promise.all([getSiteSettings(), getSiteSignals()]);
+  const media = { podcasts: signals.hasPodcasts, videos: signals.hasVideos };
   return (
     <>
       {/* Accent tokens for every school in the nav, so story labels carry their school's color on any page. */}
@@ -19,9 +20,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       >
         Skip to content
       </a>
-      <SiteHeader settings={settings} joinUrl={joinUrlFor(null, settings)} />
+      <SiteHeader settings={settings} joinUrl={joinUrlFor(null, settings)} media={media} />
       <main id="main">{children}</main>
-      <Footer settings={settings} />
+      <Footer settings={settings} media={media} />
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { sanityFetch } from "@/lib/sanity/fetch";
 import { HOME_QUERY } from "@/lib/sanity/queries";
-import { getSiteSettings } from "@/lib/sanity/loaders";
+import { getSiteSettings, getSiteSignals } from "@/lib/sanity/loaders";
 import { pageQuery } from "@/lib/sanity/paginate";
 import { tags } from "@/lib/sanity/tags";
 import { joinUrlFor } from "@/lib/circle-links";
@@ -10,9 +10,10 @@ import { NewsletterSignup } from "@/components/NewsletterSignup";
 
 /** The home front, page 1 at "/" and page N at "/?page=N" (rewritten to /latest/N; see next.config.ts). */
 export async function HomeView({ page }: { page: number }) {
-  const [data, settings] = await Promise.all([
+  const [data, settings, signals] = await Promise.all([
     sanityFetch({ query: pageQuery(HOME_QUERY, "[0...20]", page, LATEST_PER_PAGE), tags: [tags.home, tags.articles] }),
     getSiteSettings(),
+    getSiteSignals(),
   ]);
   if (page > latestPages(data.count)) notFound();
 
@@ -27,6 +28,7 @@ export async function HomeView({ page }: { page: number }) {
           media={data.media}
           page={page}
           basePath="/"
+          hideAuthors={signals.singleAuthor}
           community={{ name: "Join the Club", joinUrl: joinUrlFor(null, settings) }}
         />
       </div>

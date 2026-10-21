@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { stegaClean } from "@sanity/client/stega";
 import { sanityFetch } from "@/lib/sanity/fetch";
 import { SCHOOL_FRONT_QUERY } from "@/lib/sanity/queries";
-import { getSiteSettings } from "@/lib/sanity/loaders";
+import { getSiteSettings, getSiteSignals } from "@/lib/sanity/loaders";
 import { pageQuery } from "@/lib/sanity/paginate";
 import { schoolPageTags } from "@/lib/sanity/tags";
 import { isReservedSlug } from "@/lib/reserved-slugs";
@@ -25,7 +25,8 @@ export function getSchoolFront(slug: string, page = 1) {
 
 /** A school's section front: header, sub-nav, then the same front layout as home, scoped to the school. */
 export async function SchoolView({ slug, page }: { slug: string; page: number }) {
-  const [school, settings] = await Promise.all([getSchoolFront(slug, page), getSiteSettings()]);
+  const [school, settings, signals] = await Promise.all([getSchoolFront(slug, page), getSiteSettings(), getSiteSignals()]);
+  const media = { podcasts: signals.hasPodcasts, videos: signals.hasVideos };
   if (!school?.slug) notFound();
   if (page > latestPages(school.count)) notFound();
 
@@ -37,13 +38,14 @@ export async function SchoolView({ slug, page }: { slug: string; page: number })
       <SchoolTheme slug={schoolSlug} accentColor={school.accentColor} accentColorDark={school.accentColorDark} />
       <div className="shell">
         {page === 1 ? (
-          <SchoolHeader school={{ ...school, slug: schoolSlug }} navTags={school.navTags} joinUrl={joinUrl} active="latest" />
+          <SchoolHeader school={{ ...school, slug: schoolSlug }} navTags={school.navTags} joinUrl={joinUrl} active="latest" media={media} />
         ) : (
           <SchoolHeader
             school={{ ...school, slug: schoolSlug }}
             navTags={school.navTags}
             joinUrl={joinUrl}
             active="latest"
+            media={media}
             variant="compact"
             title={`Latest, page ${page}`}
           />
@@ -56,6 +58,7 @@ export async function SchoolView({ slug, page }: { slug: string; page: number })
           page={page}
           basePath={`/${schoolSlug}`}
           schoolSlug={schoolSlug}
+          hideAuthors={signals.singleAuthor}
           community={{ name: school.communityName ?? "Join the Club", joinUrl }}
         />
       </div>

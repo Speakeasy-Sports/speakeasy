@@ -99,6 +99,15 @@ test("author, newsletter, and info pages render", async ({ page }) => {
   }
 });
 
+test("write for us page shows the application and is linked from the footer", async ({ page }) => {
+  await page.goto("/about");
+  await page.getByRole("contentinfo").getByRole("link", { name: "Write for us" }).click();
+  await expect(page).toHaveURL(/\/write-for-us$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Write for us" })).toBeVisible();
+  await expect(page.getByLabel("What would you cover?")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Send application" })).toBeVisible();
+});
+
 test("search finds stories from the prebuilt index", async ({ page }) => {
   await page.goto("/search?q=quarterback");
   await expect(page.getByText(/\d+ stor(y|ies)/)).toBeVisible();

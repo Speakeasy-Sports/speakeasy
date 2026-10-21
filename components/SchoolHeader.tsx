@@ -1,5 +1,6 @@
 import { JoinButton } from "./JoinButton";
 import { SchoolNav } from "./SchoolNav";
+import type { MediaSections } from "./HeaderNav";
 
 type Props = {
   school: {
@@ -12,13 +13,14 @@ type Props = {
   navTags?: Array<{ _id: string; name: string | null; slug: string | null }> | null;
   joinUrl: string;
   active: string;
+  media: MediaSections;
   /** "front" on the section front; "compact" on podcasts, videos, and tags filtered to the school. */
   variant?: "front" | "compact";
   /** Overrides the large title, for example "Recruiting" on a tag page inside the section. */
   title?: string;
 };
 
-export function SchoolHeader({ school, navTags, joinUrl, active, variant = "front", title }: Props) {
+export function SchoolHeader({ school, navTags, joinUrl, active, media, variant = "front", title }: Props) {
   const compact = variant === "compact";
   return (
     <header className={compact ? "pt-8" : "pt-10 sm:pt-14"}>
@@ -43,7 +45,7 @@ export function SchoolHeader({ school, navTags, joinUrl, active, variant = "fron
         </div>
       </div>
       <div className="border-t-[3px] border-accent" />
-      <SchoolNav school={school} navTags={navTags} active={active} />
+      <SchoolNav school={school} navTags={navTags} active={active} media={media} />
     </header>
   );
 }

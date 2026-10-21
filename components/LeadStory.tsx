@@ -5,10 +5,10 @@ import { LabelRow } from "./Labels";
 import { StoryImage } from "./StoryImage";
 import { StoryMeta } from "./StoryMeta";
 
-type Props = { article: ArticleCard; showSchool?: boolean };
+type Props = { article: ArticleCard; showSchool?: boolean; hideAuthors?: boolean };
 
 /** The front-page lead: photo on the left two thirds, headline set large beside it; stacked on phones. */
-export function LeadStory({ article, showSchool = true }: Props) {
+export function LeadStory({ article, showSchool = true, hideAuthors }: Props) {
   if (!article.slug || !article.school?.slug) return null;
   const href = articlePath(article.school.slug, article.slug);
 
@@ -32,7 +32,7 @@ export function LeadStory({ article, showSchool = true }: Props) {
           </Link>
         </h2>
         {article.dek && <p className="text-lg leading-snug text-fg-muted lg:text-xl">{article.dek}</p>}
-        <StoryMeta article={article} withPhoto className="mt-1" />
+        <StoryMeta article={article} withPhoto hideAuthors={hideAuthors} className="mt-1" />
       </div>
     </article>
   );

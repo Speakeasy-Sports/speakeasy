@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { stegaClean } from "@sanity/client/stega";
 import { sanityFetch } from "@/lib/sanity/fetch";
 import { client } from "@/lib/sanity/client";
 import { ARTICLE_QUERY, ARTICLE_SLUGS_QUERY } from "@/lib/sanity/queries";
-import { getSiteSettings } from "@/lib/sanity/loaders";
+import { getSiteSettings, getSiteSignals } from "@/lib/sanity/loaders";
 import { articlePageTags } from "@/lib/sanity/tags";
 import { urlFor } from "@/lib/sanity/image";
 import { isReservedSlug } from "@/lib/reserved-slugs";
@@ -111,7 +112,7 @@ export default async function ArticlePage({ params }: Props) {
   const { school: requestedSchool, slug } = await params;
   if (isReservedSlug(requestedSchool)) notFound();
 
-  const [fetched, settings] = await Promise.all([getArticle(slug, requestedSchool), getSiteSettings()]);
+  const [fetched, settings, signals] = await Promise.all([getArticle(slug, requestedSchool), getSiteSettings(), getSiteSignals()]);
   const article = resolveCanonical(fetched, requestedSchool);
   const school = article.school!;
   const schoolSlug = stegaClean(school.slug) ?? requestedSchool;
@@ -198,9 +199,18 @@ export default async function ArticlePage({ params }: Props) {
             joinUrl={joinUrl}
             schoolSlug={schoolSlug}
           />
-          {authors.map((a) => (
-            <AuthorCard key={a._id} author={a} />
-          ))}
+          <div className="flex flex-col gap-3">
+            {authors.map((a) => (
+              <AuthorCard key={a._id} author={a} />
+            ))}
+            <p className="font-ui text-sm text-fg-muted">
+              Want to cover {stegaClean(school.shortName) ?? "college sports"}?{" "}
+              <Link href="/write-for-us" className="text-fg underline decoration-line underline-offset-4 hover:decoration-fg">
+                Write for Speakeasy
+              </Link>
+              .
+            </p>
+          </div>
           <NewsletterSignup
             headline={settings?.newsletterHeadline}
             blurb={settings?.newsletterBlurb}
@@ -211,7 +221,7 @@ export default async function ArticlePage({ params }: Props) {
       </div>
 
       {/* 9. Related */}
-      <RelatedStories articles={article.related} />
+      <RelatedStories articles={article.related} hideAuthors={signals.singleAuthor} />
 
       <p className="sr-only">
         {contentTypeLabel(stegaClean(article.contentType))} from {school.name}
