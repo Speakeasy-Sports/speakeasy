@@ -1,6 +1,6 @@
 # Speakeasy Sports content site: build spec
 
-Status: v1.4, October 21, 2026
+Status: v1.5, October 21, 2026
 Owner: Jon Smith
 Purpose: Build spec and working agreement for the Speakeasy Sports content site. Lives at the repo root as `AGENTS.md`. Every contributor treats the Decisions section as fixed and everything else as the plan of record.
 
@@ -286,9 +286,11 @@ Derived from what is published (`lib/site-signals.ts`, one cached query tagged `
 - The count is informational. If it is stale by an hour, nothing breaks.
 
 ### 7.4 Newsletter signup
-- Form posts to `/api/newsletter` with email, school interest, honeypot field, Turnstile token.
-- Target: Circle Email Hub contact creation via Admin API if the endpoint exists (verify item V3). Fallback: render Circle's hosted signup form or embed in an iframe on `/newsletter` and in the end-of-article block.
-- Double opt-in handled by Circle. Site shows a "check your inbox" state.
+- The site's own form (home, school, article, `/newsletter`) posts to `/api/newsletter` with email, school slug, and a honeypot field. No Circle script or iframe on site pages.
+- The handler submits the address to a Circle Email Hub form through the Admin API (`POST /forms/{form_id}/submissions`, V3), which creates the contact and subscribes it to marketing email. The form is `CIRCLE_NEWSLETTER_FORM_ID`: published, with a profile email field and no other required field. Its layout is read with `GET /forms/{id}` and cached for 10 minutes per instance, so a signup costs one Admin API call.
+- Spam: honeypot plus 10 signups per IP per hour (KV). Add Turnstile only if bots get through.
+- School interest is sent by the form but not yet stored in Circle; map it to a form dropdown when a second school launches.
+- Without the token or form id the endpoint answers 503 and the form says signups open soon. Whether Circle sends a confirmation email is checked with the first live signup; until then the success message promises only the next issue.
 - Flodesk migration: export contacts, import to Email Hub as a segment named `flodesk-import-2026-10`, send one re-engagement issue, then cancel Flodesk.
 
 ### 7.5 Analytics
@@ -439,6 +441,7 @@ CIRCLE_ADMIN_API_BASE=            # optional, defaults to https://app.circle.so/
 CIRCLE_SYNC_ENABLED=false         # true after one test post looks right
 CIRCLE_COMMUNITY_ID=
 CIRCLE_WEBHOOK_SECRET=            # shared secret for /api/webhooks/circle
+CIRCLE_NEWSLETTER_FORM_ID=        # Email Hub form that /api/newsletter submits to (7.4)
 CIRCLE_BASE_URL=https://club.speakeasysports.com
 POSTMARK_SERVER_TOKEN=
 POSTMARK_FROM=hello@mail.speakeasysports.com
@@ -501,7 +504,7 @@ Acceptance: inline thread matches the Circle post, MAU usage visible in a monthl
 |---|---|---|---|
 | V1 | Custom SSO is enabled on the Circle Plus plan | Phase 2 design depends on it | Jon, CSM |
 | V2 | Branded app honors custom SSO | One-login promise | Jon, CSM |
-| V3 | Admin API can create Email Hub contacts | Newsletter signup integration vs. embed fallback | Jon, CSM |
+| V3 | Admin API can create Email Hub contacts | Newsletter signup integration vs. embed fallback | Done October 21, 2026: yes, via form submissions. See `docs/circle-api-notes.md` |
 | V4 | Admin API v2 base URL, create-post body format (TipTap JSON vs. plain), image attachment on posts | Section 7.2 | Done October 19, 2026: TipTap JSON, cover via direct upload. See `docs/circle-api-notes.md` |
 | V5 | Circle Workflows can call an external webhook on "comment created" | Section 7.3 primary vs. fallback | Engineering, Circle admin. Docs confirm webhook actions exist; the "comment created" trigger still needs checking in the admin |
 | V6 | Current WordPress URLs worth redirecting | Section 6 redirects | Done October 20, 2026: No legacy content; no redirects needed |

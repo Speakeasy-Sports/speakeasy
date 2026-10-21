@@ -104,6 +104,9 @@ If Workflows cannot send webhooks (V5), change the cron schedule to every few ho
 2. Applications email `EDITOR_NOTIFY_EMAIL` from `POSTMARK_FROM`. With either unset, the form tells applicants applications are not open yet.
 3. Reply to the email to answer the applicant; Reply-To is their address. Nothing is stored anywhere else.
 
-## 8. Still to build
+## 8. Newsletter signups
 
-- Newsletter handler at `/api/newsletter`. The signup form already posts there.
+1. Email Hub must be on (a paid Circle add-on).
+2. Circle admin, Marketing, Forms, New form. Keep the profile email field; remove the name field or turn off "Make required". Save and publish.
+3. Copy the form's numeric id into `CIRCLE_NEWSLETTER_FORM_ID` in Vercel. `CIRCLE_ADMIN_API_TOKEN` must be set too; `CIRCLE_SYNC_ENABLED` does not matter for signups. The API uses the numeric `id`, not the letter-and-number `uid`; if the admin URL shows only the `uid`, `GET /forms` lists both.
+4. Sign up with a real address from the site footer band, then check Marketing, Contacts in Circle. If the site says "Check your email address" for a valid address, see the open question under V3 in `docs/circle-api-notes.md`.

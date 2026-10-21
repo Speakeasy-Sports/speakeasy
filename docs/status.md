@@ -74,6 +74,11 @@ Still for week 2: Sanity and Circle webhooks, `/api/newsletter`, WordPress redir
 - `/write-for-us`: Studio copy plus an application form that emails `EDITOR_NOTIFY_EMAIL` through Postmark (Reply-To is the applicant). Linked from the footer and the article end block. Honeypot, timing check, and a 5 per hour per IP limit.
 - Verified against a five-article, one-author dataset locally, plus the full mock dataset in the smoke tests.
 
+## Newsletter signups (branch newsletter-signup)
+
+- `/api/newsletter` submits the address to a Circle Email Hub form through the Admin API (V3 resolved from the Swagger). Honeypot and a 10 per hour per IP limit. 503 until `CIRCLE_ADMIN_API_TOKEN` and `CIRCLE_NEWSLETTER_FORM_ID` are set.
+- Not yet run against a live community: the element id question and confirmation email behavior in `docs/circle-api-notes.md` (V3).
+
 ## Remaining for week 2 (per AGENTS.md section 12)
 
 - `/api/webhooks/sanity` (revalidation, `status` flip, Circle post), `/api/webhooks/circle`, `/api/newsletter` (the form already posts there and shows an error until it exists).

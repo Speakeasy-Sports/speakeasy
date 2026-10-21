@@ -17,18 +17,20 @@ type Props = {
 type State = "idle" | "submitting" | "done" | "error";
 
 /**
- * Posts to /api/newsletter (AGENTS.md 7.4). Shows a "check your inbox" state on success, since Circle handles
- * double opt-in.
+ * Posts to /api/newsletter (AGENTS.md 7.4), which submits the address to the Circle Email Hub form. The success
+ * message does not promise a confirmation email: whether Circle sends one is checked with the first live signup.
  */
 export function NewsletterSignup({ variant = "inline", headline, blurb, school, location = "article_end", sampleUrl }: Props) {
   const id = useId();
   const [state, setState] = useState<State>("idle");
+  const [message, setMessage] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const data = new FormData(form);
     setState("submitting");
+    setMessage(null);
     try {
       const res = await fetch("/api/newsletter", {
         method: "POST",
@@ -39,7 +41,11 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
           website: data.get("website") || "", // honeypot
         }),
       });
-      if (!res.ok) throw new Error(String(res.status));
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        setMessage(body.error ?? null);
+        throw new Error(String(res.status));
+      }
       setState("done");
       track({ name: "newsletter_signup", props: { location } });
       form.reset();
@@ -53,7 +59,7 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
   const form =
     state === "done" ? (
       <p className="font-ui text-base text-fg" role="status">
-        Check your inbox. Confirm your address and you are on the list.
+        You are on the list. The next issue comes to your inbox.
       </p>
     ) : (
       <form onSubmit={onSubmit} className="flex flex-col gap-3 font-ui sm:flex-row">
@@ -86,7 +92,7 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
   const error =
     state === "error" ? (
       <p className="font-ui text-sm text-fg-muted" role="alert">
-        That did not go through. Try again in a moment.
+        {message ?? "That did not go through. Try again in a moment."}
       </p>
     ) : null;
 

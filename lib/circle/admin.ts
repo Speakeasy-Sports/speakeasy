@@ -2,6 +2,7 @@ import "server-only";
 import { createHash, randomBytes } from "node:crypto";
 import { countCircleCall } from "@/lib/kv/usage";
 import { postBodyDoc, type CirclePostContent } from "./post";
+import type { CircleForm } from "./form";
 
 // Circle Admin API v2 client. Server only: the token never reaches the browser (AGENTS.md section 3).
 // Endpoints and fields are from the Admin API V2 Swagger, checked October 19, 2026 (docs/circle-api-notes.md).
@@ -120,5 +121,20 @@ export const circlePosts: CirclePosts = {
   async postIdForComment(commentId, route) {
     const c = await call<{ post?: { id?: number } }>(route, "GET", `/comments/${encodeURIComponent(commentId)}`);
     return c.post?.id === undefined ? null : String(c.post.id);
+  },
+};
+
+/** Newsletter signups need only the token and a form, independent of the post sync switch (AGENTS.md 7.4). */
+export function newsletterConfigured(): boolean {
+  return !!process.env.CIRCLE_ADMIN_API_TOKEN && !!process.env.CIRCLE_NEWSLETTER_FORM_ID;
+}
+
+export const circleForms = {
+  get(formId: string, route: string): Promise<CircleForm> {
+    return call<CircleForm>(route, "GET", `/forms/${encodeURIComponent(formId)}`);
+  },
+  /** Creates a contact subscribed to marketing email, as if they had filled in the form. */
+  async submit(formId: string, elements: Array<{ id: number; value: string }>, route: string): Promise<void> {
+    await call<unknown>(route, "POST", `/forms/${encodeURIComponent(formId)}/submissions`, { elements });
   },
 };

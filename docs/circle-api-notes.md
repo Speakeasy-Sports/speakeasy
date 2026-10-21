@@ -24,6 +24,17 @@ Record what the Admin v2 Swagger (api-headless.circle.so, Admin APIs) actually s
 
 Call budget per article: 2 on create (upload + post), 1 per title or dek edit.
 
+## V3: Email Hub signups (verified from the Swagger, October 21, 2026)
+
+| What | Swagger says | Used by |
+|---|---|---|
+| Show form | `GET /forms/{id}` returns the form with `status` (draft, published) and `elements`. Field elements have `type: field` and `attributes.field_type`; the profile email is `contact_email`, the profile name `contact_name`. Elements can nest under `children` | `planForm` in `lib/circle/form.ts` |
+| Submit | `POST /forms/{form_id}/submissions` with `{ elements: [{ id, value }] }` and optional `submission_on_behalf_of` (email). 201 `{ success: true }` | `/api/newsletter` |
+| Errors | 422 "Submission fields is invalid" (invalid email; `error_details` names the `elementable_id`), 404 form not found, 401 "You cannot perform this action." when Email Hub is off, 403 not eligible for Admin API v2 | |
+| Effect | Help center (Create forms): submitters are "automatically subscribed to your marketing emails"; a profile email field creates or updates the contact | |
+
+Open until the first live signup: whether `elements[].id` is the element `id` (what the site sends) or its `elementable_id`. The Swagger's request schema says `id`; the 422 example reports `elementable_id`. If live signups return 422 for valid addresses, switch `planForm` to return `elementable_id`. Also unknown: whether Circle sends a confirmation email.
+
 ## V5: Workflows to webhook (partly verified)
 
 The docs say webhook actions can be configured inside Workflows. The Admin API Swagger does not list workflow trigger types, so whether "comment created" is an available trigger still needs a look in the Circle admin (Workflows, New workflow).
