@@ -1,13 +1,15 @@
 import type { ArticleCard } from "@/lib/types";
 import { StoryCard } from "./StoryCard";
 
-export function RelatedStories({ articles, hideAuthors }: { articles: ArticleCard[] | null | undefined; hideAuthors?: boolean }) {
+type Props = { articles: ArticleCard[] | null | undefined; heading: string; hideAuthors?: boolean };
+
+export function RelatedStories({ articles, heading, hideAuthors }: Props) {
   const list = (articles ?? []).filter((a) => a.slug && a.school?.slug);
   if (list.length === 0) return null;
   return (
     <section aria-labelledby="related-h" className="mt-16 border-t border-line pt-8">
       <h2 id="related-h" className="label-caps mb-6 text-fg-muted">
-        More to read
+        {heading}
       </h2>
       <div className="grid gap-8 md:grid-cols-3">
         {list.map((a) => (

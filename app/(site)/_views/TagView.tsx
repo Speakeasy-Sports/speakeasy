@@ -7,12 +7,13 @@ import { getSiteSettings, getSiteSignals } from "@/lib/sanity/loaders";
 import { pageQuery, totalPages } from "@/lib/sanity/paginate";
 import { tags } from "@/lib/sanity/tags";
 import { joinUrlFor } from "@/lib/circle-links";
-import { buildMetadata, tagPath } from "@/lib/seo";
+import { buildMetadata, defaultOgImage, tagPath } from "@/lib/seo";
 import { StoryRow } from "@/components/StoryRow";
 import { Pagination } from "@/components/Pagination";
 import { PageHeader } from "@/components/PageHeader";
 import { FilterChips } from "@/components/FilterChips";
 import { SchoolHeader } from "@/components/SchoolHeader";
+import { resolveCopy } from "@/lib/site-copy";
 import { SchoolTheme } from "@/components/SchoolTheme";
 
 const PER_PAGE = 16;
@@ -38,13 +39,14 @@ export function tagHref(slug: string, school: string, page: number) {
 }
 
 export async function tagMetadata(slug: string, { school, page }: Filter): Promise<Metadata> {
-  const tag = await getTag(slug, school, page);
+  const [tag, settings] = await Promise.all([getTag(slug, school, page), getSiteSettings()]);
   if (!tag?.name) return {};
   const scope = tag.school?.shortName ? `${tag.school.shortName} ` : "";
   return buildMetadata({
     title: `${scope}${tag.name}${page > 1 ? `, page ${page}` : ""}`,
     description: tag.description ?? `${scope}${tag.name} stories from Speakeasy Sports.`,
     path: tagHref(slug, school, page),
+    fallbackImage: defaultOgImage(settings),
   });
 }
 
@@ -86,6 +88,7 @@ export async function TagView({ slug, filter: { school, page } }: { slug: string
           school={s}
           navTags={tag.school.navTags}
           joinUrl={joinUrlFor(s, settings)}
+          joinLabel={resolveCopy(settings?.copy).join.schoolButton}
           active={slug}
           media={{ podcasts: signals.hasPodcasts, videos: signals.hasVideos }}
           variant="compact"

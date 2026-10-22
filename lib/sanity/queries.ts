@@ -83,7 +83,12 @@ export const SITE_SETTINGS_QUERY = defineQuery(`
     newsletterHeadline,
     newsletterBlurb,
     newsletterSampleUrl,
-    "navSchools": navSchools[]->{ ${SCHOOL_REF_FIELDS} }
+    "navSchools": navSchools[]->{ ${SCHOOL_REF_FIELDS} },
+    menuLinks[]{ label, href },
+    footerColumns[]{ title, links[]{ label, href } },
+    legalLinks[]{ label, href },
+    copy,
+    pageSeo
   }
 `);
 

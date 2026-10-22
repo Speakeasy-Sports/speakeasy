@@ -1,7 +1,9 @@
 import Link from "next/link";
 import type { SiteSettings } from "@/lib/types";
 import { schoolPath } from "@/lib/seo";
+import { DEFAULT_LEGAL_LINKS, resolveFooterColumns, resolveLinks } from "@/lib/nav-links";
 import type { MediaSections } from "./HeaderNav";
+import { MenuLink } from "./MenuLink";
 
 const PLATFORM_LABELS: Record<string, string> = {
   x: "X",
@@ -22,28 +24,34 @@ function Column({ title, children }: { title: string; children: React.ReactNode 
   );
 }
 
-function Item({ href, children, external }: { href: string; children: React.ReactNode; external?: boolean }) {
-  const cls = "text-fg no-underline transition-colors hover:text-fg-muted";
+function Item({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <li>
-      {external ? (
-        <a href={href} rel="noopener noreferrer" target="_blank" className={cls}>
-          {children}
-        </a>
-      ) : (
-        <Link href={href} className={cls}>
-          {children}
-        </Link>
-      )}
+      <MenuLink href={href} className="text-fg no-underline transition-colors hover:text-fg-muted">
+        {children}
+      </MenuLink>
     </li>
   );
 }
 
-export function Footer({ settings, media }: { settings: SiteSettings | null; media: MediaSections }) {
+// Sections, up to two editable columns, and Follow. Literal classes so Tailwind sees them.
+const GRID_COLS: Record<number, string> = {
+  1: "sm:grid-cols-2",
+  2: "sm:grid-cols-2",
+  3: "sm:grid-cols-3",
+  4: "sm:grid-cols-2 lg:grid-cols-4",
+};
+
+type Props = { settings: SiteSettings | null; signoff: string; media: MediaSections };
+
+export function Footer({ settings, signoff, media }: Props) {
   const year = new Date().getFullYear();
   const siteName = settings?.siteName ?? "Speakeasy Sports";
   const schools = (settings?.navSchools ?? []).filter((s) => s.slug);
   const socials = (settings?.socialLinks ?? []).filter((s) => s.url);
+  const columns = resolveFooterColumns(settings?.footerColumns);
+  const legal = resolveLinks(settings?.legalLinks, DEFAULT_LEGAL_LINKS);
+  const columnCount = 1 + columns.length + (socials.length > 0 ? 1 : 0);
 
   return (
     // A page that ends in the newsletter band runs straight into the footer rule instead of leaving a strip of paper.
@@ -56,7 +64,7 @@ export function Footer({ settings, media }: { settings: SiteSettings | null; med
             </Link>
             {settings?.tagline && <p className="max-w-sm text-lg leading-snug text-fg-muted">{settings.tagline}</p>}
           </div>
-          <nav aria-label="Footer" className="grid grid-cols-2 gap-10 sm:grid-cols-3 md:col-span-7">
+          <nav aria-label="Footer" className={`grid grid-cols-2 gap-10 md:col-span-7 ${GRID_COLS[columnCount] ?? GRID_COLS[3]}`}>
             <Column title="Sections">
               {schools.map((s) => (
                 <Item key={s._id} href={schoolPath(s.slug!)}>
@@ -67,17 +75,19 @@ export function Footer({ settings, media }: { settings: SiteSettings | null; med
               {media.videos && <Item href="/videos">Videos</Item>}
               <Item href="/search">Search</Item>
             </Column>
-            <Column title="Speakeasy">
-              <Item href="/about">About</Item>
-              <Item href="/contact">Contact</Item>
-              <Item href="/newsletter">Newsletter</Item>
-              <Item href="/write-for-us">Write for us</Item>
-              <Item href="/feed.xml">RSS</Item>
-            </Column>
+            {columns.map((c, i) => (
+              <Column key={`${i}-${c.title}`} title={c.title}>
+                {c.links.map((l, j) => (
+                  <Item key={`${j}-${l.href}`} href={l.href}>
+                    {l.label}
+                  </Item>
+                ))}
+              </Column>
+            ))}
             {socials.length > 0 && (
               <Column title="Follow">
                 {socials.map((s) => (
-                  <Item key={s._key} href={s.url!} external>
+                  <Item key={s._key} href={s.url!}>
                     {PLATFORM_LABELS[s.platform ?? ""] ?? s.platform}
                   </Item>
                 ))}
@@ -89,14 +99,13 @@ export function Footer({ settings, media }: { settings: SiteSettings | null; med
           <p>{settings?.footerText ?? `${siteName} is an independent publication and is not affiliated with any university.`}</p>
           <p className="flex flex-wrap gap-x-5 gap-y-2">
             <span>
-              &copy; {year} {siteName}. Built for fans.
+              &copy; {year} {siteName}. {signoff}
             </span>
-            <Link href="/terms" className="text-fg-subtle no-underline hover:text-fg">
-              Terms
-            </Link>
-            <Link href="/privacy" className="text-fg-subtle no-underline hover:text-fg">
-              Privacy
-            </Link>
+            {legal.map((l, i) => (
+              <MenuLink key={`${i}-${l.href}`} href={l.href} className="text-fg-subtle no-underline hover:text-fg">
+                {l.label}
+              </MenuLink>
+            ))}
           </p>
         </div>
       </div>

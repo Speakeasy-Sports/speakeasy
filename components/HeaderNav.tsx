@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname, useSelectedLayoutSegment } from "next/navigation";
 import { useEffect, useRef } from "react";
+import type { NavLink } from "@/lib/nav-links";
+import { MenuLink } from "./MenuLink";
 
 type School = { _id: string; slug: string | null; shortName: string | null; name: string | null };
 
@@ -49,7 +51,7 @@ export function HeaderNav({ schools, media }: { schools: School[]; media: MediaS
 }
 
 /** Phone menu. A native <details> so it works before hydration; it closes itself after navigation. */
-export function MobileMenu({ schools, media }: { schools: School[]; media: MediaSections }) {
+export function MobileMenu({ schools, media, extraLinks }: { schools: School[]; media: MediaSections; extraLinks: NavLink[] }) {
   const ref = useRef<HTMLDetailsElement>(null);
   const pathname = usePathname();
 
@@ -60,9 +62,9 @@ export function MobileMenu({ schools, media }: { schools: School[]; media: Media
   const links = [
     ...schools.filter((s) => s.slug).map((s) => ({ href: `/${s.slug}`, label: s.name ?? s.shortName ?? "" })),
     ...mediaLinks(media),
-    { href: "/search", label: "Search" },
-    { href: "/newsletter", label: "Newsletter" },
+    ...extraLinks,
   ];
+  const cls = "flex h-11 items-center px-3 font-ui text-[0.9375rem] text-fg no-underline hover:bg-bg";
 
   return (
     <details ref={ref} className="group/menu relative md:hidden">
@@ -79,10 +81,10 @@ export function MobileMenu({ schools, media }: { schools: School[]; media: Media
         aria-label="Menu"
         className="absolute right-0 top-12 z-20 w-64 border border-line bg-bg-elev p-2 shadow-[0_12px_32px_-12px_rgb(0_0_0/0.25)]"
       >
-        {links.map((l) => (
-          <Link key={l.href} href={l.href} className="flex h-11 items-center px-3 font-ui text-[0.9375rem] text-fg no-underline hover:bg-bg">
+        {links.map((l, i) => (
+          <MenuLink key={`${i}-${l.href}`} href={l.href} className={cls}>
             {l.label}
-          </Link>
+          </MenuLink>
         ))}
       </nav>
     </details>

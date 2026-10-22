@@ -1,3 +1,4 @@
+import { fillCopy } from "@/lib/site-copy";
 import { JoinButton } from "./JoinButton";
 import { SchoolNav } from "./SchoolNav";
 import type { MediaSections } from "./HeaderNav";
@@ -12,6 +13,8 @@ type Props = {
   };
   navTags?: Array<{ _id: string; name: string | null; slug: string | null }> | null;
   joinUrl: string;
+  /** Join button copy; "{community}" becomes the school's community name. */
+  joinLabel: string;
   active: string;
   media: MediaSections;
   /** "front" on the section front; "compact" on podcasts, videos, and tags filtered to the school. */
@@ -20,7 +23,7 @@ type Props = {
   title?: string;
 };
 
-export function SchoolHeader({ school, navTags, joinUrl, active, media, variant = "front", title }: Props) {
+export function SchoolHeader({ school, navTags, joinUrl, joinLabel, active, media, variant = "front", title }: Props) {
   const compact = variant === "compact";
   return (
     <header className={compact ? "pt-8" : "pt-10 sm:pt-14"}>
@@ -40,7 +43,7 @@ export function SchoolHeader({ school, navTags, joinUrl, active, media, variant 
         <div className="flex flex-col items-start gap-4 sm:max-w-sm sm:items-end sm:text-right">
           {!compact && school.description && <p className="font-ui text-[0.9375rem] leading-relaxed text-fg-muted">{school.description}</p>}
           <JoinButton href={joinUrl} location="school_header">
-            Join {school.communityName ?? "the Club"}
+            {fillCopy(joinLabel, { community: school.communityName ?? "the Club" })}
           </JoinButton>
         </div>
       </div>

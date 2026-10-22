@@ -7,6 +7,7 @@ import { pageQuery } from "@/lib/sanity/paginate";
 import { schoolPageTags } from "@/lib/sanity/tags";
 import { isReservedSlug } from "@/lib/reserved-slugs";
 import { joinUrlFor } from "@/lib/circle-links";
+import { resolveCopy } from "@/lib/site-copy";
 import { FrontPage, LATEST_PER_PAGE, latestPages } from "@/components/FrontPage";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { SchoolHeader } from "@/components/SchoolHeader";
@@ -32,18 +33,27 @@ export async function SchoolView({ slug, page }: { slug: string; page: number })
 
   const schoolSlug = stegaClean(school.slug);
   const joinUrl = joinUrlFor(school, settings);
+  const copy = resolveCopy(settings?.copy);
 
   return (
     <div data-school={schoolSlug}>
       <SchoolTheme slug={schoolSlug} accentColor={school.accentColor} accentColorDark={school.accentColorDark} />
       <div className="shell">
         {page === 1 ? (
-          <SchoolHeader school={{ ...school, slug: schoolSlug }} navTags={school.navTags} joinUrl={joinUrl} active="latest" media={media} />
+          <SchoolHeader
+            school={{ ...school, slug: schoolSlug }}
+            navTags={school.navTags}
+            joinUrl={joinUrl}
+            joinLabel={copy.join.schoolButton}
+            active="latest"
+            media={media}
+          />
         ) : (
           <SchoolHeader
             school={{ ...school, slug: schoolSlug }}
             navTags={school.navTags}
             joinUrl={joinUrl}
+            joinLabel={copy.join.schoolButton}
             active="latest"
             media={media}
             variant="compact"
@@ -59,7 +69,8 @@ export async function SchoolView({ slug, page }: { slug: string; page: number })
           basePath={`/${schoolSlug}`}
           schoolSlug={schoolSlug}
           hideAuthors={signals.singleAuthor}
-          community={{ name: school.communityName ?? "Join the Club", joinUrl }}
+          community={{ name: school.communityName ?? copy.join.homeCardHeadline, joinUrl }}
+          copy={copy}
         />
       </div>
       <div className="mt-24">
@@ -68,6 +79,7 @@ export async function SchoolView({ slug, page }: { slug: string; page: number })
           headline={settings?.newsletterHeadline}
           blurb={settings?.newsletterBlurb}
           sampleUrl={settings?.newsletterSampleUrl}
+          copy={copy.newsletter}
           school={schoolSlug}
           location="school"
         />

@@ -1,5 +1,7 @@
 import { getSiteSettings, getSiteSignals } from "@/lib/sanity/loaders";
 import { joinUrlFor } from "@/lib/circle-links";
+import { resolveCopy } from "@/lib/site-copy";
+import { DEFAULT_MENU_LINKS, resolveLinks } from "@/lib/nav-links";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Footer } from "@/components/Footer";
 import { SchoolTheme } from "@/components/SchoolTheme";
@@ -8,6 +10,7 @@ import { SchoolTheme } from "@/components/SchoolTheme";
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const [settings, signals] = await Promise.all([getSiteSettings(), getSiteSignals()]);
   const media = { podcasts: signals.hasPodcasts, videos: signals.hasVideos };
+  const copy = resolveCopy(settings?.copy);
   return (
     <>
       {/* Accent tokens for every school in the nav, so story labels carry their school's color on any page. */}
@@ -20,9 +23,15 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       >
         Skip to content
       </a>
-      <SiteHeader settings={settings} joinUrl={joinUrlFor(null, settings)} media={media} />
+      <SiteHeader
+        settings={settings}
+        joinUrl={joinUrlFor(null, settings)}
+        joinLabel={copy.join.headerButton}
+        menuLinks={resolveLinks(settings?.menuLinks, DEFAULT_MENU_LINKS)}
+        media={media}
+      />
       <main id="main">{children}</main>
-      <Footer settings={settings} media={media} />
+      <Footer settings={settings} signoff={copy.footer.signoff} media={media} />
     </>
   );
 }

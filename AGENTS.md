@@ -1,6 +1,6 @@
 # Speakeasy Sports content site: build spec
 
-Status: v1.5, October 21, 2026
+Status: v1.6, October 22, 2026
 Owner: Jon Smith
 Purpose: Build spec and working agreement for the Speakeasy Sports content site. Lives at the repo root as `AGENTS.md`. Every contributor treats the Decisions section as fixed and everything else as the plan of record.
 
@@ -167,9 +167,12 @@ Circle sync (read-only in Studio, written by the webhook handler)
 - `schools` (array of refs, empty = all), `startDate`, `endDate`
 
 ### siteSettings (singleton)
-- `siteName`, `tagline`, `defaultOgImage`, `socialLinks`, `footerText`
-- `joinUrl` (default Circle join url), `newsletterHeadline`, `newsletterBlurb`, `newsletterSampleUrl` (url, a past issue)
-- `navSchools` (ordered refs)
+Tabs in the Studio: General, Navigation, Newsletter, Copy, SEO.
+- General: `siteName`, `tagline`, `joinUrl` (default Circle join url), `footerText`
+- Navigation: `navSchools` (ordered refs), `menuLinks` (phone menu links after the sections, up to 6), `footerColumns` (up to 2 columns of {title, links}, between Sections and Follow), `legalLinks` (up to 4), `socialLinks`. A link is {label, href}; href is a site path or an https URL. An empty list keeps the built-in default (Search and Newsletter; one Speakeasy column; Terms and Privacy). Header section links (schools, Podcasts, Videos) stay automatic.
+- Newsletter: `newsletterHeadline`, `newsletterBlurb`, `newsletterSampleUrl` (url, a past issue)
+- Copy: `copy` (buttons, labels, empty states, form messages, 404, footer sign-off). The fields and their defaults live in `lib/site-copy.ts`; an empty field shows the default, which the Studio shows as its placeholder. `{community}` and `{school}` are filled in where a field allows them. Form field labels and screen-reader text stay in code.
+- SEO: `defaultOgImage` (share image for any page without its own), `pageSeo` (title and description for home, podcasts, videos, newsletter, search)
 
 ### infoPage
 - `title`, `slug` (one of `about`, `contact`, `terms`, `privacy`, `write-for-us`), `intro` (text, max 200), `body` (same Portable Text as articles)
