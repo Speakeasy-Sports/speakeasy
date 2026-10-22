@@ -10,7 +10,7 @@ import { articlePageTags } from "@/lib/sanity/tags";
 import { urlFor } from "@/lib/sanity/image";
 import { isReservedSlug } from "@/lib/reserved-slugs";
 import { joinUrlFor } from "@/lib/circle-links";
-import { fillCopy, resolveCopy } from "@/lib/site-copy";
+import { closingPeriod, fillCopy, resolveCopy } from "@/lib/site-copy";
 import { contentTypeLabel } from "@/lib/content-types";
 import { absoluteUrl, articlePath, authorPath, breadcrumbJsonLd, buildMetadata, newsArticleJsonLd, ogImageUrl, schoolPath } from "@/lib/seo";
 import { LabelRow } from "@/components/Labels";
@@ -210,7 +210,7 @@ export default async function ArticlePage({ params }: Props) {
               <Link href="/write-for-us" className="text-fg underline decoration-line underline-offset-4 hover:decoration-fg">
                 {copy.article.writeLink}
               </Link>
-              .
+              {closingPeriod(copy.article.writeLink)}
             </p>
           </div>
           <NewsletterSignup

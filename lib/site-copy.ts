@@ -140,6 +140,11 @@ export function fillCopy(template: string, values: Partial<Record<CopyToken, str
   return template.replace(/\{(\w+)\}/g, (match, name: string) => values[name as CopyToken] ?? match);
 }
 
+/** The period that closes a sentence ending in a link, unless the editor's link text already ends it. */
+export function closingPeriod(text: string): string {
+  return /[.!?]$/.test(text.trim()) ? "" : ".";
+}
+
 /** Studio check: the tokens a string uses must be ones its field supports. */
 export function unknownTokens(value: string, allowed: readonly CopyToken[] = []): string[] {
   return [...value.matchAll(/\{(\w+)\}/g)]

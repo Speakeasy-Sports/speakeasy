@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import { track } from "@/lib/analytics/plausible";
-import type { SiteCopy } from "@/lib/site-copy";
+import { closingPeriod, type SiteCopy } from "@/lib/site-copy";
 
 type Props = {
   /** inline: end of article. band: full-width two-column, directly above the footer. page: the /newsletter page. */
@@ -108,7 +108,7 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
           <a href={sampleUrl} className="text-fg underline decoration-line underline-offset-4 hover:decoration-fg">
             {copy.sampleLink}
           </a>
-          .
+          {closingPeriod(copy.sampleLink)}
         </>
       )}
     </p>

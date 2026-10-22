@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { COPY_SPEC, fillCopy, resolveCopy, unknownTokens } from "./site-copy";
+import { closingPeriod, COPY_SPEC, fillCopy, resolveCopy, unknownTokens } from "./site-copy";
 
 describe("resolveCopy", () => {
   it("returns every default when nothing is set", () => {
@@ -52,5 +52,13 @@ describe("length limits", () => {
         expect(entry.default.length).toBeLessThanOrEqual(entry.max ?? (entry.long ? 300 : 90));
       }
     }
+  });
+});
+
+describe("closingPeriod", () => {
+  it("adds a period unless the link text already ends the sentence", () => {
+    expect(closingPeriod("Write for Speakeasy")).toBe(".");
+    expect(closingPeriod("Write for us!")).toBe("");
+    expect(closingPeriod("Read a sample issue. ")).toBe("");
   });
 });
