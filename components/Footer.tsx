@@ -34,13 +34,8 @@ function Item({ href, children }: { href: string; children: React.ReactNode }) {
   );
 }
 
-// Sections, up to two editable columns, and Follow. Literal classes so Tailwind sees them.
-const GRID_COLS: Record<number, string> = {
-  1: "sm:grid-cols-2",
-  2: "sm:grid-cols-2",
-  3: "sm:grid-cols-3",
-  4: "sm:grid-cols-2 lg:grid-cols-4",
-};
+// Three columns as before; a fourth (two editable columns plus Follow) gets its own track on wide screens.
+const FOUR_COLUMNS = "sm:grid-cols-2 lg:grid-cols-4";
 
 type Props = { settings: SiteSettings | null; signoff: string; media: MediaSections };
 
@@ -64,7 +59,7 @@ export function Footer({ settings, signoff, media }: Props) {
             </Link>
             {settings?.tagline && <p className="max-w-sm text-lg leading-snug text-fg-muted">{settings.tagline}</p>}
           </div>
-          <nav aria-label="Footer" className={`grid grid-cols-2 gap-10 md:col-span-7 ${GRID_COLS[columnCount] ?? GRID_COLS[3]}`}>
+          <nav aria-label="Footer" className={`grid grid-cols-2 gap-10 md:col-span-7 ${columnCount > 3 ? FOUR_COLUMNS : "sm:grid-cols-3"}`}>
             <Column title="Sections">
               {schools.map((s) => (
                 <Item key={s._id} href={schoolPath(s.slug!)}>

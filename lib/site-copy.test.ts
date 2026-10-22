@@ -44,3 +44,13 @@ describe("unknownTokens", () => {
     }
   });
 });
+
+describe("length limits", () => {
+  it("fit every default", () => {
+    for (const { fields } of Object.values(COPY_SPEC)) {
+      for (const entry of Object.values(fields) as Array<{ default: string; long?: boolean; max?: number }>) {
+        expect(entry.default.length).toBeLessThanOrEqual(entry.max ?? (entry.long ? 300 : 90));
+      }
+    }
+  });
+});

@@ -5,21 +5,23 @@
  *
  * Adding an entry here adds the Studio field. Renaming one needs a migration script (AGENTS.md section 14).
  */
-type Entry = { title: string; default: string; description?: string; tokens?: readonly CopyToken[]; long?: boolean };
+// `max` is the Studio length limit. Buttons are short because they never wrap (the header has 390px on a phone).
+type Entry = { title: string; default: string; description?: string; tokens?: readonly CopyToken[]; long?: boolean; max?: number };
 export type CopyToken = "community" | "school";
 
 export const COPY_SPEC = {
   join: {
     title: "Join the Club",
     fields: {
-      headerButton: { title: "Header button", default: "Join the Club" },
+      headerButton: { title: "Header button", default: "Join the Club", max: 18 },
       schoolButton: {
         title: "School header button",
         default: "Join {community}",
         tokens: ["community"],
         description: "On each school front.",
+        max: 32,
       },
-      cardKicker: { title: "Promo card label", default: "The Club" },
+      cardKicker: { title: "Promo card label", default: "The Club", max: 24 },
       homeCardHeadline: {
         title: "Promo card headline, home",
         default: "Join the Club",
@@ -30,19 +32,20 @@ export const COPY_SPEC = {
         default: "Free to join. Every story here gets its own thread there, with the people who watch every snap.",
         long: true,
       },
-      cardButton: { title: "Promo card button", default: "Join free" },
+      cardButton: { title: "Promo card button", default: "Join free", max: 24 },
       discussButton: {
         title: "Article discuss button",
         default: "Discuss in {community}",
         tokens: ["community"],
+        max: 40,
       },
     },
   },
   newsletter: {
     title: "Newsletter form",
     fields: {
-      kicker: { title: "Label above the headline", default: "Newsletter" },
-      button: { title: "Button", default: "Sign up" },
+      kicker: { title: "Label above the headline", default: "Newsletter", max: 24 },
+      button: { title: "Button", default: "Sign up", max: 20 },
       success: { title: "After signing up", default: "You are on the list. The next issue comes to your inbox.", long: true },
       finePrint: { title: "Fine print", default: "Free. Unsubscribe anytime." },
       sampleLink: { title: "Sample issue link", default: "Read a sample issue", description: "Shown when a sample issue URL is set." },
@@ -65,7 +68,7 @@ export const COPY_SPEC = {
   fronts: {
     title: "Front pages",
     fields: {
-      emptyKicker: { title: "No stories yet, label", default: "Nothing yet" },
+      emptyKicker: { title: "No stories yet, label", default: "Nothing yet", max: 24 },
       emptyHeadline: { title: "No stories yet, headline", default: "The first stories are on the way." },
       latestEmpty: { title: "Latest list empty", default: "Everything new is in the stories above." },
       mediaRailHeading: { title: "Podcasts and videos rail heading", default: "Listen and watch" },
@@ -74,10 +77,10 @@ export const COPY_SPEC = {
   media: {
     title: "Podcasts and Videos pages",
     fields: {
-      podcastsKicker: { title: "Podcasts label", default: "Listen" },
+      podcastsKicker: { title: "Podcasts label", default: "Listen", max: 24 },
       podcastsIntro: { title: "Podcasts intro", default: "Every episode, newest first.", long: true },
       podcastsEmpty: { title: "Podcasts empty", default: "No episodes yet." },
-      videosKicker: { title: "Videos label", default: "Watch" },
+      videosKicker: { title: "Videos label", default: "Watch", max: 24 },
       videosIntro: { title: "Videos intro", default: "Film breakdowns, press conferences, and the rest, newest first.", long: true },
       videosEmpty: { title: "Videos empty", default: "No videos yet." },
     },
@@ -85,9 +88,9 @@ export const COPY_SPEC = {
   writeForUs: {
     title: "Write for us form",
     fields: {
-      kicker: { title: "Label above the heading", default: "Apply" },
+      kicker: { title: "Label above the heading", default: "Apply", max: 24 },
       heading: { title: "Heading", default: "Tell us about yourself" },
-      button: { title: "Button", default: "Send application" },
+      button: { title: "Button", default: "Send application", max: 30 },
       successTitle: { title: "After applying", default: "Thanks. Your application is in." },
       responseTime: {
         title: "Reply promise",

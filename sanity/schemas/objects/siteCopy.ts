@@ -1,7 +1,7 @@
 import { defineField, defineType } from "sanity";
 import { COPY_SPEC, unknownTokens, type CopyToken } from "../../../lib/site-copy";
 
-type Entry = { title: string; default: string; description?: string; tokens?: readonly CopyToken[]; long?: boolean };
+type Entry = { title: string; default: string; description?: string; tokens?: readonly CopyToken[]; long?: boolean; max?: number };
 
 function describe(entry: Entry): string {
   const parts = [entry.description, entry.tokens?.length ? `Can use ${entry.tokens.map((t) => `{${t}}`).join(" and ")}.` : null];
@@ -29,7 +29,7 @@ export const siteCopy = defineType({
           placeholder: entry.default,
           description: describe(entry),
           validation: (rule) =>
-            rule.max(entry.long ? 300 : 90).custom((value: string | undefined) => {
+            rule.max(entry.max ?? (entry.long ? 300 : 90)).custom((value: string | undefined) => {
               if (!value) return true;
               const bad = unknownTokens(value, entry.tokens);
               return bad.length === 0 || `This field does not fill in ${bad.map((t) => `{${t}}`).join(", ")}`;
