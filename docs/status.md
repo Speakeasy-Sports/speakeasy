@@ -79,6 +79,13 @@ Still for week 2: Sanity and Circle webhooks, `/api/newsletter`, WordPress redir
 - `/api/newsletter` submits the address to a Circle Email Hub form through the Admin API (V3 resolved from the Swagger). Honeypot and a 10 per hour per IP limit. 503 until `CIRCLE_ADMIN_API_TOKEN` and `CIRCLE_NEWSLETTER_FORM_ID` are set.
 - Not yet run against a live community: the element id question and confirmation email behavior in `docs/circle-api-notes.md` (V3).
 
+## Editable copy, menus, and SEO (branch jsatl/busy-lovelace-4n6koq)
+
+- Site settings gains Navigation, Copy, and SEO tabs: interface copy (defaults in `lib/site-copy.ts`, shown as Studio placeholders), phone menu, footer columns, legal links, index-page titles and descriptions. Empty fields keep the built-in text and links.
+- The default share image is now applied to pages without their own image (it was fetched but unused).
+- Verified against the mock dataset with defaults (32 smoke tests) and with every new field filled in (each value rendered on its page; footer and phone menu checked at 1280px and 390px).
+- Next: front-page curation (replaces `featured`/`featuredRank`, needs a migration script and an AGENTS.md change).
+
 ## Remaining for week 2 (per AGENTS.md section 12)
 
 - `/api/webhooks/sanity` (revalidation, `status` flip, Circle post), `/api/webhooks/circle`, `/api/newsletter` (the form already posts there and shows an error until it exists).
