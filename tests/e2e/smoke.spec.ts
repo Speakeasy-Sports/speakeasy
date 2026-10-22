@@ -108,6 +108,14 @@ test("write for us page shows the application and is linked from the footer", as
   await expect(page.getByRole("button", { name: "Send application" })).toBeVisible();
 });
 
+test("newsletter form reaches the handler and says when signups are not open", async ({ page }) => {
+  // CI has no Circle token or form id, so the handler answers 503 with its own message.
+  await page.goto("/newsletter");
+  await page.getByLabel("Email address").first().fill("fan@example.com");
+  await page.getByRole("button", { name: "Sign up" }).first().click();
+  await expect(page.getByRole("alert").filter({ hasText: "Signups open soon" })).toBeVisible();
+});
+
 test("search finds stories from the prebuilt index", async ({ page }) => {
   await page.goto("/search?q=quarterback");
   await expect(page.getByText(/\d+ stor(y|ies)/)).toBeVisible();
