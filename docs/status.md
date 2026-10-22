@@ -79,10 +79,21 @@ Still for week 2: Sanity and Circle webhooks, `/api/newsletter`, WordPress redir
 - `/api/newsletter` submits the address to a Circle Email Hub form through the Admin API (V3 resolved from the Swagger). Honeypot and a 10 per hour per IP limit. 503 until `CIRCLE_ADMIN_API_TOKEN` and `CIRCLE_NEWSLETTER_FORM_ID` are set.
 - Not yet run against a live community: the element id question and confirmation email behavior in `docs/circle-api-notes.md` (V3).
 
-## Remaining for week 2 (per AGENTS.md section 12)
+## Launch QA (branch launch-qa-fixes, October 22, 2026)
 
-- `/api/webhooks/sanity` (revalidation, `status` flip, Circle post), `/api/webhooks/circle`, `/api/newsletter` (the form already posts there and shows an error until it exists).
-- Postmark review notifications.
+Against the mock dataset, production build:
+- Lighthouse mobile, home, Georgia front, and image, podcast, and video articles: Accessibility, Best Practices, and SEO 100 on all five; Performance 95 to 98; CLS 0. With real network and CPU throttling (`--throttling-method=devtools`), LCP is 1.6 to 1.8s, and 2.3s on the video article. Performance moves between 90 and 98 run to run with Total Blocking Time; confirm on a Vercel preview, where the container's CPU noise is gone.
+- Fixed: the serif italic was preloaded ahead of the roman and delayed article LCP by about 0.7s (2.7 to 2.9s before). It is now a separate `next/font` family that loads on use (`lib/fonts.ts`).
+- axe (WCAG 2.1 A and AA plus best practices) on 14 pages, light and dark, 390px and 1280px: 0 violations after one fix. In dark mode the MediaArt panel tint left the Georgia accent label at 4.39:1; the panel now uses `--bg-elev` in dark mode.
+- No horizontal scroll at 390px or 1280px on any of the 14 pages. The first Tab reaches a visible "Skip to content".
+- Watch: the light MediaArt panel is slightly darker than `--bg`, and SchoolTheme checks light accents against `--bg` only. Georgia passes comfortably; check a second school's light accent on that panel when it is added.
+
+## Remaining for launch (AGENTS.md section 12, Phase 1)
+
+- Live end-to-end test on a preview with the real Sanity project, Circle, and Postmark: publish to site and Circle post within a minute, comment count update (settles V5), review email, newsletter signup (the open questions in `docs/circle-api-notes.md`).
+- Lighthouse on the Vercel preview to confirm the scores above.
+- V7 brand fonts and mark (fonts, OG image, icon are placeholders), V8 photo rights, V9 if V5 fails.
+- Load 15 to 20 articles; Flodesk export and Email Hub import.
 
 ## Not possible from the repo
 
