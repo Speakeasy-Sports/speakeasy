@@ -65,6 +65,9 @@ export function tagsForChange(p: SanityWebhookPayload): string[] {
       return [...s.map(tags.page), tags.pages];
     case "siteSettings":
       return [tags.settings];
+    case "frontPage":
+      // School fronts with no picks of their own use the home picks that cover them, so they refresh too.
+      return [tags.home, tags.schools];
     case "sponsorSlot":
       return [tags.sponsors];
     default:

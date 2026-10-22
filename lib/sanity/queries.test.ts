@@ -84,7 +84,7 @@ async function run<T = unknown>(query: string, params: Record<string, unknown> =
 type Card = { _id: string; slug: string; school: { slug: string } | null };
 
 describe("HOME_QUERY", () => {
-  it("with nothing featured, tops the page with the four newest, then lists the rest, regardless of status", async () => {
+  it("with no picks, tops the page with the four newest, then lists the rest, regardless of status", async () => {
     const home = await run<{ top: Card[]; latest: Card[]; count: number }>(HOME_QUERY);
     expect(home.top.map((r) => r._id)).toEqual(["a-review", "a-subject", "a-none", "a-bama"]);
     expect(home.latest.map((r) => r._id)).toEqual(["a-one", "a-both", "a-nodate"]);
@@ -97,6 +97,56 @@ describe("SCHOOL_FRONT_QUERY", () => {
   it("includes articles that list the school as primary or secondary", async () => {
     const s = await run<{ top: Card[]; latest: Card[] }>(SCHOOL_FRONT_QUERY, { slug: "alabama" });
     expect([...s.top, ...s.latest].map((r) => r._id)).toEqual(["a-subject", "a-bama"]);
+  });
+});
+
+// Front page picks (AGENTS.md section 6): run the same queries with a Front page document and school picks added.
+const weak = (id: string) => ({ _type: "reference", _ref: id, _weak: true, _key: id });
+async function runWith<T>(extra: object[], query: string, params: Record<string, unknown> = {}, replace: Record<string, object> = {}) {
+  const docs = [...dataset.map((d) => replace[(d as { _id: string })._id] ?? d), ...extra];
+  const value = await evaluate(parse(query), { dataset: docs, params, timestamp: new Date(NOW) });
+  return (await value.get()) as T;
+}
+const frontPage = (...ids: string[]) => ({ _id: "frontPage", _type: "frontPage", topStories: ids.map(weak) });
+
+describe("front page picks", () => {
+  it("leads with the picks in order, fills with the newest, and never repeats them in Latest", async () => {
+    const home = await runWith<{ top: Card[]; latest: Card[]; count: number }>([frontPage("a-both", "a-nodate")], HOME_QUERY);
+    expect(home.top.map((r) => r._id)).toEqual(["a-both", "a-nodate", "a-review", "a-subject"]);
+    expect(home.latest.map((r) => r._id)).toEqual(["a-none", "a-bama", "a-one"]);
+    expect(home.top.length + home.latest.length).toBe(home.count);
+  });
+
+  it("skips picks that are missing, unpublished, or not usable", async () => {
+    const home = await runWith<{ top: Card[] }>([frontPage("a-missing", "a-broken", "a-one")], HOME_QUERY);
+    expect(home.top.map((r) => r._id)).toEqual(["a-one", "a-review", "a-subject", "a-none"]);
+  });
+
+  it("uses a school's own picks, dropping any that do not cover the school", async () => {
+    const bama = { ...school("school-alabama", "alabama"), topStories: [weak("a-one"), weak("a-bama")] };
+    const s = await runWith<{ top: Card[]; latest: Card[] }>(
+      [frontPage("a-subject")],
+      SCHOOL_FRONT_QUERY,
+      { slug: "alabama" },
+      { "school-alabama": bama },
+    );
+    // a-one is a Georgia story, so it is skipped; the home pick is ignored because Alabama has picks of its own.
+    expect(s.top.map((r) => r._id)).toEqual(["a-bama", "a-subject"]);
+    expect(s.latest).toEqual([]);
+  });
+
+  it("keeps a school's own picks out of its Latest list", async () => {
+    const ga = { ...school("school-georgia", "georgia"), topStories: [weak("a-both"), weak("a-one")] };
+    const s = await runWith<{ top: Card[]; latest: Card[] }>([], SCHOOL_FRONT_QUERY, { slug: "georgia" }, { "school-georgia": ga });
+    expect(s.top.map((r) => r._id)).toEqual(["a-both", "a-one", "a-review", "a-subject"]);
+    expect(s.latest.map((r) => r._id)).toEqual(["a-none", "a-nodate"]);
+  });
+
+  it("inherits the home page's picks that cover a school with no picks of its own", async () => {
+    const s = await runWith<{ top: Card[]; latest: Card[] }>([frontPage("a-bama", "a-nodate")], SCHOOL_FRONT_QUERY, { slug: "georgia" });
+    // a-bama is not a Georgia story, so only a-nodate carries over; the rest are the newest Georgia stories.
+    expect(s.top.map((r) => r._id)).toEqual(["a-nodate", "a-review", "a-subject", "a-none"]);
+    expect(s.latest.map((r) => r._id)).toEqual(["a-one", "a-both"]);
   });
 });
 

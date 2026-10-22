@@ -6,6 +6,7 @@ import { article } from "./article";
 import { sponsorSlot } from "./sponsorSlot";
 import { siteSettings } from "./siteSettings";
 import { infoPage } from "./infoPage";
+import { frontPage } from "./frontPage";
 import { heroEmbed } from "./objects/heroEmbed";
 import { episodeTimestamp } from "./objects/episodeTimestamp";
 import { body } from "./objects/body";
@@ -22,6 +23,7 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   tag,
   sponsorSlot,
   siteSettings,
+  frontPage,
   infoPage,
   // objects
   heroEmbed,
@@ -34,4 +36,4 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   ...blockTypes,
 ];
 
-export const SINGLETON_TYPES = new Set(["siteSettings"]);
+export const SINGLETON_TYPES = new Set(["siteSettings", "frontPage"]);

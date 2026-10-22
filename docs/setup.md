@@ -71,7 +71,7 @@ Create both in sanity.io/manage, project, API, Webhooks. Both: dataset `producti
 
 | Webhook | Trigger on | Filter | Drafts | Versions |
 |---|---|---|---|---|
-| Site publish | Create, Update, Delete | `_type in ["article", "school", "author", "tag", "infoPage", "siteSettings", "sponsorSlot"] && !(delta::operation() == "update" && delta::changedOnly(circleCommentCount))` | Off | Off |
+| Site publish | Create, Update, Delete | `_type in ["article", "school", "author", "tag", "infoPage", "siteSettings", "frontPage", "sponsorSlot"] && !(delta::operation() == "update" && delta::changedOnly(circleCommentCount))` | Off | Off |
 | Review notification | Create, Update | `_type == "article" && status == "review" && delta::changedAny(status)` | On | Off |
 
 What the handler does:
