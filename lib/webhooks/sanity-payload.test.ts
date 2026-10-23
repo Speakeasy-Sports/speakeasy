@@ -38,6 +38,7 @@ describe("tagsForChange", () => {
     expect(tagsForChange(parsePayload({ _id: "x", _type: "tag", slug: "portal" })!)).toEqual(["tag:portal", "taxonomy", "articles"]);
     expect(tagsForChange(parsePayload({ _id: "x", _type: "infoPage", slug: "about" })!)).toEqual(["page:about", "pages"]);
     expect(tagsForChange(parsePayload({ _id: "x", _type: "siteSettings" })!)).toEqual(["settings"]);
+    expect(tagsForChange(parsePayload({ _id: "frontPage", _type: "frontPage" })!)).toEqual(["home", "schools"]);
     expect(tagsForChange(parsePayload({ _id: "x", _type: "sponsorSlot" })!)).toEqual(["sponsors"]);
     expect(tagsForChange(parsePayload({ _id: "x", _type: "sanity.imageAsset" })!)).toEqual([]);
   });

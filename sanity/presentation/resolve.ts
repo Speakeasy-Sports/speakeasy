@@ -12,6 +12,7 @@ export const resolve: PresentationPluginOptions["resolve"] = {
         ],
       }),
     }),
+    frontPage: defineLocations({ locations: [{ title: "Home", href: "/" }] }),
     school: defineLocations({
       select: { title: "name", slug: "slug.current" },
       resolve: (doc) => ({

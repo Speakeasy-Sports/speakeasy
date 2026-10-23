@@ -1,9 +1,10 @@
-import { defineArrayMember, defineField, defineType } from "sanity";
+import { defineArrayMember, defineField, defineType, getPublishedId } from "sanity";
 import { HomeIcon } from "@sanity/icons/Home";
 import { isReservedSlug } from "../../lib/reserved-slugs";
 import { contrast, DARK_BG, isHex, LIGHT_BG } from "../../lib/color";
 import { hexColor } from "./shared/validation";
 import { altField } from "./shared/imageWithAlt";
+import { topStoriesField } from "./frontPage";
 
 export const school = defineType({
   name: "school",
@@ -12,6 +13,7 @@ export const school = defineType({
   icon: HomeIcon,
   groups: [
     { name: "identity", title: "Identity", default: true },
+    { name: "front", title: "Front page" },
     { name: "community", title: "Community" },
     { name: "seo", title: "SEO" },
   ],
@@ -91,6 +93,12 @@ export const school = defineType({
       description: "Tags shown in the section sub-nav after Latest, Podcasts, and Videos. Up to six, in this order.",
       of: [defineArrayMember({ type: "reference", to: [{ type: "tag" }] })],
       validation: (rule) => rule.max(6).unique(),
+    }),
+    topStoriesField({
+      description:
+        "This school's front: up to four, the first is the lead. Leave empty to use the home page's picks that cover this school, then the newest stories. Only stories listed under this school can be picked.",
+      filter: ({ document }) => ({ filter: "$school in schools[]._ref", params: { school: getPublishedId(document._id) } }),
+      group: "front",
     }),
     defineField({
       name: "communityName",

@@ -1,6 +1,6 @@
 # Speakeasy Sports content site: build spec
 
-Status: v1.6, October 22, 2026
+Status: v1.7, October 22, 2026
 Owner: Jon Smith
 Purpose: Build spec and working agreement for the Speakeasy Sports content site. Lives at the repo root as `AGENTS.md`. Every contributor treats the Decisions section as fixed and everything else as the plan of record.
 
@@ -121,6 +121,7 @@ Conventions: server components unless a component needs state or browser APIs; c
 - `description` (text), `seoTitle`, `seoDescription`
 - `order` (number)
 - `navTags` (array of tag refs, up to 6, ordered; the section sub-nav tags, curated by an editor rather than computed)
+- `topStories` (array of weak article refs, up to 4, ordered; this school front's picks, limited to articles listing the school. Empty = inherit the Front page picks that list the school)
 
 ### author
 - `name`, `slug`, `photo` (image with alt), `bio` (text, short), `role` (string, e.g. "Columnist")
@@ -152,7 +153,6 @@ Body
 Workflow
 - `status` (enum: `draft`, `review`, `scheduled`, `published`). Only Editors and Admins may set `published`.
 - `publishedAt` (datetime), `updatedAt` (datetime, set on any post-publish edit), `correction` (text, optional, rendered at the end of the article)
-- `featured` (boolean) and `featuredRank` (number 1 to 4). Homepage lead = featured rank 1.
 - `memberOnly` (boolean, default false; enforced in Phase 2 only)
 
 SEO and social
@@ -174,13 +174,17 @@ Tabs in the Studio: General, Navigation, Newsletter, Copy, SEO.
 - Copy: `copy` (buttons, labels, empty states, form messages, 404, footer sign-off). The fields and their defaults live in `lib/site-copy.ts`; an empty field shows the default, which the Studio shows as its placeholder. `{community}` and `{school}` are filled in where a field allows them. Form field labels and screen-reader text stay in code.
 - SEO: `defaultOgImage` (share image for any page without its own), `pageSeo` (title and description for home, podcasts, videos, newsletter, search)
 
+### frontPage (singleton)
+- `topStories` (array of weak article refs, up to 4, ordered). The first is the home lead, the next three the secondary row. Weak so a picked article can still be unpublished or deleted; the site skips any pick that is not live.
+- Replaced `article.featured` and `article.featuredRank` in v1.7. `scripts/migrate-featured-to-front-page.mjs` copies the old ranks into this document, then removes the old fields.
+
 ### infoPage
 - `title`, `slug` (one of `about`, `contact`, `terms`, `privacy`, `write-for-us`), `intro` (text, max 200), `body` (same Portable Text as articles)
 - One document per footer page. A missing page 404s rather than showing filler. On `write-for-us` the application form renders under the body.
 
 ### Studio configuration
-- Desk structure: Articles (by status: Needs review, Scheduled, Published, Drafts), Schools, Authors, Tags, Sponsor slots, Pages, Settings.
-- Featured rank: the Studio warns when another published article already holds the same rank. Ties are legal; the more recent story wins.
+- Desk structure: Articles (by status: Needs review, Scheduled, Published, Drafts), Front page, Schools, Authors, Tags, Sponsor slots, Pages, Settings.
+- Front page curation: editors order up to four stories in Front page, and optionally up to four per school in the school's Front page tab. One list per front, so two stories can never claim the same slot.
 - Scheduled drafts (Sanity Growth feature) handle timed publishing. Sanity does not set custom fields when it publishes, including scheduled publishes, so the site sets `status` itself: when `/api/webhooks/sanity` receives a published article whose `status` is not `published`, it patches the published document with `status: "published"` and `publishedAt` (if empty, set to now) using the write token. That patch fires the webhook again; the second delivery sees `published` and changes nothing. Nobody sets `published` by hand, and the option is hidden from Contributors.
 - Validation: `dek` required, hero alt required, at least one school and one author, `primarySchool` in `schools`.
 - Preview: visual editing with `next-sanity` and draft mode. Editors can preview any status.
@@ -197,10 +201,10 @@ Tabs in the Studio: General, Navigation, Newsletter, Copy, SEO.
 ## 6. Routes and page specs
 
 ### `/` Home (front page, not a feed)
-- Lead story: `featuredRank` 1. Large image or hero embed, type label, headline, dek, byline.
-- Secondary: `featuredRank` 2 to 4 in a row of three.
+- Lead story: the first Front page pick. Large image or hero embed, type label, headline, dek, byline.
+- Secondary: picks 2 to 4 in a row of three.
 - "Latest" list: most recent 20 published articles across all schools, with school label, type label, headline, timestamp. Load more via pagination at `/?page=2`.
-- Top stories are the first four of: featured ranks 1 to 4, then everything else newest first. With nothing featured they are the four newest. Latest excludes exactly those four on every page, so pages never repeat or skip a story.
+- Top stories are the first four of: the live Front page picks in their order, then everything else newest first. With no picks they are the four newest. Latest and the media rail exclude exactly those four on every page, so pages never repeat or skip a story. A school front uses its own `topStories`, or with none, the Front page picks that list the school.
 - Launch mode: with fewer than 8 live stories in scope, the front is the lead plus one Latest list (secondary stories fold into Latest, newest first), so a thin front never shows a row of three over one stray row. The full layout returns on its own at 8.
 - `/?page=N` and `/{school}?page=N` are rewritten in `next.config.ts` to internal routes (`/latest/N`, `/{school}/latest/N`) so the front pages never read search params and stay fully static. The internal routes set their canonical back to the `?page=N` form. The same applies to `?school=` and `?page=` on `/podcasts`, `/videos`, `/tags/{slug}` (internal `.../f/{school or all}/{page}`) and `?page=` on `/authors/{slug}` (internal `.../p/{page}`).
 - Newsletter block between Latest and footer.

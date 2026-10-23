@@ -24,6 +24,7 @@
  *   Sanity webhook, tag changed       -> tag:{slug}, taxonomy, articles
  *   Sanity webhook, infoPage changed  -> page:{slug}, pages
  *   Sanity webhook, siteSettings      -> settings
+ *   Sanity webhook, frontPage         -> home, schools  (school fronts can inherit the home picks)
  *   Sanity webhook, sponsorSlot       -> sponsors
  *   Circle webhook, comment count     -> article-slug:{slug}  (the handler finds the article by circlePostId)
  *

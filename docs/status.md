@@ -84,7 +84,12 @@ Still for week 2: Sanity and Circle webhooks, `/api/newsletter`, WordPress redir
 - Site settings gains Navigation, Copy, and SEO tabs: interface copy (defaults in `lib/site-copy.ts`, shown as Studio placeholders), phone menu, footer columns, legal links, index-page titles and descriptions. Empty fields keep the built-in text and links.
 - The default share image is now applied to pages without their own image (it was fetched but unused).
 - Verified against the mock dataset with defaults (32 smoke tests) and with every new field filled in (each value rendered on its page; footer and phone menu checked at 1280px and 390px).
-- Next: front-page curation (replaces `featured`/`featuredRank`, needs a migration script and an AGENTS.md change).
+
+## Front page curation (stacked on the copy, menus, and SEO branch)
+
+- A Front page singleton holds the home page's top stories as an ordered list of up to four; each school can hold its own list, or inherits the home picks that cover it. Replaces `article.featured` and `featuredRank` (AGENTS.md v1.7).
+- The front queries run in three stages (picks, top four, everything that excludes them) so each set is computed once instead of once per article.
+- `scripts/migrate-featured-to-front-page.mjs`: copy the old ranks before the deploy, remove the old fields after. The Sanity webhook filter needs `"frontPage"` added (docs/setup.md section 5).
 
 ## Launch QA (branch launch-qa-fixes, October 22, 2026)
 

@@ -65,10 +65,19 @@ const CARD_FIELDS = /* groq */ `
 const LIVE = /* groq */ `_type == "article" && defined(slug.current) && defined(primarySchool)`;
 const BY_DATE = /* groq */ `order(coalesce(publishedAt, _createdAt) desc)`;
 
-// Front-page order: featured ranks 1 to 4 first (a newer story wins a tied rank), then everything else newest first.
-// The first four of this order are the "top stories"; with nothing featured they are simply the four newest.
-// The Latest list excludes exactly those four, on every page, so pagination never repeats or skips a story.
-const TOP_ORDER = /* groq */ `order(select(featured == true && featuredRank in 1..4 => featuredRank, 99) asc, coalesce(publishedAt, _createdAt) desc)`;
+// Top stories (AGENTS.md section 6): the editor's picks first, in their order, then the newest live stories, four in all.
+// With no picks they are simply the four newest. Latest and the media rail exclude exactly those four, on every page,
+// so pagination never repeats or skips a story. Picks are weak references: an unpublished or deleted pick is skipped.
+//
+// The front queries run in three stages so each set is computed once: picks, then the top four, then everything that
+// excludes them. Inside a later stage, `^.picks` and `^.top` are the earlier stage's results. The parentheses in
+// `(list[]->)[cond]` matter: without them the filter applies to each article on its own instead of to the list.
+const HOME_PICKS = /* groq */ `coalesce((*[_id == "frontPage"][0].topStories[]->)[${LIVE}], [])`;
+// A school uses its own picks; with none, the home page's picks that cover it, as featured ranks used to.
+const SCHOOL_PICKS = /* groq */ `coalesce(select(
+  count((topStories[]->)[${LIVE} && ^._id in schools[]._ref]) > 0 => (topStories[]->)[${LIVE} && ^._id in schools[]._ref],
+  (*[_id == "frontPage"][0].topStories[]->)[${LIVE} && ^._id in schools[]._ref]
+), [])`;
 
 const MEDIA_TYPES = /* groq */ `["podcast", "video"]`;
 
@@ -104,14 +113,15 @@ export const SITE_SIGNALS_QUERY = defineQuery(`
 `);
 
 export const HOME_QUERY = defineQuery(`
+  { "picks": ${HOME_PICKS}[]{ ${CARD_FIELDS} } }
   {
-    "top": (*[${LIVE}] | ${TOP_ORDER})[0...4]{ ${CARD_FIELDS} },
-    "latest": *[${LIVE} && !(_id in ((*[${LIVE}] | ${TOP_ORDER})[0...4]._id))] | ${BY_DATE} [0...20]{ ${CARD_FIELDS} },
+    "top": ((picks + (*[${LIVE} && !(_id in ^.picks[]._id)] | ${BY_DATE})[0...4]{ ${CARD_FIELDS} })[0...4])
+  }
+  {
+    top,
+    "latest": *[${LIVE} && !(_id in ^.top[]._id)] | ${BY_DATE} [0...20]{ ${CARD_FIELDS} },
     "count": count(*[${LIVE}]),
-    "media": *[
-      ${LIVE} && contentType in ${MEDIA_TYPES}
-      && !(_id in ((*[${LIVE}] | ${TOP_ORDER})[0...4]._id))
-    ] | ${BY_DATE} [0...4]{ ${CARD_FIELDS} }
+    "media": *[${LIVE} && contentType in ${MEDIA_TYPES} && !(_id in ^.top[]._id)] | ${BY_DATE} [0...4]{ ${CARD_FIELDS} }
   }
 `);
 
@@ -127,15 +137,18 @@ export const SCHOOL_FRONT_QUERY = defineQuery(`
     seoTitle,
     seoDescription,
     ${NAV_TAG_FIELDS},
-    "top": (*[${LIVE} && ^._id in schools[]._ref] | ${TOP_ORDER})[0...4]{ ${CARD_FIELDS} },
-    "latest": *[
-      ${LIVE} && ^._id in schools[]._ref
-      && !(_id in ((*[${LIVE} && ^.^._id in schools[]._ref] | ${TOP_ORDER})[0...4]._id))
-    ] | ${BY_DATE} [0...20]{ ${CARD_FIELDS} },
+    "picks": ${SCHOOL_PICKS}[]{ ${CARD_FIELDS} }
+  }
+  {
+    ...,
+    "top": ((picks + (*[${LIVE} && ^._id in schools[]._ref && !(_id in ^.picks[]._id)] | ${BY_DATE})[0...4]{ ${CARD_FIELDS} })[0...4])
+  }
+  {
+    ...,
+    "latest": *[${LIVE} && ^._id in schools[]._ref && !(_id in ^.top[]._id)] | ${BY_DATE} [0...20]{ ${CARD_FIELDS} },
     "count": count(*[${LIVE} && ^._id in schools[]._ref]),
     "media": *[
-      ${LIVE} && ^._id in schools[]._ref && contentType in ${MEDIA_TYPES}
-      && !(_id in ((*[${LIVE} && ^.^._id in schools[]._ref] | ${TOP_ORDER})[0...4]._id))
+      ${LIVE} && ^._id in schools[]._ref && contentType in ${MEDIA_TYPES} && !(_id in ^.top[]._id)
     ] | ${BY_DATE} [0...4]{ ${CARD_FIELDS} }
   }
 `);

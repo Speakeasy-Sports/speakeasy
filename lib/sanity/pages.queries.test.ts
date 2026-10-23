@@ -30,7 +30,7 @@ const live = (dataset as Array<{ _type: string; primarySchool?: unknown; slug?: 
 );
 
 describe("HOME_QUERY", () => {
-  it("puts featured ranks 1 to 4 on top in rank order", async () => {
+  it("puts the front page picks on top in their order", async () => {
     const home = await run<{ top: Card[] }>(HOME_QUERY);
     expect(home.top.map((a) => a.slug)).toEqual([
       "fourth-quarter-collapse-defensive-rotation",

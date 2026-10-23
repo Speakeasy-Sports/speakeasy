@@ -11,8 +11,10 @@ import { BillIcon } from "@sanity/icons/Bill";
 import { CogIcon } from "@sanity/icons/Cog";
 import { DocumentIcon } from "@sanity/icons/Document";
 import { SITE_SETTINGS_ID } from "./schemas/siteSettings";
+import { FRONT_PAGE_ID } from "./schemas/frontPage";
+import { StarIcon } from "@sanity/icons/Star";
 
-// Desk structure (AGENTS.md section 5): Articles by status, Schools, Authors, Tags, Sponsor slots, Settings.
+// Desk structure (AGENTS.md section 5): Articles by status, Front page, Schools, Authors, Tags, Sponsor slots, Pages, Settings.
 export const structure: StructureResolver = (S) =>
   S.list()
     .title("Speakeasy Sports")
@@ -68,6 +70,10 @@ export const structure: StructureResolver = (S) =>
               S.documentTypeListItem("article").title("All articles"),
             ]),
         ),
+      S.listItem()
+        .title("Front page")
+        .icon(StarIcon)
+        .child(S.document().schemaType("frontPage").documentId(FRONT_PAGE_ID).title("Front page")),
       S.divider(),
       S.documentTypeListItem("school").title("Schools").icon(HomeIcon),
       S.documentTypeListItem("author").title("Authors").icon(UserIcon),

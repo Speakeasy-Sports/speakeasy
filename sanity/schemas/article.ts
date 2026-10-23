@@ -1,4 +1,4 @@
-import { defineArrayMember, defineField, defineType, getPublishedId } from "sanity";
+import { defineArrayMember, defineField, defineType } from "sanity";
 import { DocumentTextIcon } from "@sanity/icons/DocumentText";
 import { altField, imageWithAltFields } from "./shared/imageWithAlt";
 import { slugFormat } from "./shared/validation";
@@ -193,39 +193,6 @@ export const article = defineType({
       group: "workflow",
       description: "Rendered at the end of the article. Corrections are never silent.",
       validation: (rule) => rule.max(1000),
-    }),
-    defineField({ name: "featured", type: "boolean", group: "workflow", initialValue: false }),
-    defineField({
-      name: "featuredRank",
-      type: "number",
-      group: "workflow",
-      description: "1 is the homepage lead. 2 to 4 fill the secondary row.",
-      hidden: ({ document }) => !document?.featured,
-      validation: (rule) => [
-        rule
-          .integer()
-          .min(1)
-          .max(4)
-          .custom((value, context) => {
-            if (context.document?.featured && !value) return "Pick a rank for featured articles";
-            return true;
-          }),
-        // Two stories on the same rank is legal (the newer one wins), but usually a mistake. Say so.
-        rule.custom(async (value, context) => {
-          if (!context.document?.featured || !value) return true;
-          // Drafts and release versions ("drafts.x", "versions.r.x") all map to the same published id. Compare against
-          // published documents only, so neither this article nor another's unpublished schedule counts.
-          const id = getPublishedId(context.document._id);
-          const other = await context
-            .getClient({ apiVersion: "2026-10-01" })
-            .withConfig({ perspective: "published" })
-            .fetch<string | null>(`*[_type == "article" && featured == true && featuredRank == $rank && _id != $id][0].title`, {
-              rank: value,
-              id,
-            });
-          return other ? `"${other}" already holds rank ${value}. The more recent story wins the slot.` : true;
-        }).warning(),
-      ],
     }),
     defineField({
       name: "memberOnly",

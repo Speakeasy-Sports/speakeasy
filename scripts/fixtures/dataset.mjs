@@ -120,10 +120,10 @@ const authors = [
 
 // [slug, title, dek, type, hoursAgo, author, tags, extra]
 const rows = [
-  ["fourth-quarter-collapse-defensive-rotation", "What the fourth-quarter collapse says about the defensive rotation", "Georgia played 19 defenders in the first half and 11 after the break. That is not a coincidence.", "analysis", 2, "jon", ["defense"], { featured: true, featuredRank: 1, schools: ["georgia", "alabama"] }],
-  ["bye-week-mailbag", "Pod: The bye week mailbag", "Your questions on the quarterback room, the schedule, and whether the offensive line is fixed.", "podcast", 5, "jon", ["quarterbacks"], { featured: true, featuredRank: 2, podcast: true }],
-  ["five-plays-georgia-texas", "Five plays that decided Georgia and Texas", "The scoreboard said one thing. The down-and-distance chart said it earlier.", "recap", 9, "marcus", ["film-room", "defense"], { featured: true, featuredRank: 3 }],
-  ["tight-end-screen-film-room", "Film room: the tight end screen that keeps working", "Six snaps, one concept, and why defenses still bite on it.", "video", 14, "marcus", ["film-room"], { featured: true, featuredRank: 4, video: true }],
+  ["fourth-quarter-collapse-defensive-rotation", "What the fourth-quarter collapse says about the defensive rotation", "Georgia played 19 defenders in the first half and 11 after the break. That is not a coincidence.", "analysis", 2, "jon", ["defense"], { pick: 1, schools: ["georgia", "alabama"] }],
+  ["bye-week-mailbag", "Pod: The bye week mailbag", "Your questions on the quarterback room, the schedule, and whether the offensive line is fixed.", "podcast", 5, "jon", ["quarterbacks"], { pick: 2, podcast: true }],
+  ["five-plays-georgia-texas", "Five plays that decided Georgia and Texas", "The scoreboard said one thing. The down-and-distance chart said it earlier.", "recap", 9, "marcus", ["film-room", "defense"], { pick: 3 }],
+  ["tight-end-screen-film-room", "Film room: the tight end screen that keeps working", "Six snaps, one concept, and why defenses still bite on it.", "video", 14, "marcus", ["film-room"], { pick: 4, video: true }],
   ["healthy-line-ole-miss", "What a healthy offensive line changes against Ole Miss", "Three starters return. The run game was built for exactly this.", "preview", 3, "jon", ["quarterbacks"], {}],
   ["recruiting-board-florida-weekend", "Recruiting board: who visits Athens on Florida weekend", "Eleven official visitors, four of them uncommitted, and one name that changes the class.", "news", 7, "avery", ["recruiting"], {}],
   ["stop-grading-style-points", "Stop grading this offense on style points", "Wins in October are not judged by how they look in a highlight package.", "opinion", 20, "jon", [], {}],
@@ -167,8 +167,6 @@ const articles = rows.map(([slug, title, dek, contentType, ago, author, tagSlugs
     primarySchool: ref(`school-${schoolsList[0]}`),
     authors: [ref(`author-${author}`)],
     tags: tagSlugs.map((t) => ({ ...ref(`tag-${t}`), _key: key() })),
-    featured: Boolean(extra.featured),
-    featuredRank: extra.featuredRank,
     noIndex: false,
   };
   if (extra.podcast) {
@@ -255,6 +253,16 @@ const infoPages = [
   body: [para(span("Placeholder body for local runs. The real copy lives in the Studio."))],
 }));
 
+// Home page picks, in the order the rows above number them (AGENTS.md section 6).
+const frontPage = {
+  _id: "frontPage",
+  _type: "frontPage",
+  topStories: rows
+    .filter((r) => r[7].pick)
+    .sort((x, y) => x[7].pick - y[7].pick)
+    .map((r) => ({ _type: "reference", _ref: `article-${r[0]}`, _weak: true, _key: key() })),
+};
+
 export const dataset = [
   ...schools,
   ...tags,
@@ -264,5 +272,6 @@ export const dataset = [
   ...articles,
   sponsor,
   settings,
+  frontPage,
   ...infoPages,
 ];
