@@ -173,6 +173,26 @@
   max-width: var(--measure);
   margin-inline: auto;
 }
+/* MediaArt panel: a light tint of the page in light mode. In dark mode the tint drops a school accent below 4.5:1
+   (Georgia: 4.39:1), so the panel uses the elevated surface, where SchoolTheme guarantees 4.5:1 for every school. */
+.media-art {
+  background: color-mix(in srgb, var(--fg) 5%, var(--bg));
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .media-art {
+    background: var(--bg-elev);
+  }
+}
+:root[data-theme="dark"] .media-art {
+  background: var(--bg-elev);
+}
+
+/* Serif italics use the separate, non-preloaded italic family (lib/fonts.ts). */
+.article-body :where(em, i),
+.font-display.italic {
+  font-family: var(--font-serif-italic, Georgia), Georgia, serif;
+}
+
 .article-body > * + * {
   margin-top: 1.25em;
 }
