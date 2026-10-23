@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildMetadata } from "./metadata";
+import { buildMetadata, defaultOgImage } from "./metadata";
 import { absoluteUrl, articlePath, ogImageUrl } from "./site";
 import { breadcrumbJsonLd, jsonLdString, newsArticleJsonLd } from "./structured-data";
 
@@ -68,5 +68,24 @@ describe("structured data", () => {
     ]);
     expect(crumbs.itemListElement[1]).toEqual({ "@type": "ListItem", position: 2, name: "Georgia", item: "https://speakeasysports.com/georgia" });
     expect(jsonLdString({ a: "</script><script>alert(1)" })).not.toContain("</script>");
+  });
+});
+
+describe("default share image", () => {
+  it("is used only when the page has no image of its own", () => {
+    const fallback = defaultOgImage({ defaultOgImage: { asset: { _id: "image-abc123-1200x630-png" }, alt: "Speakeasy Sports" } });
+    expect(fallback?.url).toContain("abc123-1200x630.png");
+    expect(fallback?.url).toContain("w=1200");
+
+    const withFallback = buildMetadata({ title: "Podcasts", path: "/podcasts", fallbackImage: fallback });
+    expect(withFallback.openGraph?.images).toEqual([expect.objectContaining({ url: fallback?.url, alt: "Speakeasy Sports" })]);
+
+    const own = buildMetadata({ title: "A", path: "/a", image: { url: "https://example.com/own.png" }, fallbackImage: fallback });
+    expect(own.openGraph?.images).toEqual([expect.objectContaining({ url: "https://example.com/own.png" })]);
+  });
+
+  it("is null when Site settings has none", () => {
+    expect(defaultOgImage(null)).toBeNull();
+    expect(defaultOgImage({ defaultOgImage: { asset: null } })).toBeNull();
   });
 });

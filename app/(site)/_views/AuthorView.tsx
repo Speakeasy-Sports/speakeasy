@@ -5,7 +5,8 @@ import { AUTHOR_QUERY } from "@/lib/sanity/queries";
 import { pageQuery, totalPages } from "@/lib/sanity/paginate";
 import { tags } from "@/lib/sanity/tags";
 import { urlFor } from "@/lib/sanity/image";
-import { authorPath, buildMetadata, profilePageJsonLd } from "@/lib/seo";
+import { getSiteSettings } from "@/lib/sanity/loaders";
+import { authorPath, buildMetadata, defaultOgImage, profilePageJsonLd } from "@/lib/seo";
 import { SanityImage } from "@/components/SanityImage";
 import { StoryRow } from "@/components/StoryRow";
 import { Pagination } from "@/components/Pagination";
@@ -38,13 +39,14 @@ export function authorPageHref(slug: string, page: number) {
 }
 
 export async function authorMetadata(slug: string, page: number): Promise<Metadata> {
-  const author = await getAuthor(slug, page);
+  const [author, settings] = await Promise.all([getAuthor(slug, page), getSiteSettings()]);
   if (!author?.name) return {};
   return buildMetadata({
     title: page > 1 ? `${author.name}, page ${page}` : author.name,
     description: author.bio ?? `Stories by ${author.name} on Speakeasy Sports.`,
     path: authorPageHref(slug, page),
     image: author.photo?.asset ? { url: urlFor(author.photo).width(600).height(600).fit("crop").url(), width: 600, height: 600 } : null,
+    fallbackImage: defaultOgImage(settings),
   });
 }
 

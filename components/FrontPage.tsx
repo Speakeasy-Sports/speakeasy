@@ -1,4 +1,5 @@
 import type { ArticleCard } from "@/lib/types";
+import type { SiteCopy } from "@/lib/site-copy";
 import { LeadStory } from "./LeadStory";
 import { StoryCard } from "./StoryCard";
 import { StoryRow } from "./StoryRow";
@@ -23,6 +24,7 @@ type Props = {
   /** Set on a school's section front: hides the now-redundant school label on every story. */
   schoolSlug?: string | null;
   community: { name: string; joinUrl: string };
+  copy: Pick<SiteCopy, "join" | "fronts">;
   /** Date only on every story, for while one person writes everything. */
   hideAuthors?: boolean;
 };
@@ -41,7 +43,7 @@ function byDate(a: ArticleCard, b: ArticleCard): number {
  * Pages 2 and up show only the Latest river. With fewer than COMPACT_FRONT_BELOW stories (launch), the row of three
  * folds into Latest so the page reads as a lead and a list instead of a lead, three cards, and one stray row.
  */
-export function FrontPage({ top, latest: river, count, media, page, basePath, schoolSlug, community, hideAuthors }: Props) {
+export function FrontPage({ top, latest: river, count, media, page, basePath, schoolSlug, community, copy, hideAuthors }: Props) {
   const showSchool = !schoolSlug;
   const compact = count < COMPACT_FRONT_BELOW;
   const [lead, ...rest] = top;
@@ -53,8 +55,8 @@ export function FrontPage({ top, latest: river, count, media, page, basePath, sc
   if (!lead) {
     return (
       <div className="py-24 text-center">
-        <p className="label-caps text-fg-muted">Nothing yet</p>
-        <p className="headline mt-3 text-3xl">The first stories are on the way.</p>
+        <p className="label-caps text-fg-muted">{copy.fronts.emptyKicker}</p>
+        <p className="headline mt-3 text-3xl">{copy.fronts.emptyHeadline}</p>
       </div>
     );
   }
@@ -88,14 +90,14 @@ export function FrontPage({ top, latest: river, count, media, page, basePath, sc
               ))}
             </div>
           ) : (
-            !compact && <p className="py-10 font-ui text-fg-muted">Everything new is in the stories above.</p>
+            !compact && <p className="py-10 font-ui text-fg-muted">{copy.fronts.latestEmpty}</p>
           )}
           <Pagination page={page} total={total} href={href} label="Latest stories pages" />
         </section>
 
         <aside aria-label="More from Speakeasy" className="flex flex-col gap-12 lg:sticky lg:top-8 lg:col-span-4 lg:self-start">
-          <JoinCard communityName={community.name} joinUrl={community.joinUrl} schoolSlug={schoolSlug} />
-          <MediaRail items={media} schoolSlug={schoolSlug} showSchool={showSchool} />
+          <JoinCard communityName={community.name} joinUrl={community.joinUrl} schoolSlug={schoolSlug} copy={copy.join} />
+          <MediaRail items={media} heading={copy.fronts.mediaRailHeading} schoolSlug={schoolSlug} showSchool={showSchool} />
         </aside>
       </div>
     </>

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { client } from "@/lib/sanity/client";
 import { SCHOOL_SLUGS_QUERY } from "@/lib/sanity/queries";
-import { buildMetadata, schoolPath } from "@/lib/seo";
+import { getSiteSettings } from "@/lib/sanity/loaders";
+import { buildMetadata, defaultOgImage, schoolPath } from "@/lib/seo";
 import { getSchoolFront, SchoolView } from "../_views/SchoolView";
 
 // ISR: every school is prerendered at build and revalidated every 60s and on demand from the webhook.
@@ -22,12 +23,13 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { school: slug } = await params;
-  const school = await getSchoolFront(slug);
+  const [school, settings] = await Promise.all([getSchoolFront(slug), getSiteSettings()]);
   if (!school) return {};
   return buildMetadata({
     title: school.seoTitle ?? school.name ?? slug,
     description: school.seoDescription ?? school.description,
     path: schoolPath(slug),
+    fallbackImage: defaultOgImage(settings),
     schoolFeed: { path: `/${slug}/feed.xml`, title: `${school.shortName ?? school.name} on Speakeasy Sports` },
   });
 }

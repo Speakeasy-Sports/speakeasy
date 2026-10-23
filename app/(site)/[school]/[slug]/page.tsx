@@ -10,6 +10,7 @@ import { articlePageTags } from "@/lib/sanity/tags";
 import { urlFor } from "@/lib/sanity/image";
 import { isReservedSlug } from "@/lib/reserved-slugs";
 import { joinUrlFor } from "@/lib/circle-links";
+import { closingPeriod, fillCopy, resolveCopy } from "@/lib/site-copy";
 import { contentTypeLabel } from "@/lib/content-types";
 import { absoluteUrl, articlePath, authorPath, breadcrumbJsonLd, buildMetadata, newsArticleJsonLd, ogImageUrl, schoolPath } from "@/lib/seo";
 import { LabelRow } from "@/components/Labels";
@@ -119,6 +120,7 @@ export default async function ArticlePage({ params }: Props) {
   const heroType = stegaClean(article.heroType);
   const canonical = articlePath(schoolSlug, stegaClean(article.slug) ?? slug);
   const joinUrl = joinUrlFor(school, settings);
+  const copy = resolveCopy(settings?.copy);
   const authors = (article.authors ?? []).filter((a) => a.name);
 
   const heroImageUrl = article.heroImage?.asset ? urlFor(article.heroImage).width(1200).height(675).fit("crop").url() : null;
@@ -193,7 +195,7 @@ export default async function ArticlePage({ params }: Props) {
         {/* 8. End block */}
         <footer className="measure mt-12 flex flex-col divide-y divide-line border-t border-line [&>*]:py-8 [&>*:last-child]:pb-0">
           <DiscussInClub
-            communityName={stegaClean(school.communityName) ?? "the Club"}
+            label={fillCopy(copy.join.discussButton, { community: stegaClean(school.communityName) ?? "the Club" })}
             postUrl={article.circlePostUrl}
             commentCount={article.circleCommentCount}
             joinUrl={joinUrl}
@@ -204,24 +206,25 @@ export default async function ArticlePage({ params }: Props) {
               <AuthorCard key={a._id} author={a} />
             ))}
             <p className="font-ui text-sm text-fg-muted">
-              Want to cover {stegaClean(school.shortName) ?? "college sports"}?{" "}
+              {fillCopy(copy.article.writePrompt, { school: stegaClean(school.shortName) ?? "college sports" })}{" "}
               <Link href="/write-for-us" className="text-fg underline decoration-line underline-offset-4 hover:decoration-fg">
-                Write for Speakeasy
+                {copy.article.writeLink}
               </Link>
-              .
+              {closingPeriod(copy.article.writeLink)}
             </p>
           </div>
           <NewsletterSignup
             headline={settings?.newsletterHeadline}
             blurb={settings?.newsletterBlurb}
             school={schoolSlug}
+            copy={copy.newsletter}
             location="article_end"
           />
         </footer>
       </div>
 
       {/* 9. Related */}
-      <RelatedStories articles={article.related} hideAuthors={signals.singleAuthor} />
+      <RelatedStories articles={article.related} heading={copy.article.relatedHeading} hideAuthors={signals.singleAuthor} />
 
       <p className="sr-only">
         {contentTypeLabel(stegaClean(article.contentType))} from {school.name}

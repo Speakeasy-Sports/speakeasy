@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import type { SiteCopy } from "@/lib/site-copy";
 
 type State = { kind: "idle" | "submitting" | "done" } | { kind: "error"; message: string; field?: string };
 
@@ -12,7 +13,7 @@ const label = "text-sm font-semibold text-fg";
 const optional = <span className="font-normal text-fg-subtle">(optional)</span>;
 
 /** The Write for us application (AGENTS.md 7.9). Posts to /api/write-for-us, which emails the editor. */
-export function WriteForUsForm() {
+export function WriteForUsForm({ copy }: { copy: SiteCopy["writeForUs"] }) {
   const id = useId();
   const [state, setState] = useState<State>({ kind: "idle" });
   const startedAt = useRef(0);
@@ -58,8 +59,8 @@ export function WriteForUsForm() {
   if (state.kind === "done") {
     return (
       <div ref={status} tabIndex={-1} role="status" className="flex flex-col gap-2 font-ui outline-none">
-        <p className="text-base font-semibold text-fg">Thanks. Your application is in.</p>
-        <p className="text-base text-fg-muted">We read every application and reply within a week.</p>
+        <p className="text-base font-semibold text-fg">{copy.successTitle}</p>
+        <p className="text-base text-fg-muted">{copy.responseTime}</p>
       </div>
     );
   }
@@ -162,10 +163,10 @@ export function WriteForUsForm() {
             disabled={state.kind === "submitting"}
             className="h-12 shrink-0 rounded-base bg-fg px-6 text-sm font-semibold text-bg transition-opacity hover:opacity-90 disabled:opacity-60"
           >
-            {state.kind === "submitting" ? "Sending" : "Send application"}
+            {state.kind === "submitting" ? "Sending" : copy.button}
           </button>
         </div>
-        <p className="text-[0.8125rem] text-fg-subtle">We read every application and reply within a week.</p>
+        <p className="text-[0.8125rem] text-fg-subtle">{copy.responseTime}</p>
       </div>
     </form>
   );

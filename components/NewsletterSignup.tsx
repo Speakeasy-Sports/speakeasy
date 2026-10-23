@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import { track } from "@/lib/analytics/plausible";
+import { closingPeriod, type SiteCopy } from "@/lib/site-copy";
 
 type Props = {
   /** inline: end of article. band: full-width two-column, directly above the footer. page: the /newsletter page. */
@@ -12,6 +13,8 @@ type Props = {
   school?: string | null;
   location?: string;
   sampleUrl?: string | null;
+  /** Button, messages, and fine print from Site settings > Copy. */
+  copy: SiteCopy["newsletter"];
 };
 
 type State = "idle" | "submitting" | "done" | "error";
@@ -20,7 +23,7 @@ type State = "idle" | "submitting" | "done" | "error";
  * Posts to /api/newsletter (AGENTS.md 7.4), which submits the address to the Circle Email Hub form. The success
  * message does not promise a confirmation email: whether Circle sends one is checked with the first live signup.
  */
-export function NewsletterSignup({ variant = "inline", headline, blurb, school, location = "article_end", sampleUrl }: Props) {
+export function NewsletterSignup({ variant = "inline", headline, blurb, school, location = "article_end", sampleUrl, copy }: Props) {
   const id = useId();
   const [state, setState] = useState<State>("idle");
   const [message, setMessage] = useState<string | null>(null);
@@ -59,7 +62,7 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
   const form =
     state === "done" ? (
       <p className="font-ui text-base text-fg" role="status">
-        You are on the list. The next issue comes to your inbox.
+        {copy.success}
       </p>
     ) : (
       <form onSubmit={onSubmit} className="flex flex-col gap-3 font-ui sm:flex-row">
@@ -84,7 +87,7 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
           disabled={state === "submitting"}
           className="h-12 shrink-0 rounded-base bg-fg px-6 text-sm font-semibold text-bg transition-opacity hover:opacity-90 disabled:opacity-60"
         >
-          {state === "submitting" ? "Signing up" : "Sign up"}
+          {state === "submitting" ? "Signing up" : copy.button}
         </button>
       </form>
     );
@@ -98,14 +101,14 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
 
   const fine = (
     <p className="font-ui text-[0.8125rem] text-fg-subtle">
-      Free. Unsubscribe anytime.
+      {copy.finePrint}
       {sampleUrl && (
         <>
           {" "}
           <a href={sampleUrl} className="text-fg underline decoration-line underline-offset-4 hover:decoration-fg">
-            Read a sample issue
+            {copy.sampleLink}
           </a>
-          .
+          {closingPeriod(copy.sampleLink)}
         </>
       )}
     </p>
@@ -116,7 +119,7 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
       <section aria-labelledby={`${id}-h`} data-newsletter-band className="border-t border-line bg-bg-elev">
         <div className="shell grid gap-8 py-14 md:grid-cols-12 md:items-end md:gap-10 md:py-20">
           <div className="flex flex-col gap-3 md:col-span-6">
-            <p className="label-caps text-fg-muted">Newsletter</p>
+            <p className="label-caps text-fg-muted">{copy.kicker}</p>
             <h2 id={`${id}-h`} className="headline text-[2rem] leading-[1.05] sm:text-[2.75rem] sm:tracking-[-0.025em]">
               {title}
             </h2>
@@ -147,7 +150,7 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
 
   return (
     <section aria-labelledby={`${id}-h`} className="flex flex-col gap-4">
-      <p className="label-caps text-fg-muted">Newsletter</p>
+      <p className="label-caps text-fg-muted">{copy.kicker}</p>
       <h2 id={`${id}-h`} className="headline text-2xl leading-tight sm:text-[1.75rem]">
         {title}
       </h2>

@@ -1,13 +1,24 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { buildMetadata } from "@/lib/seo";
+import { getSiteSettings } from "@/lib/sanity/loaders";
+import { pageSeo } from "@/lib/page-seo";
+import { buildMetadata, defaultOgImage } from "@/lib/seo";
 import { SearchClient } from "@/components/SearchClient";
 
 // Static shell; the query comes from ?q= in the browser and the index loads there too (AGENTS.md section 6).
-export const metadata: Metadata = {
-  ...buildMetadata({ title: "Search", description: "Search every Speakeasy Sports story.", path: "/search" }),
-  robots: { index: false, follow: true },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  const seo = pageSeo(settings?.pageSeo, "search");
+  return {
+    ...buildMetadata({
+      title: seo.title ?? "Search",
+      description: seo.description ?? "Search every Speakeasy Sports story.",
+      path: "/search",
+      fallbackImage: defaultOgImage(settings),
+    }),
+    robots: { index: false, follow: true },
+  };
+}
 
 export default function SearchPage() {
   return (

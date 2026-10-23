@@ -4,7 +4,8 @@ import { sanityFetch } from "@/lib/sanity/fetch";
 import { INFO_PAGE_QUERY } from "@/lib/sanity/queries";
 import { tags } from "@/lib/sanity/tags";
 import { formatLongDate } from "@/lib/format/date";
-import { buildMetadata } from "@/lib/seo";
+import { getSiteSettings } from "@/lib/sanity/loaders";
+import { buildMetadata, defaultOgImage } from "@/lib/seo";
 import { PortableTextRenderer } from "@/components/PortableTextRenderer";
 import type { ArticleBody } from "@/lib/types";
 
@@ -15,9 +16,9 @@ function getPage(slug: InfoSlug) {
 }
 
 export async function infoPageMetadata(slug: InfoSlug): Promise<Metadata> {
-  const page = await getPage(slug);
+  const [page, settings] = await Promise.all([getPage(slug), getSiteSettings()]);
   if (!page?.title) return {};
-  return buildMetadata({ title: page.title, description: page.intro, path: `/${slug}` });
+  return buildMetadata({ title: page.title, description: page.intro, path: `/${slug}`, fallbackImage: defaultOgImage(settings) });
 }
 
 /**

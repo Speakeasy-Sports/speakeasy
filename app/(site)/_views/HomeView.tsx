@@ -5,6 +5,7 @@ import { getSiteSettings, getSiteSignals } from "@/lib/sanity/loaders";
 import { pageQuery } from "@/lib/sanity/paginate";
 import { tags } from "@/lib/sanity/tags";
 import { joinUrlFor } from "@/lib/circle-links";
+import { resolveCopy } from "@/lib/site-copy";
 import { FrontPage, LATEST_PER_PAGE, latestPages } from "@/components/FrontPage";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
 
@@ -16,6 +17,7 @@ export async function HomeView({ page }: { page: number }) {
     getSiteSignals(),
   ]);
   if (page > latestPages(data.count)) notFound();
+  const copy = resolveCopy(settings?.copy);
 
   return (
     <>
@@ -29,7 +31,8 @@ export async function HomeView({ page }: { page: number }) {
           page={page}
           basePath="/"
           hideAuthors={signals.singleAuthor}
-          community={{ name: "Join the Club", joinUrl: joinUrlFor(null, settings) }}
+          community={{ name: copy.join.homeCardHeadline, joinUrl: joinUrlFor(null, settings) }}
+          copy={copy}
         />
       </div>
       <div className="mt-24">
@@ -38,6 +41,7 @@ export async function HomeView({ page }: { page: number }) {
           headline={settings?.newsletterHeadline}
           blurb={settings?.newsletterBlurb}
           sampleUrl={settings?.newsletterSampleUrl}
+          copy={copy.newsletter}
           location="home"
         />
       </div>

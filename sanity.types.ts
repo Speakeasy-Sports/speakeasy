@@ -15,6 +15,90 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: sanity/schema.json
+export type Join = {
+  headerButton?: string;
+  schoolButton?: string;
+  cardKicker?: string;
+  homeCardHeadline?: string;
+  cardBody?: string;
+  cardButton?: string;
+  discussButton?: string;
+};
+
+export type Newsletter = {
+  kicker?: string;
+  button?: string;
+  success?: string;
+  finePrint?: string;
+  sampleLink?: string;
+  recentHeading?: string;
+};
+
+export type CopyArticle = {
+  writePrompt?: string;
+  writeLink?: string;
+  relatedHeading?: string;
+};
+
+export type Fronts = {
+  emptyKicker?: string;
+  emptyHeadline?: string;
+  latestEmpty?: string;
+  mediaRailHeading?: string;
+};
+
+export type Media = {
+  podcastsKicker?: string;
+  podcastsIntro?: string;
+  podcastsEmpty?: string;
+  videosKicker?: string;
+  videosIntro?: string;
+  videosEmpty?: string;
+};
+
+export type WriteForUs = {
+  kicker?: string;
+  heading?: string;
+  button?: string;
+  successTitle?: string;
+  responseTime?: string;
+};
+
+export type NotFound = {
+  headline?: string;
+  body?: string;
+  link?: string;
+};
+
+export type Footer = {
+  signoff?: string;
+};
+
+export type Home = {
+  title?: string;
+  description?: string;
+};
+
+export type Podcasts = {
+  title?: string;
+  description?: string;
+};
+
+export type Videos = {
+  title?: string;
+  description?: string;
+};
+
+export type PageSeoNewsletter = {
+  title?: string;
+  description?: string;
+};
+
+export type Search = {
+  title?: string;
+  description?: string;
+};
+
 export type SponsorSlotReference = {
   _ref: string;
   _type: "reference";
@@ -75,6 +159,43 @@ export type ImageBlock = {
   alt?: string;
   caption?: string;
   credit?: string;
+};
+
+export type PageSeo = {
+  _type: "pageSeo";
+  home?: Home;
+  podcasts?: Podcasts;
+  videos?: Videos;
+  newsletter?: PageSeoNewsletter;
+  search?: Search;
+};
+
+export type SiteCopy = {
+  _type: "siteCopy";
+  join?: Join;
+  newsletter?: Newsletter;
+  article?: CopyArticle;
+  fronts?: Fronts;
+  media?: Media;
+  writeForUs?: WriteForUs;
+  notFound?: NotFound;
+  footer?: Footer;
+};
+
+export type FooterColumn = {
+  _type: "footerColumn";
+  title?: string;
+  links?: Array<
+    {
+      _key: string;
+    } & NavLink
+  >;
+};
+
+export type NavLink = {
+  _type: "navLink";
+  label?: string;
+  href?: string;
 };
 
 export type Body = Array<
@@ -162,14 +283,28 @@ export type SiteSettings = {
   _rev: string;
   siteName?: string;
   tagline?: string;
-  defaultOgImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
-  };
+  joinUrl?: string;
+  footerText?: string;
+  navSchools?: Array<
+    {
+      _key: string;
+    } & SchoolReference
+  >;
+  menuLinks?: Array<
+    {
+      _key: string;
+    } & NavLink
+  >;
+  footerColumns?: Array<
+    {
+      _key: string;
+    } & FooterColumn
+  >;
+  legalLinks?: Array<
+    {
+      _key: string;
+    } & NavLink
+  >;
   socialLinks?: Array<{
     platform?:
       | "x"
@@ -183,16 +318,19 @@ export type SiteSettings = {
     _type: "socialLink";
     _key: string;
   }>;
-  footerText?: string;
-  joinUrl?: string;
   newsletterHeadline?: string;
   newsletterBlurb?: string;
   newsletterSampleUrl?: string;
-  navSchools?: Array<
-    {
-      _key: string;
-    } & SchoolReference
-  >;
+  copy?: SiteCopy;
+  defaultOgImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  pageSeo?: PageSeo;
 };
 
 export type SanityImageCrop = {
@@ -522,6 +660,19 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
+  | Join
+  | Newsletter
+  | CopyArticle
+  | Fronts
+  | Media
+  | WriteForUs
+  | NotFound
+  | Footer
+  | Home
+  | Podcasts
+  | Videos
+  | PageSeoNewsletter
+  | Search
   | SponsorSlotReference
   | SponsorSlotRef
   | Callout
@@ -531,6 +682,10 @@ export type AllSanitySchemaTypes =
   | VideoEmbed
   | SanityImageAssetReference
   | ImageBlock
+  | PageSeo
+  | SiteCopy
+  | FooterColumn
+  | NavLink
   | Body
   | EpisodeTimestamp
   | HeroEmbed
@@ -558,7 +713,7 @@ export type AllSanitySchemaTypes =
 
 // Source: lib/sanity/queries.ts
 // Variable: SITE_SETTINGS_QUERY
-// Query: *[_id == "siteSettings"][0]{    siteName,    tagline,    defaultOgImage { asset->{ _id, url }, alt },    socialLinks[]{ _key, platform, url },    footerText,    joinUrl,    newsletterHeadline,    newsletterBlurb,    newsletterSampleUrl,    "navSchools": navSchools[]->{   _id,  name,  shortName,  "slug": slug.current,  communityName,  circleJoinUrl,  accentColor,  accentColorDark }  }
+// Query: *[_id == "siteSettings"][0]{    siteName,    tagline,    defaultOgImage { asset->{ _id, url }, alt },    socialLinks[]{ _key, platform, url },    footerText,    joinUrl,    newsletterHeadline,    newsletterBlurb,    newsletterSampleUrl,    "navSchools": navSchools[]->{   _id,  name,  shortName,  "slug": slug.current,  communityName,  circleJoinUrl,  accentColor,  accentColorDark },    menuLinks[]{ label, href },    footerColumns[]{ title, links[]{ label, href } },    legalLinks[]{ label, href },    copy,    pageSeo  }
 export type SITE_SETTINGS_QUERY_RESULT =
   | {
       siteName: null;
@@ -571,6 +726,11 @@ export type SITE_SETTINGS_QUERY_RESULT =
       newsletterBlurb: null;
       newsletterSampleUrl: null;
       navSchools: null;
+      menuLinks: null;
+      footerColumns: null;
+      legalLinks: null;
+      copy: null;
+      pageSeo: null;
     }
   | {
       siteName: null;
@@ -595,6 +755,11 @@ export type SITE_SETTINGS_QUERY_RESULT =
       newsletterBlurb: null;
       newsletterSampleUrl: null;
       navSchools: null;
+      menuLinks: null;
+      footerColumns: null;
+      legalLinks: null;
+      copy: null;
+      pageSeo: null;
     }
   | {
       siteName: string | null;
@@ -634,6 +799,23 @@ export type SITE_SETTINGS_QUERY_RESULT =
         accentColor: string | null;
         accentColorDark: string | null;
       }> | null;
+      menuLinks: Array<{
+        label: string | null;
+        href: string | null;
+      }> | null;
+      footerColumns: Array<{
+        title: string | null;
+        links: Array<{
+          label: string | null;
+          href: string | null;
+        }> | null;
+      }> | null;
+      legalLinks: Array<{
+        label: string | null;
+        href: string | null;
+      }> | null;
+      copy: SiteCopy | null;
+      pageSeo: PageSeo | null;
     }
   | null;
 
@@ -2047,7 +2229,7 @@ export type CIRCLE_DAILY_QUERY_RESULT = {
 // Query TypeMap
 declare global {
   interface SanityQueries {
-    '\n  *[_id == "siteSettings"][0]{\n    siteName,\n    tagline,\n    defaultOgImage { asset->{ _id, url }, alt },\n    socialLinks[]{ _key, platform, url },\n    footerText,\n    joinUrl,\n    newsletterHeadline,\n    newsletterBlurb,\n    newsletterSampleUrl,\n    "navSchools": navSchools[]->{ \n  _id,\n  name,\n  shortName,\n  "slug": slug.current,\n  communityName,\n  circleJoinUrl,\n  accentColor,\n  accentColorDark\n }\n  }\n': SITE_SETTINGS_QUERY_RESULT;
+    '\n  *[_id == "siteSettings"][0]{\n    siteName,\n    tagline,\n    defaultOgImage { asset->{ _id, url }, alt },\n    socialLinks[]{ _key, platform, url },\n    footerText,\n    joinUrl,\n    newsletterHeadline,\n    newsletterBlurb,\n    newsletterSampleUrl,\n    "navSchools": navSchools[]->{ \n  _id,\n  name,\n  shortName,\n  "slug": slug.current,\n  communityName,\n  circleJoinUrl,\n  accentColor,\n  accentColorDark\n },\n    menuLinks[]{ label, href },\n    footerColumns[]{ title, links[]{ label, href } },\n    legalLinks[]{ label, href },\n    copy,\n    pageSeo\n  }\n': SITE_SETTINGS_QUERY_RESULT;
     '\n  {\n    "articles": count(*[_type == "article" && defined(slug.current) && defined(primarySchool)]),\n    "podcasts": count(*[_type == "article" && defined(slug.current) && defined(primarySchool) && contentType == "podcast"]),\n    "videos": count(*[_type == "article" && defined(slug.current) && defined(primarySchool) && contentType == "video"]),\n    "authors": count(*[_type == "author" && count(*[_type == "article" && defined(slug.current) && defined(primarySchool) && references(^._id)]) > 0])\n  }\n': SITE_SIGNALS_QUERY_RESULT;
     '\n  {\n    "top": (*[_type == "article" && defined(slug.current) && defined(primarySchool)] | order(select(featured == true && featuredRank in 1..4 => featuredRank, 99) asc, coalesce(publishedAt, _createdAt) desc))[0...4]{ \n  _id,\n  title,\n  "slug": slug.current,\n  dek,\n  contentType,\n  heroType,\n  publishedAt,\n  "school": primarySchool->{ \n  _id,\n  name,\n  shortName,\n  "slug": slug.current,\n  communityName,\n  circleJoinUrl,\n  accentColor,\n  accentColorDark\n },\n  "authors": authors[]->{ _id, name, "slug": slug.current, \n  photo { asset->{ _id, url, metadata { lqip } }, hotspot, crop, alt }\n },\n  heroImage { \n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop,\n  alt,\n  caption,\n  credit\n },\n  heroEmbed { provider, url, title }\n },\n    "latest": *[_type == "article" && defined(slug.current) && defined(primarySchool) && !(_id in ((*[_type == "article" && defined(slug.current) && defined(primarySchool)] | order(select(featured == true && featuredRank in 1..4 => featuredRank, 99) asc, coalesce(publishedAt, _createdAt) desc))[0...4]._id))] | order(coalesce(publishedAt, _createdAt) desc) [0...20]{ \n  _id,\n  title,\n  "slug": slug.current,\n  dek,\n  contentType,\n  heroType,\n  publishedAt,\n  "school": primarySchool->{ \n  _id,\n  name,\n  shortName,\n  "slug": slug.current,\n  communityName,\n  circleJoinUrl,\n  accentColor,\n  accentColorDark\n },\n  "authors": authors[]->{ _id, name, "slug": slug.current, \n  photo { asset->{ _id, url, metadata { lqip } }, hotspot, crop, alt }\n },\n  heroImage { \n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop,\n  alt,\n  caption,\n  credit\n },\n  heroEmbed { provider, url, title }\n },\n    "count": count(*[_type == "article" && defined(slug.current) && defined(primarySchool)]),\n    "media": *[\n      _type == "article" && defined(slug.current) && defined(primarySchool) && contentType in ["podcast", "video"]\n      && !(_id in ((*[_type == "article" && defined(slug.current) && defined(primarySchool)] | order(select(featured == true && featuredRank in 1..4 => featuredRank, 99) asc, coalesce(publishedAt, _createdAt) desc))[0...4]._id))\n    ] | order(coalesce(publishedAt, _createdAt) desc) [0...4]{ \n  _id,\n  title,\n  "slug": slug.current,\n  dek,\n  contentType,\n  heroType,\n  publishedAt,\n  "school": primarySchool->{ \n  _id,\n  name,\n  shortName,\n  "slug": slug.current,\n  communityName,\n  circleJoinUrl,\n  accentColor,\n  accentColorDark\n },\n  "authors": authors[]->{ _id, name, "slug": slug.current, \n  photo { asset->{ _id, url, metadata { lqip } }, hotspot, crop, alt }\n },\n  heroImage { \n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n  hotspot,\n  crop,\n  alt,\n  caption,\n  credit\n },\n  heroEmbed { provider, url, title }\n }\n  }\n': HOME_QUERY_RESULT;
     '\n  *[_type == "school" && defined(slug.current)]{ "slug": slug.current }\n': SCHOOL_SLUGS_QUERY_RESULT;

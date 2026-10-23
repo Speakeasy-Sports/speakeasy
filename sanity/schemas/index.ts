@@ -9,6 +9,9 @@ import { infoPage } from "./infoPage";
 import { heroEmbed } from "./objects/heroEmbed";
 import { episodeTimestamp } from "./objects/episodeTimestamp";
 import { body } from "./objects/body";
+import { navLink, footerColumn } from "./objects/navLink";
+import { siteCopy } from "./objects/siteCopy";
+import { pageSeo } from "./objects/pageSeo";
 import { blockTypes } from "./blocks";
 
 export const schemaTypes: SchemaTypeDefinition[] = [
@@ -24,6 +27,10 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   heroEmbed,
   episodeTimestamp,
   body,
+  navLink,
+  footerColumn,
+  siteCopy,
+  pageSeo,
   ...blockTypes,
 ];
 

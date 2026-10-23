@@ -7,7 +7,9 @@ import { getSiteSettings, getSiteSignals } from "@/lib/sanity/loaders";
 import { pageQuery, totalPages } from "@/lib/sanity/paginate";
 import { tags } from "@/lib/sanity/tags";
 import { joinUrlFor } from "@/lib/circle-links";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, defaultOgImage } from "@/lib/seo";
+import { resolveCopy, type SiteCopy } from "@/lib/site-copy";
+import { pageSeo } from "@/lib/page-seo";
 import { LeadStory } from "@/components/LeadStory";
 import { StoryCard } from "@/components/StoryCard";
 import { Pagination } from "@/components/Pagination";
@@ -21,17 +23,25 @@ const PER_PAGE = 24;
 export type MediaKind = "podcast" | "video";
 type Kind = MediaKind;
 
-const COPY: Record<Kind, { title: string; kicker: string; intro: string; path: string; empty: string }> = {
-  podcast: { title: "Podcasts", kicker: "Listen", intro: "Every episode, newest first.", path: "/podcasts", empty: "No episodes yet." },
-  video: { title: "Videos", kicker: "Watch", intro: "Film breakdowns, press conferences, and the rest, newest first.", path: "/videos", empty: "No videos yet." },
+const PAGES: Record<Kind, { title: string; path: string; seo: "podcasts" | "videos" }> = {
+  podcast: { title: "Podcasts", path: "/podcasts", seo: "podcasts" },
+  video: { title: "Videos", path: "/videos", seo: "videos" },
 };
+
+/** Kicker, intro, and empty line from Site settings > Copy. */
+function pageCopy(kind: Kind, copy: SiteCopy) {
+  const m = copy.media;
+  return kind === "podcast"
+    ? { kicker: m.podcastsKicker, intro: m.podcastsIntro, empty: m.podcastsEmpty }
+    : { kicker: m.videosKicker, intro: m.videosIntro, empty: m.videosEmpty };
+}
 
 export function mediaHref(kind: Kind, school: string, page: number) {
   const q = new URLSearchParams();
   if (school) q.set("school", school);
   if (page > 1) q.set("page", String(page));
   const s = q.toString();
-  return s ? `${COPY[kind].path}?${s}` : COPY[kind].path;
+  return s ? `${PAGES[kind].path}?${s}` : PAGES[kind].path;
 }
 
 function getMedia(kind: Kind, school: string, page: number) {
@@ -45,12 +55,18 @@ function getMedia(kind: Kind, school: string, page: number) {
 type Filter = { school: string; page: number };
 
 export async function mediaMetadata(kind: Kind, p: Filter): Promise<Metadata> {
-  const data = await getMedia(kind, p.school, p.page);
+  const [data, settings] = await Promise.all([getMedia(kind, p.school, p.page), getSiteSettings()]);
+  const { title } = PAGES[kind];
+  const intro = pageCopy(kind, resolveCopy(settings?.copy)).intro;
+  const seo = pageSeo(settings?.pageSeo, PAGES[kind].seo);
   const scope = data.school?.shortName ? `${data.school.shortName} ` : "";
+  // The editor's title and description apply to the unfiltered first page; filtered and later pages derive theirs.
+  const unfiltered = !p.school && p.page === 1;
   return buildMetadata({
-    title: `${scope}${COPY[kind].title}${p.page > 1 ? `, page ${p.page}` : ""}`,
-    description: `${scope}${COPY[kind].title.toLowerCase()} from Speakeasy Sports. ${COPY[kind].intro}`,
+    title: unfiltered && seo.title ? seo.title : `${scope}${title}${p.page > 1 ? `, page ${p.page}` : ""}`,
+    description: (unfiltered && seo.description) || `${scope}${title.toLowerCase()} from Speakeasy Sports. ${intro}`,
     path: mediaHref(kind, p.school, p.page),
+    fallbackImage: defaultOgImage(settings),
   });
 }
 
@@ -65,7 +81,7 @@ export async function MediaIndexView({ kind, filter: p }: { kind: Kind; filter: 
   const pages = totalPages(data.count, PER_PAGE);
   if (p.page > pages) notFound();
 
-  const copy = COPY[kind];
+  const copy = { title: PAGES[kind].title, ...pageCopy(kind, resolveCopy(settings?.copy)) };
   const showSchool = !p.school;
   const [first, ...rest] = data.articles;
   const lead = p.page === 1 ? first : undefined;
@@ -106,6 +122,7 @@ export async function MediaIndexView({ kind, filter: p }: { kind: Kind; filter: 
           school={s}
           navTags={data.school.navTags}
           joinUrl={joinUrlFor(s, settings)}
+          joinLabel={resolveCopy(settings?.copy).join.schoolButton}
           active={kind === "podcast" ? "podcasts" : "videos"}
           media={{ podcasts: signals.hasPodcasts, videos: signals.hasVideos }}
           variant="compact"

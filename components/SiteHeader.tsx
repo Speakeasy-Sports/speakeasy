@@ -1,11 +1,15 @@
 import Link from "next/link";
 import type { SiteSettings } from "@/lib/types";
+import type { NavLink } from "@/lib/nav-links";
 import { HeaderNav, MobileMenu, type MediaSections } from "./HeaderNav";
 import { JoinButton } from "./JoinButton";
 
 type Props = {
   settings: SiteSettings | null;
   joinUrl: string;
+  joinLabel: string;
+  /** Phone menu links after the sections, from Site settings > Navigation. */
+  menuLinks: NavLink[];
   media: MediaSections;
 };
 
@@ -13,7 +17,7 @@ type Props = {
  * Masthead. Desktop: sections left, wordmark centered, search and Join right.
  * Phones (AGENTS.md section 9): wordmark, Join, menu.
  */
-export function SiteHeader({ settings, joinUrl, media }: Props) {
+export function SiteHeader({ settings, joinUrl, joinLabel, menuLinks, media }: Props) {
   const schools = settings?.navSchools ?? [];
   const siteName = settings?.siteName ?? "Speakeasy Sports";
 
@@ -38,8 +42,10 @@ export function SiteHeader({ settings, joinUrl, media }: Props) {
               <path d="M16 16l4.5 4.5" />
             </svg>
           </Link>
-          <JoinButton href={joinUrl} location="header" />
-          <MobileMenu schools={schools} media={media} />
+          <JoinButton href={joinUrl} location="header">
+            {joinLabel}
+          </JoinButton>
+          <MobileMenu schools={schools} media={media} extraLinks={menuLinks} />
         </div>
       </div>
     </header>
