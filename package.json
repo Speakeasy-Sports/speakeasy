@@ -16,7 +16,8 @@
     "typegen": "sanity schema extract --path sanity/schema.json --force && sanity typegen generate",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "check:secrets": "node scripts/check-client-secrets.mjs"
+    "check:secrets": "node scripts/check-client-secrets.mjs",
+    "seed": "node --env-file-if-exists=.env.local scripts/seed.mjs"
   },
   "dependencies": {
     "@portabletext/react": "^8.0.1",

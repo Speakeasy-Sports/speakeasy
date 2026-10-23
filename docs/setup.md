@@ -110,3 +110,12 @@ If Workflows cannot send webhooks (V5), change the cron schedule to every few ho
 2. Circle admin, Marketing, Forms, New form. Keep the profile email field; remove the name field or turn off "Make required". Save and publish.
 3. Copy the form's numeric id into `CIRCLE_NEWSLETTER_FORM_ID` in Vercel. `CIRCLE_ADMIN_API_TOKEN` must be set too; `CIRCLE_SYNC_ENABLED` does not matter for signups. The API uses the numeric `id`, not the letter-and-number `uid`; if the admin URL shows only the `uid`, `GET /forms` lists both.
 4. Sign up with a real address from the site footer band, then check Marketing, Contacts in Circle. If the site says "Check your email address" for a valid address, see the open question under V3 in `docs/circle-api-notes.md`.
+
+## 9. Sample content for testing
+
+`pnpm seed` adds ten sample Georgia stories (by the existing Jon Smith author, with placeholder images) so the full front page, sections, and article pages can be checked in production. Needs `NEXT_PUBLIC_SANITY_PROJECT_ID` and `SANITY_API_WRITE_TOKEN` in `.env.local`.
+
+- Every sample has an id starting `seed-`, is marked noIndex (out of the sitemap and search index), and ends with a "Sample story" note.
+- Existing Georgia, author, and tag documents are reused by slug; missing ones are created with `seed-` ids.
+- `pnpm seed --remove` deletes every `seed-` document and the sample images, and nothing else. Run it before launch and before setting `CIRCLE_SYNC_ENABLED=true`, or each sample gets a Circle post.
+- `pnpm seed --dry-run` prints the documents without writing.
