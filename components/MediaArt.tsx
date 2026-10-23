@@ -28,10 +28,7 @@ export function MediaArt({ kind, seed, label, size = "md" }: Props) {
   });
 
   return (
-    <div
-      className="@container relative h-full w-full overflow-hidden"
-      style={{ background: "color-mix(in srgb, var(--fg) 5%, var(--bg))" }}
-    >
+    <div className="media-art @container relative h-full w-full overflow-hidden">
       <svg
         aria-hidden="true"
         viewBox={`0 0 ${bars * 6} 100`}

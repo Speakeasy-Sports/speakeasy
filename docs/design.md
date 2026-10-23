@@ -38,7 +38,7 @@ Story units on mixed fronts carry their own `data-school`, so a Georgia story on
 
 ## Type
 
-Two families, one file each for roman and italic, loaded in `lib/fonts.ts` with `next/font/local` and exposed as `--font-serif`.
+Two families, one file each for roman and italic, loaded in `lib/fonts.ts` with `next/font/local`. The roman is `--font-serif` and is preloaded. The italic is a separate `next/font` family, `--font-serif-italic`, that is not preloaded: it only appears below the first screen (body emphasis, pull quotes), and preloading it cost about 0.7s of article LCP on Lighthouse mobile. `globals.css` applies it to `.article-body em` and `.font-display.italic`; any new serif italic needs a selector there.
 
 | Token | Family | Use |
 |---|---|---|
@@ -116,7 +116,7 @@ Grouped by where they appear. Server components unless marked client.
 - **`StoryCard`**: 16:9 photo above labels, headline, dek, meta. With `compactOnPhone`, becomes a text-left, thumbnail-right row on phones.
 - **`StoryRow`**: river unit. Text left, small 16:9 photo right (104px phone, 176px desktop). Dek hidden on phones. `CompactRow` is the rail version with a 72px square.
 - **`StoryImage`**: the picture for any story unit. Hero photo, else the YouTube frame, else `MediaArt`. Fixed aspect box, decorative (`alt=""`, hidden from assistive tech), optional Listen or Watch pill.
-- **`MediaArt`**: SVG waveform seeded from the title, for media stories without a photo. Neutral panel (5% `--fg` on `--bg`) with the accent only on the bars and play button. The school label shows only when the frame is at least 16rem wide, a container query, so thumbnails stay clean. No requests.
+- **`MediaArt`**: SVG waveform seeded from the title, for media stories without a photo. Neutral panel (5% `--fg` on `--bg` in light mode, `--bg-elev` in dark, where the tint left Georgia's dark accent at 4.39:1) with the accent only on the bars and play button. The school label shows only when the frame is at least 16rem wide, a container query, so thumbnails stay clean. No requests.
 - **`MediaRail`**: "Listen and watch" `rule-heading` and compact rows, links to all podcasts and videos.
 - **`JoinCard`**: rail promo for the Circle community on an elevated surface with a 3px accent top rule.
 - **`TypeLabel`, `SchoolLabel`, `LabelRow`** (`Labels.tsx`): accent `label-caps`, "Type · School". The school is dropped inside its own section.
