@@ -117,5 +117,5 @@ If Workflows cannot send webhooks (V5), change the cron schedule to every few ho
 
 - Every sample has an id starting `seed-`, is marked noIndex (out of the sitemap and search index), and ends with a "Sample story" note.
 - Existing Georgia, author, and tag documents are reused by slug; missing ones are created with `seed-` ids.
-- `pnpm seed --remove` deletes every `seed-` document and the sample images, and nothing else. Run it before launch and before setting `CIRCLE_SYNC_ENABLED=true`, or each sample gets a Circle post.
+- `pnpm seed --remove` deletes every `seed-` document and the sample images, and nothing else. A sample tag that real articles have started using is kept, and the run lists it. Run it before launch and before setting `CIRCLE_SYNC_ENABLED=true`, or each sample gets a Circle post.
 - `pnpm seed --dry-run` prints the documents without writing.

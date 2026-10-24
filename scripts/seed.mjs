@@ -164,16 +164,22 @@ async function removeAll() {
     console.log("Dry run: would delete every document whose id starts with seed-, then the seed images.");
     return;
   }
-  const ids = await client.fetch(`*[string::startsWith(_id, $p) || string::startsWith(_id, $d)]._id`, {
-    p: PREFIX,
-    d: `drafts.${PREFIX}`,
-  });
-  // Articles first so the school, author, and tags they reference can go in the same pass.
-  const order = (id) => (id.includes("article-") ? 0 : 1);
-  const sorted = [...ids].sort((a, b) => order(a) - order(b));
-  if (sorted.length) {
+  const prefixes = { p: PREFIX, d: `drafts.${PREFIX}` };
+  const starts = "(string::startsWith(_id, $p) || string::startsWith(_id, $d))";
+  // Sample stories first. Then the school, author, and tags the seed created, except any that real content now
+  // references (a tag reused by real articles stays, and the run says so).
+  const articles = await client.fetch(`*[_type == "article" && ${starts}]._id`, prefixes);
+  if (articles.length) {
     const tx = client.transaction();
-    for (const id of sorted) tx.delete(id);
+    for (const id of articles) tx.delete(id);
+    await tx.commit();
+  }
+  const rest = await client.fetch(`*[_type != "article" && ${starts}]{ _id, "used": count(*[references(^._id)]) > 0 }`, prefixes);
+  const free = rest.filter((d) => !d.used).map((d) => d._id);
+  const kept = rest.filter((d) => d.used).map((d) => d._id);
+  if (free.length) {
+    const tx = client.transaction();
+    for (const id of free) tx.delete(id);
     await tx.commit();
   }
   const assets = await client.fetch(`*[_type == "sanity.imageAsset" && source.name == $s && count(*[references(^._id)]) == 0]._id`, { s: SOURCE });
@@ -182,7 +188,8 @@ async function removeAll() {
     for (const id of assets) tx.delete(id);
     await tx.commit();
   }
-  console.log(`Removed ${sorted.length} sample documents and ${assets.length} images from ${projectId}/${dataset}.`);
+  console.log(`Removed ${articles.length} sample stories, ${free.length} other sample documents, and ${assets.length} images from ${projectId}/${dataset}.`);
+  if (kept.length) console.log(`Kept because real content uses them: ${kept.join(", ")}`);
 }
 
 (remove ? removeAll() : seed()).catch((err) => {
