@@ -12,6 +12,7 @@ export const RESERVED_SLUGS = [
   "terms",
   "privacy",
   "write-for-us",
+  "community",
   "studio",
   "api",
   "feed.xml",

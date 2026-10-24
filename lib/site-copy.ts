@@ -13,7 +13,6 @@ export const COPY_SPEC = {
   join: {
     title: "Join the Club",
     fields: {
-      headerButton: { title: "Header button", default: "Join the Club", max: 18 },
       schoolButton: {
         title: "School header button",
         default: "Join {community}",
@@ -44,6 +43,7 @@ export const COPY_SPEC = {
   newsletter: {
     title: "Newsletter form",
     fields: {
+      headerButton: { title: "Header button", default: "Newsletter", max: 14, description: "The filled button in the header. Links to /newsletter." },
       kicker: { title: "Label above the headline", default: "Newsletter", max: 24 },
       button: { title: "Button", default: "Sign up", max: 20 },
       success: { title: "After signing up", default: "You are on the list. The next issue comes to your inbox.", long: true },

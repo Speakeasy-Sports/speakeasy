@@ -25,6 +25,7 @@ export async function GET() {
     { url: absoluteUrl("/podcasts"), changeFrequency: "daily", priority: 0.6 },
     { url: absoluteUrl("/videos"), changeFrequency: "daily", priority: 0.6 },
     { url: absoluteUrl("/newsletter"), priority: 0.5 },
+    { url: absoluteUrl("/community"), priority: 0.5 },
     ...data.authors.filter((a) => a.slug).map((a) => ({ url: absoluteUrl(authorPath(a.slug!)), lastModified: a.updated, priority: 0.4 })),
     ...data.tags.filter((t) => t.slug).map((t) => ({ url: absoluteUrl(tagPath(t.slug!)), lastModified: t.updated, priority: 0.4 })),
     ...data.pages.filter((p) => p.slug).map((p) => ({ url: absoluteUrl(`/${p.slug}`), lastModified: p.updated, priority: 0.2 })),

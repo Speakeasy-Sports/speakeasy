@@ -1,5 +1,4 @@
 import { getSiteSettings, getSiteSignals } from "@/lib/sanity/loaders";
-import { joinUrlFor } from "@/lib/circle-links";
 import { resolveCopy } from "@/lib/site-copy";
 import { DEFAULT_MENU_LINKS, resolveLinks } from "@/lib/nav-links";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -25,8 +24,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       </a>
       <SiteHeader
         settings={settings}
-        joinUrl={joinUrlFor(null, settings)}
-        joinLabel={copy.join.headerButton}
+        newsletterLabel={copy.newsletter.headerButton}
         menuLinks={resolveLinks(settings?.menuLinks, DEFAULT_MENU_LINKS)}
         media={media}
       />

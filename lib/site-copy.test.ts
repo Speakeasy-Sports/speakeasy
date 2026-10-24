@@ -4,7 +4,7 @@ import { closingPeriod, COPY_SPEC, fillCopy, resolveCopy, unknownTokens } from "
 describe("resolveCopy", () => {
   it("returns every default when nothing is set", () => {
     const copy = resolveCopy(null);
-    expect(copy.join.headerButton).toBe("Join the Club");
+    expect(copy.newsletter.headerButton).toBe("Newsletter");
     expect(copy.footer.signoff).toBe(COPY_SPEC.footer.fields.signoff.default);
     for (const [section, { fields }] of Object.entries(COPY_SPEC)) {
       for (const key of Object.keys(fields)) {
@@ -14,8 +14,8 @@ describe("resolveCopy", () => {
   });
 
   it("uses the editor's text and falls back for empty or blank fields", () => {
-    const copy = resolveCopy({ join: { headerButton: "  Join free  ", cardButton: "   ", cardBody: null } });
-    expect(copy.join.headerButton).toBe("Join free");
+    const copy = resolveCopy({ join: { cardButton: "   ", cardBody: null }, newsletter: { headerButton: "  Subscribe  " } });
+    expect(copy.newsletter.headerButton).toBe("Subscribe");
     expect(copy.join.cardButton).toBe("Join free");
     expect(copy.join.cardBody).toBe(COPY_SPEC.join.fields.cardBody.default);
     expect(copy.newsletter.button).toBe("Sign up");

@@ -111,6 +111,14 @@ export const school = defineType({
       group: "community",
       validation: (rule) => rule.uri({ scheme: ["https"] }),
     }),
+    defineField({
+      name: "circleSignInUrl",
+      title: "Circle member sign-in URL",
+      type: "url",
+      group: "community",
+      description: 'The "Member sign in" link on /community. Hidden when empty.',
+      validation: (rule) => rule.uri({ scheme: ["https"] }),
+    }),
 
     defineField({ name: "seoTitle", type: "string", group: "seo", validation: (rule) => rule.max(70) }),
     defineField({ name: "seoDescription", type: "text", rows: 2, group: "seo", validation: (rule) => rule.max(160) }),

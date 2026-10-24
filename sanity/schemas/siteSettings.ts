@@ -2,6 +2,7 @@ import { defineArrayMember, defineField, defineType } from "sanity";
 import { CogIcon } from "@sanity/icons/Cog";
 import { SOCIAL_PLATFORMS } from "./author";
 import { altField } from "./shared/imageWithAlt";
+import { NEWSLETTER_BLURB, NEWSLETTER_HEADLINE } from "../../lib/newsletter-copy";
 
 export const SITE_SETTINGS_ID = "siteSettings";
 
@@ -110,10 +111,17 @@ export const siteSettings = defineType({
       name: "newsletterHeadline",
       type: "string",
       group: "newsletter",
-      placeholder: "The Speakeasy newsletter",
+      placeholder: NEWSLETTER_HEADLINE,
       validation: (rule) => rule.max(90),
     }),
-    defineField({ name: "newsletterBlurb", type: "text", rows: 2, group: "newsletter", validation: (rule) => rule.max(300) }),
+    defineField({
+      name: "newsletterBlurb",
+      type: "text",
+      rows: 2,
+      group: "newsletter",
+      placeholder: NEWSLETTER_BLURB,
+      validation: (rule) => rule.max(300),
+    }),
     defineField({
       name: "newsletterSampleUrl",
       title: "Sample issue URL",

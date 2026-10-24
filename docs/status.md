@@ -95,6 +95,15 @@ Against the mock dataset, production build:
 - No horizontal scroll at 390px or 1280px on any of the 14 pages. The first Tab reaches a visible "Skip to content".
 - Watch: the light MediaArt panel is slightly darker than `--bg`, and SchoolTheme checks light accents against `--bg` only. Georgia passes comfortably; check a second school's light accent on that panel when it is added.
 
+## Phase 1 UX update, pre-launch releases (docs/specs/phase-1-ux-update.md)
+
+Stacked branches, each merged in order:
+- A, `ux-a-content-model`: `coverageScope` (school or national), `/national` front and article routes with 301s to the canonical scope, `heroType` "none" for text-only stories, `homepageLead` in Settings, national stories skip Circle sync. `pnpm migrate:scope` sets the scope on existing articles and creates Settings; run it on production after A merges.
+- B, `ux-b-fronts`: one pinned or newest lead plus the next newest as supporting stories (no more featured ranks), text-only treatments for lead, card, row, and related, positioning line on home.
+- C, `ux-c-header`: Newsletter replaces Join the Club in the header, section links on a second row (National, schools, Podcasts and Videos once live, Community), `/community` with join and member sign-in links (`circleSignInUrl` on the school), newsletter copy updated.
+- Supersedes the four-pick front-page curation in PR #12.
+- After launch: E (waitlist on `/community`, stored in Sanity) and F (share, topics).
+
 ## Remaining for launch (AGENTS.md section 12, Phase 1)
 
 - Live end-to-end test on a preview with the real Sanity project, Circle, and Postmark: publish to site and Circle post within a minute, comment count update (settles V5), review email, newsletter signup (the open questions in `docs/circle-api-notes.md`).
