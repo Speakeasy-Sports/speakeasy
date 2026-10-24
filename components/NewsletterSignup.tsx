@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 import { track } from "@/lib/analytics/plausible";
 import { closingPeriod, type SiteCopy } from "@/lib/site-copy";
+import { NEWSLETTER_BLURB, NEWSLETTER_HEADLINE } from "@/lib/newsletter-copy";
 
 type Props = {
   /** inline: end of article. band: full-width two-column, directly above the footer. page: the /newsletter page. */
@@ -57,7 +58,8 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
     }
   }
 
-  const title = headline ?? "The Speakeasy newsletter";
+  const title = headline ?? NEWSLETTER_HEADLINE;
+  const text = blurb ?? NEWSLETTER_BLURB;
 
   const form =
     state === "done" ? (
@@ -123,7 +125,7 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
             <h2 id={`${id}-h`} className="headline text-[2rem] leading-[1.05] sm:text-[2.75rem] sm:tracking-[-0.025em]">
               {title}
             </h2>
-            {blurb && <p className="max-w-md text-lg leading-snug text-fg-muted">{blurb}</p>}
+            <p className="max-w-md text-lg leading-snug text-fg-muted">{text}</p>
           </div>
           <div className="flex flex-col gap-3 md:col-span-6">
             {form}
@@ -154,7 +156,7 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
       <h2 id={`${id}-h`} className="headline text-2xl leading-tight sm:text-[1.75rem]">
         {title}
       </h2>
-      {blurb && <p className="text-base leading-snug text-fg-muted">{blurb}</p>}
+      <p className="text-base leading-snug text-fg-muted">{text}</p>
       {form}
       {error}
       {fine}

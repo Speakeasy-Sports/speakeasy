@@ -119,6 +119,7 @@ Conventions: server components unless a component needs state or browser APIs; c
 - `communityName` (string, e.g. "Dawg Social Club")
 - `circleSpaceId` (string, the Circle space that receives auto-posts)
 - `circleJoinUrl` (url)
+- `circleSignInUrl` (url, optional; the member sign-in link on `/community`)
 - `logo` (image), `heroImage` (image, optional)
 - `description` (text), `seoTitle`, `seoDescription`
 - `order` (number)
@@ -174,7 +175,7 @@ Circle sync (read-only in Studio, written by the webhook handler)
 Tabs in the Studio: General, Navigation, Newsletter, Copy, SEO.
 - Editorial: `homepageLead` (weak reference to one article; empty or unpublished means the newest story leads)
 - General: `siteName`, `tagline`, `joinUrl` (default Circle join url), `footerText`
-- Navigation: `navSchools` (ordered refs), `menuLinks` (phone menu links after the sections, up to 6), `footerColumns` (up to 2 columns of {title, links}, between Sections and Follow), `legalLinks` (up to 4), `socialLinks`. A link is {label, href}; href is a site path or an https URL. An empty list keeps the built-in default (Search and Newsletter; one Speakeasy column; Terms and Privacy). Header section links (schools, Podcasts, Videos) stay automatic.
+- Navigation: `navSchools` (ordered refs), `menuLinks` (phone menu links after the sections, up to 6), `footerColumns` (up to 2 columns of {title, links}, between Sections and Follow), `legalLinks` (up to 4), `socialLinks`. A link is {label, href}; href is a site path or an https URL. An empty list keeps the built-in default (Search and Write for us; one Speakeasy column; Terms and Privacy). Header section links (National, schools, Podcasts, Videos, Community) stay automatic.
 - Newsletter: `newsletterHeadline`, `newsletterBlurb`, `newsletterSampleUrl` (url, a past issue)
 - Copy: `copy` (buttons, labels, empty states, form messages, 404, footer sign-off). The fields and their defaults live in `lib/site-copy.ts`; an empty field shows the default, which the Studio shows as its placeholder. `{community}` and `{school}` are filled in where a field allows them. Form field labels and screen-reader text stay in code.
 - SEO: `defaultOgImage` (share image for any page without its own), `pageSeo` (title and description for home, podcasts, videos, newsletter, search)
@@ -210,14 +211,14 @@ Tabs in the Studio: General, Navigation, Newsletter, Copy, SEO.
 - Launch mode: with fewer than 8 live stories in scope, the front is the lead plus one Latest list (secondary stories fold into Latest, newest first), so a thin front never shows a row of three over one stray row. The full layout returns on its own at 8.
 - `/?page=N` and `/{school}?page=N` are rewritten in `next.config.ts` to internal routes (`/latest/N`, `/{school}/latest/N`) so the front pages never read search params and stay fully static. The internal routes set their canonical back to the `?page=N` form. The same applies to `?school=` and `?page=` on `/podcasts`, `/videos`, `/tags/{slug}` (internal `.../f/{school or all}/{page}`) and `?page=` on `/authors/{slug}` (internal `.../p/{page}`).
 - Newsletter block between Latest and footer.
-- Persistent "Join the Club" in header.
+- Header: wordmark centered, Search and a filled "Newsletter" button on the right (`copy.newsletter.headerButton`). Section links (National, schools, Podcasts and Videos once live, Community) sit on a second row on desktop and in the phone menu. Joining a club happens on `/community`, school fronts, and the article end, not in the header.
 - ISR revalidate 60s, plus tag-based revalidation from the webhook.
 
 ### `/[school]` School section
 - Same layout as home scoped to the school, using the school accent token.
 - Section header: school name, `communityName`, join CTA to `circleJoinUrl`.
 - Sub-nav: Latest, Podcasts, Videos, then the school's `navTags` in order (curated in the school document, up to 6). Podcasts and Videos appear once the site has published at least one of each (the page you are on always shows), and a sub-nav that would only say "Latest" is not rendered.
-- Reserved slugs (not valid school slugs): `national`, `authors`, `tags`, `podcasts`, `videos`, `search`, `newsletter`, `about`, `contact`, `terms`, `privacy`, `write-for-us`, `studio`, `api`, `feed.xml`, `latest`, `all`, `search-index.json`, `sitemap.xml`, `robots.txt`.
+- Reserved slugs (not valid school slugs): `national`, `community`, `authors`, `tags`, `podcasts`, `videos`, `search`, `newsletter`, `about`, `contact`, `terms`, `privacy`, `write-for-us`, `studio`, `api`, `feed.xml`, `latest`, `all`, `search-index.json`, `sitemap.xml`, `robots.txt`.
 - Podcasts, Videos, and tag links in the sub-nav go to the site-wide pages filtered with `?school={slug}`; those pages render with the school's header, accent, and sub-nav, so the reader stays in the section.
 
 ### `/[school]/[slug]` Article
@@ -251,6 +252,9 @@ Grid of articles where `contentType` = podcast or video, newest first, with the 
 
 ### `/search`
 Client-side search over a prebuilt JSON index (title, dek, tags, school, author) regenerated on publish. Good enough to 5,000 articles. Replace with Sanity search or Algolia later.
+
+### `/community`
+One panel per school with a `circleJoinUrl`: "Open now", the community description, "Join {communityName}", and "Member sign in" when `circleSignInUrl` is set. The home Join card links here ("Find your community"). A waitlist for future schools is added after launch (spec release E).
 
 ### `/newsletter`
 Headline, blurb, email form posting to `/api/newsletter`, sample issue link.
@@ -309,7 +313,7 @@ Derived from what is published (`lib/site-signals.ts`, one cached query tagged `
 
 ### 7.5 Analytics
 - Plausible script in root layout with `data-domain="speakeasysports.com"`. Outbound link tracking on.
-- Custom events via `plausible('event', {props})`: `join_click` (location prop: header|article_end|school_header|rail), `newsletter_signup`, `discuss_click`, `video_play`, `podcast_play`.
+- Custom events via `plausible('event', {props})`: `join_click` (location prop: community_page|article_end|school_header|rail), `newsletter_signup`, `discuss_click`, `video_play`, `podcast_play`.
 - No cookie banner needed with Plausible. Add one only if a cookie-setting embed is introduced.
 
 ### 7.6 Email
@@ -404,7 +408,7 @@ Rules:
 
 | Component | Notes |
 |---|---|
-| `SiteHeader` | Logo, school switcher, join button. Collapses at 390px to logo + join + menu |
+| `SiteHeader` | Wordmark, search, Newsletter button, section links on a second row. Collapses at 390px to wordmark + Newsletter + menu |
 | `SchoolNav` | Section sub-nav: Latest, Podcasts, Videos, tags |
 | `LeadStory`, `StoryCard`, `StoryRow` | Front page units. Image sizes fixed via `next/image` with `sizes` set |
 | `TypeLabel`, `SchoolLabel` | Small caps labels in accent |

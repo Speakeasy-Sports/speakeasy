@@ -9,9 +9,10 @@ export type FooterColumn = { title: string; links: NavLink[] };
 type RawLink = { label?: string | null; href?: string | null } | null | undefined;
 type RawColumn = { title?: string | null; links?: RawLink[] | null } | null | undefined;
 
+// The header's Newsletter button is always on screen, so the phone menu does not repeat it.
 export const DEFAULT_MENU_LINKS: NavLink[] = [
   { label: "Search", href: "/search" },
-  { label: "Newsletter", href: "/newsletter" },
+  { label: "Write for us", href: "/write-for-us" },
 ];
 
 export const DEFAULT_FOOTER_COLUMNS: FooterColumn[] = [
@@ -21,6 +22,7 @@ export const DEFAULT_FOOTER_COLUMNS: FooterColumn[] = [
       { label: "About", href: "/about" },
       { label: "Contact", href: "/contact" },
       { label: "Newsletter", href: "/newsletter" },
+      { label: "Community", href: "/community" },
       { label: "Write for us", href: "/write-for-us" },
       { label: "RSS", href: "/feed.xml" },
     ],

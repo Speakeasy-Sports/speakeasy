@@ -26,7 +26,7 @@ type Props = {
   /** Set on /national: hides "National" on every story there, the way a school front hides its school. */
   national?: boolean;
   /** The Join card beside Latest. Omitted on /national, which has no club of its own yet. */
-  community?: { name: string; joinUrl: string };
+  community?: { name: string; joinUrl: string; findCommunity?: boolean };
   copy: Pick<SiteCopy, "join" | "fronts">;
   /** Date only on every story, for while one person writes everything. */
   hideAuthors?: boolean;
@@ -106,7 +106,7 @@ export function FrontPage({ top, latest: river, count, media, page, basePath, sc
         </section>
 
         <aside aria-label="More from Speakeasy" className="flex flex-col gap-12 lg:sticky lg:top-8 lg:col-span-4 lg:self-start">
-          {community && <JoinCard communityName={community.name} joinUrl={community.joinUrl} schoolSlug={schoolSlug} copy={copy.join} />}
+          {community && <JoinCard communityName={community.name} joinUrl={community.joinUrl} schoolSlug={schoolSlug} copy={copy.join} findCommunity={community.findCommunity} />}
           <MediaRail items={media} heading={copy.fronts.mediaRailHeading} schoolSlug={schoolSlug} showSchool={showSchool} showNational={showNational} />
         </aside>
       </div>

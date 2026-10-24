@@ -190,6 +190,15 @@ export const NATIONAL_FRONT_QUERY = defineQuery(`
   }
 `);
 
+// /community: every school with an open club (a join URL), in nav order.
+export const COMMUNITY_QUERY = defineQuery(`
+  *[_type == "school" && defined(circleJoinUrl)] | order(order asc, name asc){
+    ${SCHOOL_REF_FIELDS},
+    description,
+    circleSignInUrl
+  }
+`);
+
 export const AUTHOR_QUERY = defineQuery(`
   *[_type == "author" && slug.current == $slug][0]{
     ${AUTHOR_REF_FIELDS},

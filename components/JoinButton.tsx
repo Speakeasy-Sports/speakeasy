@@ -4,7 +4,7 @@ import { track } from "@/lib/analytics/plausible";
 
 type Props = {
   href: string;
-  location: "header" | "article_end" | "school_header" | "rail";
+  location: "article_end" | "school_header" | "rail" | "community_page";
   children?: React.ReactNode;
   className?: string;
 };

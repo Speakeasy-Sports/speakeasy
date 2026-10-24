@@ -61,6 +61,7 @@ export function Footer({ settings, signoff, media }: Props) {
           </div>
           <nav aria-label="Footer" className={`grid grid-cols-2 gap-10 md:col-span-7 ${columnCount > 3 ? FOUR_COLUMNS : "sm:grid-cols-3"}`}>
             <Column title="Sections">
+              <Item href="/national">National</Item>
               {schools.map((s) => (
                 <Item key={s._id} href={schoolPath(s.slug!)}>
                   {s.name}

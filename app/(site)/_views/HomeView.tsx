@@ -41,7 +41,7 @@ export async function HomeView({ page }: { page: number }) {
           basePath="/"
           hideAuthors={signals.singleAuthor}
           kicker={copy.fronts.positioning}
-          community={{ name: copy.join.homeCardHeadline, joinUrl: joinUrlFor(null, settings) }}
+          community={{ name: copy.join.homeCardHeadline, joinUrl: joinUrlFor(null, settings), findCommunity: true }}
           copy={copy}
         />
       </div>

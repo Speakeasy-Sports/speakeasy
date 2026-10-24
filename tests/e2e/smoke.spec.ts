@@ -6,12 +6,22 @@ const ARTICLE = process.env.E2E_ARTICLE_PATH ?? "/georgia/fourth-quarter-collaps
 const PODCAST = process.env.E2E_PODCAST_PATH ?? "/georgia/bye-week-mailbag";
 const SCHOOL = process.env.E2E_SCHOOL_PATH ?? "/georgia";
 
-test("home renders the latest list and the join button", async ({ page }) => {
+test("home renders the latest list and the newsletter header button", async ({ page }) => {
   const res = await page.goto("/");
   expect(res?.status()).toBe(200);
   await expect(page.getByRole("heading", { name: "Latest" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Join the Club" })).toBeVisible();
-  await expect(page.locator("article").first()).toBeVisible();
+  await page.getByRole("banner").getByRole("link", { name: "Newsletter", exact: true }).click();
+  await expect(page).toHaveURL(/\/newsletter$/);
+});
+
+test("community page lists open clubs and is linked from the header", async ({ page, isMobile }) => {
+  await page.goto("/");
+  // Phones reach the section links through the menu; desktop shows them on the header's second row.
+  if (isMobile) await page.locator('summary[aria-label="Menu"]').click();
+  await page.getByRole("banner").getByRole("link", { name: "Community", exact: true }).filter({ visible: true }).first().click();
+  await expect(page).toHaveURL(/\/community$/);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("community");
+  await expect(page.getByRole("link", { name: /Join Dawg Social Club/ })).toBeVisible();
 });
 
 test("school section renders with its accent", async ({ page }) => {

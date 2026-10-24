@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { SiteCopy } from "@/lib/site-copy";
 import { JoinButton } from "./JoinButton";
 
@@ -7,10 +8,12 @@ type Props = {
   joinUrl: string;
   schoolSlug?: string | null;
   copy: SiteCopy["join"];
+  /** On home: a quiet link to /community for readers whose school has no club yet. */
+  findCommunity?: boolean;
 };
 
 /** Rail promo for the Circle community. Every story on the site has a thread there, which is the honest pitch. */
-export function JoinCard({ communityName, joinUrl, schoolSlug, copy }: Props) {
+export function JoinCard({ communityName, joinUrl, schoolSlug, copy, findCommunity }: Props) {
   return (
     <section
       aria-labelledby="join-card-h"
@@ -29,6 +32,14 @@ export function JoinCard({ communityName, joinUrl, schoolSlug, copy }: Props) {
           {copy.cardButton}
         </JoinButton>
       </div>
+      {findCommunity && (
+        <p className="font-ui text-sm text-fg-muted">
+          Looking for another school?{" "}
+          <Link href="/community" className="text-fg underline decoration-line underline-offset-4 hover:decoration-fg">
+            Find your community
+          </Link>
+        </p>
+      )}
     </section>
   );
 }

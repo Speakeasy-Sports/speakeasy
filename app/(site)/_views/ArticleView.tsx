@@ -184,6 +184,7 @@ export async function ArticleView({ article, slug }: { article: LoadedArticle; s
           <NewsletterSignup
             headline={settings?.newsletterHeadline}
             blurb={settings?.newsletterBlurb}
+            sampleUrl={settings?.newsletterSampleUrl}
             school={schoolSlug ?? undefined}
             copy={copy.newsletter}
             location="article_end"
