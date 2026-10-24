@@ -6,7 +6,6 @@ import { ARTICLE_QUERY } from "@/lib/sanity/queries";
 import { getSiteSettings, getSiteSignals } from "@/lib/sanity/loaders";
 import { articlePageTags } from "@/lib/sanity/tags";
 import { urlFor } from "@/lib/sanity/image";
-import { joinUrlFor } from "@/lib/circle-links";
 import { closingPeriod, fillCopy, resolveCopy } from "@/lib/site-copy";
 import { contentTypeLabel } from "@/lib/content-types";
 import { absoluteUrl, authorPath, breadcrumbJsonLd, buildMetadata, NATIONAL_SLUG, newsArticleJsonLd, ogImageUrl, schoolPath, storyPath } from "@/lib/seo";
@@ -23,6 +22,8 @@ import { DiscussInClub } from "@/components/DiscussInClub";
 import { AuthorCard } from "@/components/AuthorCard";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { RelatedStories } from "@/components/RelatedStories";
+import { ReadNext } from "@/components/ReadNext";
+import { CommunityInvite } from "@/components/CommunityInvite";
 import { SchoolTheme } from "@/components/SchoolTheme";
 import { JsonLd } from "@/components/JsonLd";
 
@@ -83,7 +84,11 @@ export async function ArticleView({ article, slug }: { article: LoadedArticle; s
   const schoolSlug = school ? stegaClean(school.slug) : null;
   const heroType = stegaClean(article.heroType);
   const canonical = storyPath({ scope: article.scope, slug: stegaClean(article.slug) ?? slug, school: schoolSlug ? { slug: schoolSlug } : null })!;
-  const joinUrl = school ? joinUrlFor(school, settings) : null;
+  // A school story goes to its club: the thread once posted, else the club's join page. Anything else, including a
+  // school without a club, points to /community, so national readers are never sent to one school's signup.
+  const postUrl = school ? stegaClean(article.circlePostUrl) : null;
+  const clubJoinUrl = school ? stegaClean(school.circleJoinUrl) : null;
+  const [readNext, ...moreToRead] = (article.related ?? []).filter((a) => a.path);
   const copy = resolveCopy(settings?.copy);
   const authors = (article.authors ?? []).filter((a) => a.name);
   const section = sectionName(article);
@@ -158,17 +163,9 @@ export async function ArticleView({ article, slug }: { article: LoadedArticle; s
         {/* 7. Correction */}
         <CorrectionNote text={article.correction} />
 
-        {/* 8. End block */}
+        {/* 8. Read next, then the end block */}
+        <ReadNext article={readNext} heading={copy.article.readNextHeading} />
         <footer className="measure mt-12 flex flex-col divide-y divide-line border-t border-line [&>*]:py-8 [&>*:last-child]:pb-0">
-          {school && schoolSlug && joinUrl && (
-            <DiscussInClub
-              label={fillCopy(copy.join.discussButton, { community: stegaClean(school.communityName) ?? "the Club" })}
-              postUrl={article.circlePostUrl}
-              commentCount={article.circleCommentCount}
-              joinUrl={joinUrl}
-              schoolSlug={schoolSlug}
-            />
-          )}
           <div className="flex flex-col gap-3">
             {authors.map((a) => (
               <AuthorCard key={a._id} author={a} />
@@ -189,11 +186,28 @@ export async function ArticleView({ article, slug }: { article: LoadedArticle; s
             copy={copy.newsletter}
             location="article_end"
           />
+          {school && (postUrl || clubJoinUrl) ? (
+            <DiscussInClub
+              label={fillCopy(copy.join.discussButton, { community: stegaClean(school.communityName) ?? "the Club" })}
+              joinLabel={fillCopy(copy.join.schoolButton, { community: stegaClean(school.communityName) ?? "the Club" })}
+              postUrl={postUrl}
+              commentCount={article.circleCommentCount}
+              joinUrl={clubJoinUrl ?? postUrl ?? ""}
+              schoolSlug={schoolSlug}
+            />
+          ) : (
+            article.openClub && (
+              <CommunityInvite
+                title={copy.article.communityTitle}
+                body={fillCopy(copy.article.communityBody, { community: stegaClean(article.openClub) ?? "" })}
+              />
+            )
+          )}
         </footer>
       </div>
 
-      {/* 9. Related */}
-      <RelatedStories articles={article.related} heading={copy.article.relatedHeading} hideAuthors={signals.singleAuthor} />
+      {/* 9. More to read */}
+      <RelatedStories articles={moreToRead} heading={copy.article.relatedHeading} hideAuthors={signals.singleAuthor} />
 
       <p className="sr-only">
         {contentTypeLabel(stegaClean(article.contentType))} from {national ? "National" : school?.name}

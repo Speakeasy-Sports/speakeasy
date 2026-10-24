@@ -62,7 +62,20 @@ export const COPY_SPEC = {
         description: "At the end of every article, before the link.",
       },
       writeLink: { title: "Write for us link", default: "Write for Speakeasy" },
+      readNextHeading: { title: "Read next label", default: "Read next", max: 24 },
       relatedHeading: { title: "Related stories heading", default: "More to read" },
+      communityTitle: {
+        title: "Community invitation, title",
+        default: "Find your community",
+        description: "At the end of national stories and stories from a school without a club. The button says the same.",
+        max: 24,
+      },
+      communityBody: {
+        title: "Community invitation, text",
+        default: "Fan communities for college sports, starting with {community}. More schools are on the way.",
+        tokens: ["community"],
+        long: true,
+      },
     },
   },
   fronts: {

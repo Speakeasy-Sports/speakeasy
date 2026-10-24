@@ -127,10 +127,11 @@ describe("ARTICLE_QUERY", () => {
     expect(a?._id).toBe("a-review");
   });
 
-  it("orders related by shared tags, then date, same primary school only", async () => {
+  it("ranks related by same school and shared tags, then shared tags anywhere, then the newest", async () => {
     const a = await run<{ related: Card[] }>(ARTICLE_QUERY, { slug: "subject" });
-    // Two shared tags, then one, then the newest untagged Georgia story. Never the Alabama story.
-    expect(a.related.map((r) => r._id)).toEqual(["a-both", "a-one", "a-review"]);
+    // Georgia stories sharing tags (two, then one), then the Alabama story that shares tags, ahead of the newer
+    // untagged Georgia story.
+    expect(a.related.map((r) => r._id)).toEqual(["a-both", "a-one", "a-bama"]);
   });
 
   it("falls back to most recent same-school stories for an untagged article", async () => {

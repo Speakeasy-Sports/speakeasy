@@ -101,6 +101,7 @@ Stacked branches, each merged in order:
 - A, `ux-a-content-model`: `coverageScope` (school or national), `/national` front and article routes with 301s to the canonical scope, `heroType` "none" for text-only stories, `homepageLead` in Settings, national stories skip Circle sync. `pnpm migrate:scope` sets the scope on existing articles and creates Settings; run it on production after A merges.
 - B, `ux-b-fronts`: one pinned or newest lead plus the next newest as supporting stories (no more featured ranks), text-only treatments for lead, card, row, and related, positioning line on home.
 - C, `ux-c-header`: Newsletter replaces Join the Club in the header, section links on a second row (National, schools, Podcasts and Videos once live, Community), `/community` with join and member sign-in links (`circleSignInUrl` on the school), newsletter copy updated.
+- D, `ux-d-article-end`: Read next first, then author and Write link, newsletter, and the community invitation (Discuss, Join the school's club, or Find your community), then More to read. Related stories ranked by section, shared tags, and school association. `read_next_click` goal added.
 - Supersedes the four-pick front-page curation in PR #12.
 - After launch: E (waitlist on `/community`, stored in Sanity) and F (share, topics).
 

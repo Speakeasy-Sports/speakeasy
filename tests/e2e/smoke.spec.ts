@@ -82,8 +82,14 @@ test("national front and a text-only national article", async ({ page }) => {
   // Text only: no hero figure, and no Georgia discuss or join button for a national story.
   await expect(page.locator("article figure")).toHaveCount(0);
   await expect(page.getByRole("link", { name: /Dawg Social Club/ })).toHaveCount(0);
-  // Related stories include other national coverage.
-  await expect(page.getByRole("link", { name: /Why the road trip is the best part/ }).first()).toBeVisible();
+  // Read next is the other national story, ahead of the newsletter and the community invitation.
+  const readNext = page.getByRole("region", { name: "Read next" });
+  await expect(readNext.getByRole("link", { name: /Why the road trip is the best part/ })).toBeVisible();
+  const newsletter = page.getByRole("heading", { name: /newsletter|twice a week/i }).first();
+  const above = async (a: typeof readNext, b: typeof readNext) => ((await a.boundingBox())?.y ?? 0) < ((await b.boundingBox())?.y ?? 0);
+  expect(await above(readNext, newsletter)).toBe(true);
+  await expect(page.getByRole("link", { name: "Find your community" })).toHaveAttribute("href", "/community");
+  await expect(page.getByRole("region", { name: "More to read" })).toBeVisible();
 });
 
 test("national and school article URLs redirect to their canonical scope", async ({ request }) => {

@@ -137,7 +137,7 @@ Grouped by where they appear. Server components unless marked client.
 - **`Callout`**: UI face between rules: the info variant opens with a 3px accent rule, the note variant with a hairline. Both close with a hairline. No fill.
 - **`SponsorSlot`**: renders only when a slot matches. "Presented by" label, logo, name, headline between two hairlines.
 - **`CorrectionNote`**: 2px left rule, UI face, "Correction" label.
-- **`DiscussInClub`** (client): accent button to the Circle post with the comment count; falls back to the join URL. Fires `discuss_click`.
+- **`DiscussInClub`** (client): accent button to the Circle post with the comment count; before the post exists it reads "Join {community}" and links to the join URL. Fires `discuss_click` (or `join_click` before the post). `CommunityInvite` (outline button to `/community`) replaces it on national stories and schools without a club. `ReadNext` sits between the body and the end block.
 - **`AuthorCard`**: photo, name, role, bio, socials. No box; the end block's hairlines separate it.
 - **`NewsletterSignup`** (client): `inline` (article end, no box), `band` (full width on `--bg-elev`, directly above the footer), `page` (form only). "You are on the list" state on success (editable in Site settings > Copy; it promises the next issue, not a confirmation email). Fires `newsletter_signup`.
 - **`RelatedStories`**: "More to read" under a hairline, three `StoryCard`s.
