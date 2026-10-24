@@ -156,7 +156,7 @@ Body
 Workflow
 - `status` (enum: `draft`, `review`, `scheduled`, `published`). Only Editors and Admins may set `published`.
 - `publishedAt` (datetime), `updatedAt` (datetime, set on any post-publish edit), `correction` (text, optional, rendered at the end of the article)
-- `featured` (boolean) and `featuredRank` (number 1 to 4). Homepage lead = featured rank 1.
+- `featured` and `featuredRank`: retired, hidden in the Studio, kept on old documents. The homepage lead is `siteSettings.homepageLead`.
 - `memberOnly` (boolean, default false; enforced in Phase 2 only)
 
 SEO and social
@@ -202,10 +202,11 @@ Tabs in the Studio: General, Navigation, Newsletter, Copy, SEO.
 ## 6. Routes and page specs
 
 ### `/` Home (front page, not a feed)
-- Lead story: `featuredRank` 1. Large image or hero embed, type label, headline, dek, byline.
-- Secondary: `featuredRank` 2 to 4 in a row of three.
+- Lead story: `siteSettings.homepageLead` when it is live, otherwise the newest story. Large image or hero embed, or a typography-led text-only lead; type label, headline, dek, byline. A short editable positioning line ("College sports, on the field and beyond.") sits above it.
+- Supporting: the three newest stories after the lead, in a row of three. No curation.
 - "Latest" list: most recent 20 published articles across all schools, with school label, type label, headline, timestamp. Load more via pagination at `/?page=2`.
-- Top stories are the first four of: featured ranks 1 to 4, then everything else newest first. With nothing featured they are the four newest. Latest excludes exactly those four on every page, so pages never repeat or skip a story.
+- Order is newest first with `_id` breaking ties. A picks query names the lead and the supporting three (`lib/fronts.ts`), and the front query excludes exactly those four from Latest on every page, so pages never repeat or skip a story. School and national fronts use the homepage lead only when it belongs on that front; otherwise their newest story leads. No per-section curation.
+- Text-only stories render without any picture frame: a larger headline for the lead, a 3px rule in the section color for a card (accent for a school, `--fg` for national), and a full-width row in Latest. Podcast and video entries keep their artwork.
 - Launch mode: with fewer than 8 live stories in scope, the front is the lead plus one Latest list (secondary stories fold into Latest, newest first), so a thin front never shows a row of three over one stray row. The full layout returns on its own at 8.
 - `/?page=N` and `/{school}?page=N` are rewritten in `next.config.ts` to internal routes (`/latest/N`, `/{school}/latest/N`) so the front pages never read search params and stay fully static. The internal routes set their canonical back to the `?page=N` form. The same applies to `?school=` and `?page=` on `/podcasts`, `/videos`, `/tags/{slug}` (internal `.../f/{school or all}/{page}`) and `?page=` on `/authors/{slug}` (internal `.../p/{page}`).
 - Newsletter block between Latest and footer.

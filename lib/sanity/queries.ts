@@ -77,10 +77,10 @@ const CARD_FIELDS = /* groq */ `
 const LIVE = /* groq */ `_type == "article" && defined(slug.current) && (${NATIONAL} || defined(primarySchool))`;
 const BY_DATE = /* groq */ `order(coalesce(publishedAt, _createdAt) desc)`;
 
-// Front-page order: featured ranks 1 to 4 first (a newer story wins a tied rank), then everything else newest first.
-// The first four of this order are the "top stories"; with nothing featured they are simply the four newest.
-// The Latest list excludes exactly those four, on every page, so pagination never repeats or skips a story.
-const TOP_ORDER = /* groq */ `order(select(featured == true && featuredRank in 1..4 => featuredRank, 99) asc, coalesce(publishedAt, _createdAt) desc)`;
+// Front-page order: newest first, with _id breaking ties so the same data always gives the same order.
+const FRONT_ORDER = /* groq */ `order(coalesce(publishedAt, _createdAt) desc, _id asc)`;
+// The curated lead (Site settings > Editorial), when it is live and belongs on the front being built.
+const PINNED = /* groq */ `*[_id == "siteSettings"][0].homepageLead._ref`;
 
 const MEDIA_TYPES = /* groq */ `["podcast", "video"]`;
 
@@ -115,20 +115,41 @@ export const SITE_SIGNALS_QUERY = defineQuery(`
   }
 `);
 
+// Fronts are built in two steps (docs/specs/phase-1-ux-update.md, 4.1). The picks query names the lead (the curated
+// homepageLead if it is live on this front, else the newest story) and the newest stories after it; lib/fronts.ts turns
+// that into the lead and three supporting stories. The front query then takes those ids as $lead and $supporting and
+// excludes them from Latest on every page, so pagination never repeats or skips a story.
+export const HOME_PICKS_QUERY = defineQuery(`
+  {
+    "pinned": *[${LIVE} && _id == ${PINNED}][0]._id,
+    "newest": (*[${LIVE}] | ${FRONT_ORDER})[0...4]._id
+  }
+`);
+
 export const HOME_QUERY = defineQuery(`
   {
-    "top": (*[${LIVE}] | ${TOP_ORDER})[0...4]{ ${CARD_FIELDS} },
-    "latest": *[${LIVE} && !(_id in ((*[${LIVE}] | ${TOP_ORDER})[0...4]._id))] | ${BY_DATE} [0...20]{ ${CARD_FIELDS} },
+    "lead": *[${LIVE} && _id == $lead][0]{ ${CARD_FIELDS} },
+    "supporting": *[${LIVE} && _id in $supporting] | ${FRONT_ORDER} { ${CARD_FIELDS} },
+    "latest": *[${LIVE} && _id != $lead && !(_id in $supporting)] | ${FRONT_ORDER} [0...20]{ ${CARD_FIELDS} },
     "count": count(*[${LIVE}]),
     "media": *[
-      ${LIVE} && contentType in ${MEDIA_TYPES}
-      && !(_id in ((*[${LIVE}] | ${TOP_ORDER})[0...4]._id))
-    ] | ${BY_DATE} [0...4]{ ${CARD_FIELDS} }
+      ${LIVE} && contentType in ${MEDIA_TYPES} && _id != $lead && !(_id in $supporting)
+    ] | ${FRONT_ORDER} [0...4]{ ${CARD_FIELDS} }
   }
 `);
 
 export const SCHOOL_SLUGS_QUERY = defineQuery(`
   *[_type == "school" && defined(slug.current)]{ "slug": slug.current }
+`);
+
+// A national story associated with the school is part of its front (and links to /national).
+const IN_SCHOOL = /* groq */ `^._id in schools[]._ref`;
+
+export const SCHOOL_PICKS_QUERY = defineQuery(`
+  *[_type == "school" && slug.current == $slug][0]{
+    "pinned": *[${LIVE} && ${IN_SCHOOL} && _id == ${PINNED}][0]._id,
+    "newest": (*[${LIVE} && ${IN_SCHOOL}] | ${FRONT_ORDER})[0...4]._id
+  }
 `);
 
 export const SCHOOL_FRONT_QUERY = defineQuery(`
@@ -139,32 +160,33 @@ export const SCHOOL_FRONT_QUERY = defineQuery(`
     seoTitle,
     seoDescription,
     ${NAV_TAG_FIELDS},
-    "top": (*[${LIVE} && ^._id in schools[]._ref] | ${TOP_ORDER})[0...4]{ ${CARD_FIELDS} },
-    "latest": *[
-      ${LIVE} && ^._id in schools[]._ref
-      && !(_id in ((*[${LIVE} && ^.^._id in schools[]._ref] | ${TOP_ORDER})[0...4]._id))
-    ] | ${BY_DATE} [0...20]{ ${CARD_FIELDS} },
-    "count": count(*[${LIVE} && ^._id in schools[]._ref]),
+    "lead": *[${LIVE} && ${IN_SCHOOL} && _id == $lead][0]{ ${CARD_FIELDS} },
+    "supporting": *[${LIVE} && ${IN_SCHOOL} && _id in $supporting] | ${FRONT_ORDER} { ${CARD_FIELDS} },
+    "latest": *[${LIVE} && ${IN_SCHOOL} && _id != $lead && !(_id in $supporting)] | ${FRONT_ORDER} [0...20]{ ${CARD_FIELDS} },
+    "count": count(*[${LIVE} && ${IN_SCHOOL}]),
     "media": *[
-      ${LIVE} && ^._id in schools[]._ref && contentType in ${MEDIA_TYPES}
-      && !(_id in ((*[${LIVE} && ^.^._id in schools[]._ref] | ${TOP_ORDER})[0...4]._id))
-    ] | ${BY_DATE} [0...4]{ ${CARD_FIELDS} }
+      ${LIVE} && ${IN_SCHOOL} && contentType in ${MEDIA_TYPES} && _id != $lead && !(_id in $supporting)
+    ] | ${FRONT_ORDER} [0...4]{ ${CARD_FIELDS} }
   }
 `);
 
 // /national: the same front as a school, scoped to national stories.
+export const NATIONAL_PICKS_QUERY = defineQuery(`
+  {
+    "pinned": *[${LIVE} && ${NATIONAL} && _id == ${PINNED}][0]._id,
+    "newest": (*[${LIVE} && ${NATIONAL}] | ${FRONT_ORDER})[0...4]._id
+  }
+`);
+
 export const NATIONAL_FRONT_QUERY = defineQuery(`
   {
-    "top": (*[${LIVE} && ${NATIONAL}] | ${TOP_ORDER})[0...4]{ ${CARD_FIELDS} },
-    "latest": *[
-      ${LIVE} && ${NATIONAL}
-      && !(_id in ((*[${LIVE} && ${NATIONAL}] | ${TOP_ORDER})[0...4]._id))
-    ] | ${BY_DATE} [0...20]{ ${CARD_FIELDS} },
+    "lead": *[${LIVE} && ${NATIONAL} && _id == $lead][0]{ ${CARD_FIELDS} },
+    "supporting": *[${LIVE} && ${NATIONAL} && _id in $supporting] | ${FRONT_ORDER} { ${CARD_FIELDS} },
+    "latest": *[${LIVE} && ${NATIONAL} && _id != $lead && !(_id in $supporting)] | ${FRONT_ORDER} [0...20]{ ${CARD_FIELDS} },
     "count": count(*[${LIVE} && ${NATIONAL}]),
     "media": *[
-      ${LIVE} && ${NATIONAL} && contentType in ${MEDIA_TYPES}
-      && !(_id in ((*[${LIVE} && ${NATIONAL}] | ${TOP_ORDER})[0...4]._id))
-    ] | ${BY_DATE} [0...4]{ ${CARD_FIELDS} }
+      ${LIVE} && ${NATIONAL} && contentType in ${MEDIA_TYPES} && _id != $lead && !(_id in $supporting)
+    ] | ${FRONT_ORDER} [0...4]{ ${CARD_FIELDS} }
   }
 `);
 

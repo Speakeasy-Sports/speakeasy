@@ -112,10 +112,10 @@ Grouped by where they appear. Server components unless marked client.
 
 ### Front units
 - **`FrontPage`**: assembles lead, secondary row, Latest river with `Pagination`, and the rail (`JoinCard`, `MediaRail`). Pages 2 and up show the river only.
-- **`LeadStory`**: 1200px photo (priority) at 7 of 12 columns, labels, headline, dek, and meta with author photo.
-- **`StoryCard`**: 16:9 photo above labels, headline, dek, meta. With `compactOnPhone`, becomes a text-left, thumbnail-right row on phones.
-- **`StoryRow`**: river unit. Text left, small 16:9 photo right (104px phone, 176px desktop). Dek hidden on phones. `CompactRow` is the rail version with a 72px square.
-- **`StoryImage`**: the picture for any story unit. Hero photo, else the YouTube frame, else `MediaArt`. Fixed aspect box, decorative (`alt=""`, hidden from assistive tech), optional Listen or Watch pill.
+- **`LeadStory`**: 1200px photo (priority) at 7 of 12 columns, labels, headline, dek, and meta with author photo. Text only: no image column; headline 36/48/56px across up to 56rem, dek 18 to 24px.
+- **`StoryCard`**: 16:9 photo above labels, headline, dek, meta. With `compactOnPhone`, becomes a text-left, thumbnail-right row on phones. Text only: a 3px top rule in the section color (`--accent` for a school story, `--fg` for national), headline a step larger, dek always shown.
+- **`StoryRow`**: river unit. Text left, small 16:9 photo right (104px phone, 176px desktop). Dek hidden on phones. Text only: full width, no thumbnail column, dek shown on phones. `CompactRow` is the rail version with a 72px square.
+- **`StoryImage`**: the picture for any story unit. Hero photo, else the YouTube frame, else `MediaArt` (podcasts and videos). `hasPicture()` decides whether a unit gets a picture at all: written stories without a photo get none. Fixed aspect box, decorative (`alt=""`, hidden from assistive tech), optional Listen or Watch pill.
 - **`MediaArt`**: SVG waveform seeded from the title, for media stories without a photo. Neutral panel (5% `--fg` on `--bg` in light mode, `--bg-elev` in dark, where the tint left Georgia's dark accent at 4.39:1) with the accent only on the bars and play button. The school label shows only when the frame is at least 16rem wide, a container query, so thumbnails stay clean. No requests.
 - **`MediaRail`**: "Listen and watch" `rule-heading` and compact rows, links to all podcasts and videos.
 - **`JoinCard`**: rail promo for the Circle community on an elevated surface with a 3px accent top rule.
@@ -154,6 +154,10 @@ What is left after the October 20, 2026 cleanup (square photo corners, hairlines
 |---|---|---|
 | `MobileMenu` | Drop shadow | No shadows |
 | `Pagination`, `FilterChips` | Boxed buttons and pills | Probably fine as controls; decide |
+
+## Photography
+
+Budget $100 to $300 a month, owned or directly licensed images only. Text-only stories are a normal format, not a fallback: use a photo when it adds something. Licenses must cover the website, newsletter, social posts, and Circle previews. No image service, scraping, or agency integration. Every photo keeps alt text, caption, and credit.
 
 ## Checklist for design changes
 

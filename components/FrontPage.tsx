@@ -30,6 +30,8 @@ type Props = {
   copy: Pick<SiteCopy, "join" | "fronts">;
   /** Date only on every story, for while one person writes everything. */
   hideAuthors?: boolean;
+  /** A short line above the lead on page 1 (the home positioning line). */
+  kicker?: string;
 };
 
 export function latestPages(count: number): number {
@@ -46,7 +48,7 @@ function byDate(a: ArticleCard, b: ArticleCard): number {
  * Pages 2 and up show only the Latest river. With fewer than COMPACT_FRONT_BELOW stories (launch), the row of three
  * folds into Latest so the page reads as a lead and a list instead of a lead, three cards, and one stray row.
  */
-export function FrontPage({ top, latest: river, count, media, page, basePath, schoolSlug, national, community, copy, hideAuthors }: Props) {
+export function FrontPage({ top, latest: river, count, media, page, basePath, schoolSlug, national, community, copy, hideAuthors, kicker }: Props) {
   const showSchool = !schoolSlug;
   const showNational = !national;
   const compact = count < COMPACT_FRONT_BELOW;
@@ -69,11 +71,15 @@ export function FrontPage({ top, latest: river, count, media, page, basePath, sc
     <>
       {page === 1 && (
         <section aria-label="Top stories" className="pt-8 sm:pt-12">
+          {kicker && <p className="mb-6 font-ui text-sm text-fg-muted">{kicker}</p>}
           <LeadStory article={lead} showSchool={showSchool} showNational={showNational} hideAuthors={hideAuthors} />
           {secondary.length > 0 && (
             <div className="mt-10 grid gap-6 border-t border-line pt-8 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 lg:mt-14 lg:grid-cols-3 lg:gap-x-16 lg:column-rules [&>*+*]:border-t [&>*+*]:border-line [&>*+*]:pt-6 sm:[&>*+*]:border-t-0 sm:[&>*+*]:pt-0">
               {secondary.map((a) => (
-                <StoryCard key={a._id} article={a} showSchool={showSchool} showNational={showNational} hideAuthors={hideAuthors} compactOnPhone />
+                // The row draws dividers on its direct children; the wrapper keeps them off a text-only card's own rule.
+                <div key={a._id}>
+                  <StoryCard article={a} showSchool={showSchool} showNational={showNational} hideAuthors={hideAuthors} compactOnPhone />
+                </div>
               ))}
             </div>
           )}

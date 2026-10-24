@@ -7,11 +7,8 @@ Every server step writes one JSON log line in Vercel (Project, Logs). The event 
 ## 1. Merge the open work (by October 30)
 
 1. Merge #13 (launch QA fixes) and #11 (editable copy, menus, SEO), in either order.
-2. Retarget #12 (front page curation) to `main`. Before merging it:
-   - Run `node scripts/migrate-featured-to-front-page.mjs` with production env vars. It is a dry run: check the four titles it lists.
-   - Run it again with `--apply`. The live site ignores the new Front page document until #12 deploys.
-   - In sanity.io/manage, add `"frontPage"` to the Site publish webhook filter (section 3 below).
-3. Merge #12. After the deploy is live, run the script with `--apply --unset-old` to remove the old `featured` and `featuredRank` fields.
+2. Merge the UX update releases in order (`docs/specs/phase-1-ux-update.md`): A (national coverage), B (single homepage lead, text-only cards), then C and D. They replace the featured-rank workflow and #12.
+3. After A deploys: `pnpm migrate:scope --dry-run`, then `pnpm migrate:scope` (docs/setup.md section 10). It also sets the homepage lead from today's rank-one story.
 
 ## 2. Production environment variables (Vercel, Production)
 

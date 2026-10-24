@@ -15,6 +15,15 @@ type Props = {
   artSize?: "sm" | "md" | "lg";
 };
 
+/**
+ * Whether a story has something real to show: a hero photo, or a podcast or video lead (which get their artwork).
+ * Written stories without a photo are text-only and render no picture frame at all (docs/specs/phase-1-ux-update.md,
+ * 4.2): no placeholder, no generated art.
+ */
+export function hasPicture(article: Pick<ArticleCard, "heroType" | "heroImage">): boolean {
+  return Boolean(article.heroImage?.asset) || article.heroType === "video" || article.heroType === "podcast";
+}
+
 const RATIOS = { wide: 16 / 9, square: 1, tall: 4 / 5 } as const;
 const ASPECT_CSS = { wide: "16 / 9", square: "1 / 1", tall: "4 / 5" } as const;
 

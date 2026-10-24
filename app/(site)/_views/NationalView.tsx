@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { sanityFetch } from "@/lib/sanity/fetch";
-import { NATIONAL_FRONT_QUERY } from "@/lib/sanity/queries";
+import { NATIONAL_FRONT_QUERY, NATIONAL_PICKS_QUERY } from "@/lib/sanity/queries";
+import { selectFront } from "@/lib/fronts";
 import { getSiteSettings, getSiteSignals } from "@/lib/sanity/loaders";
 import { pageQuery } from "@/lib/sanity/paginate";
 import { tags } from "@/lib/sanity/tags";
@@ -9,10 +10,14 @@ import { NATIONAL_SLUG } from "@/lib/seo";
 import { FrontPage, LATEST_PER_PAGE, latestPages } from "@/components/FrontPage";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
 
-export function getNationalFront(page = 1) {
+const NATIONAL_TAGS = [tags.articles, tags.settings];
+
+export async function getNationalFront(page = 1) {
+  const { lead, supporting } = selectFront(await sanityFetch({ query: NATIONAL_PICKS_QUERY, tags: NATIONAL_TAGS }));
   return sanityFetch({
     query: pageQuery(NATIONAL_FRONT_QUERY, "[0...20]", page, LATEST_PER_PAGE),
-    tags: [tags.articles],
+    params: { lead: lead ?? "", supporting },
+    tags: NATIONAL_TAGS,
   });
 }
 
@@ -38,7 +43,7 @@ export async function NationalView({ page }: { page: number }) {
           <div className="border-t-[3px] border-fg" />
         </header>
         <FrontPage
-          top={data.top}
+          top={[data.lead, ...data.supporting].filter((a) => a !== null)}
           latest={data.latest}
           count={data.count}
           media={data.media}
