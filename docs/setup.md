@@ -119,3 +119,11 @@ If Workflows cannot send webhooks (V5), change the cron schedule to every few ho
 - Existing Georgia, author, and tag documents are reused by slug; missing ones are created with `seed-` ids.
 - `pnpm seed --remove` deletes every `seed-` document and the sample images, and nothing else. A sample tag that real articles have started using is kept, and the run lists it. Run it before launch and before setting `CIRCLE_SYNC_ENABLED=true`, or each sample gets a Circle post.
 - `pnpm seed --dry-run` prints the documents without writing.
+
+## 10. Coverage scope migration (one time, after the national-coverage release merges)
+
+1. `pnpm migrate:scope --dry-run` lists every article that gets `coverageScope: "school"` (and `heroType` where it is missing), and whether Site settings will be created and `homepageLead` set from the current rank-one featured story.
+2. `pnpm migrate:scope` applies it. It is safe to run twice.
+3. Check: the run ends with "Every article has coverageScope and heroType", and existing article URLs still load.
+
+The site reads a missing `coverageScope` as a school story, so pages work before and after the migration. Rolling back the code needs no data change: older code ignores the new fields.

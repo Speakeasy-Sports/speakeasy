@@ -2,7 +2,7 @@ import { client } from "@/lib/sanity/client";
 import { SITEMAP_QUERY } from "@/lib/sanity/queries";
 import { tags } from "@/lib/sanity/tags";
 import { sitemapXml, type SitemapEntry } from "@/lib/sitemap";
-import { absoluteUrl, articlePath, authorPath, schoolPath, tagPath } from "@/lib/seo";
+import { absoluteUrl, authorPath, NATIONAL_SLUG, schoolPath, tagPath } from "@/lib/seo";
 
 // Articles, schools, authors, tags, and standing pages; noIndex articles excluded (AGENTS.md section 6).
 // A route handler rather than app/sitemap.ts; see lib/sitemap.ts for why.
@@ -20,9 +20,8 @@ export async function GET() {
     ...data.schools
       .filter((s) => s.slug)
       .map((s) => ({ url: absoluteUrl(schoolPath(s.slug!)), lastModified: s.updated, changeFrequency: "hourly" as const, priority: 0.9 })),
-    ...data.articles
-      .filter((a) => a.slug && a.school)
-      .map((a) => ({ url: absoluteUrl(articlePath(a.school!, a.slug!)), lastModified: a.updated, priority: 0.8 })),
+    { url: absoluteUrl(`/${NATIONAL_SLUG}`), changeFrequency: "hourly", priority: 0.9 },
+    ...data.articles.filter((a) => a.path).map((a) => ({ url: absoluteUrl(a.path!), lastModified: a.updated, priority: 0.8 })),
     { url: absoluteUrl("/podcasts"), changeFrequency: "daily", priority: 0.6 },
     { url: absoluteUrl("/videos"), changeFrequency: "daily", priority: 0.6 },
     { url: absoluteUrl("/newsletter"), priority: 0.5 },

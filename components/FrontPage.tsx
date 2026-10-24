@@ -23,7 +23,10 @@ type Props = {
   basePath: string;
   /** Set on a school's section front: hides the now-redundant school label on every story. */
   schoolSlug?: string | null;
-  community: { name: string; joinUrl: string };
+  /** Set on /national: hides "National" on every story there, the way a school front hides its school. */
+  national?: boolean;
+  /** The Join card beside Latest. Omitted on /national, which has no club of its own yet. */
+  community?: { name: string; joinUrl: string };
   copy: Pick<SiteCopy, "join" | "fronts">;
   /** Date only on every story, for while one person writes everything. */
   hideAuthors?: boolean;
@@ -43,8 +46,9 @@ function byDate(a: ArticleCard, b: ArticleCard): number {
  * Pages 2 and up show only the Latest river. With fewer than COMPACT_FRONT_BELOW stories (launch), the row of three
  * folds into Latest so the page reads as a lead and a list instead of a lead, three cards, and one stray row.
  */
-export function FrontPage({ top, latest: river, count, media, page, basePath, schoolSlug, community, copy, hideAuthors }: Props) {
+export function FrontPage({ top, latest: river, count, media, page, basePath, schoolSlug, national, community, copy, hideAuthors }: Props) {
   const showSchool = !schoolSlug;
+  const showNational = !national;
   const compact = count < COMPACT_FRONT_BELOW;
   const [lead, ...rest] = top;
   const secondary = compact ? [] : rest;
@@ -65,11 +69,11 @@ export function FrontPage({ top, latest: river, count, media, page, basePath, sc
     <>
       {page === 1 && (
         <section aria-label="Top stories" className="pt-8 sm:pt-12">
-          <LeadStory article={lead} showSchool={showSchool} hideAuthors={hideAuthors} />
+          <LeadStory article={lead} showSchool={showSchool} showNational={showNational} hideAuthors={hideAuthors} />
           {secondary.length > 0 && (
             <div className="mt-10 grid gap-6 border-t border-line pt-8 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 lg:mt-14 lg:grid-cols-3 lg:gap-x-16 lg:column-rules [&>*+*]:border-t [&>*+*]:border-line [&>*+*]:pt-6 sm:[&>*+*]:border-t-0 sm:[&>*+*]:pt-0">
               {secondary.map((a) => (
-                <StoryCard key={a._id} article={a} showSchool={showSchool} hideAuthors={hideAuthors} compactOnPhone />
+                <StoryCard key={a._id} article={a} showSchool={showSchool} showNational={showNational} hideAuthors={hideAuthors} compactOnPhone />
               ))}
             </div>
           )}
@@ -86,7 +90,7 @@ export function FrontPage({ top, latest: river, count, media, page, basePath, sc
           {latest.length > 0 ? (
             <div className="divide-y divide-line">
               {latest.map((a) => (
-                <StoryRow key={a._id} article={a} showSchool={showSchool} hideAuthors={hideAuthors} />
+                <StoryRow key={a._id} article={a} showSchool={showSchool} showNational={showNational} hideAuthors={hideAuthors} />
               ))}
             </div>
           ) : (
@@ -96,8 +100,8 @@ export function FrontPage({ top, latest: river, count, media, page, basePath, sc
         </section>
 
         <aside aria-label="More from Speakeasy" className="flex flex-col gap-12 lg:sticky lg:top-8 lg:col-span-4 lg:self-start">
-          <JoinCard communityName={community.name} joinUrl={community.joinUrl} schoolSlug={schoolSlug} copy={copy.join} />
-          <MediaRail items={media} heading={copy.fronts.mediaRailHeading} schoolSlug={schoolSlug} showSchool={showSchool} />
+          {community && <JoinCard communityName={community.name} joinUrl={community.joinUrl} schoolSlug={schoolSlug} copy={copy.join} />}
+          <MediaRail items={media} heading={copy.fronts.mediaRailHeading} schoolSlug={schoolSlug} showSchool={showSchool} showNational={showNational} />
         </aside>
       </div>
     </>

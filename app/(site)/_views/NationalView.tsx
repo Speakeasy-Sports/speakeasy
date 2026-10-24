@@ -1,0 +1,64 @@
+import { notFound } from "next/navigation";
+import { sanityFetch } from "@/lib/sanity/fetch";
+import { NATIONAL_FRONT_QUERY } from "@/lib/sanity/queries";
+import { getSiteSettings, getSiteSignals } from "@/lib/sanity/loaders";
+import { pageQuery } from "@/lib/sanity/paginate";
+import { tags } from "@/lib/sanity/tags";
+import { resolveCopy } from "@/lib/site-copy";
+import { NATIONAL_SLUG } from "@/lib/seo";
+import { FrontPage, LATEST_PER_PAGE, latestPages } from "@/components/FrontPage";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
+
+export function getNationalFront(page = 1) {
+  return sanityFetch({
+    query: pageQuery(NATIONAL_FRONT_QUERY, "[0...20]", page, LATEST_PER_PAGE),
+    tags: [tags.articles],
+  });
+}
+
+/**
+ * /national: national-scope stories in the same front layout as a school, in the neutral brand treatment
+ * (docs/specs/phase-1-ux-update.md, 3.3). No Join card: there is no national club yet.
+ */
+export async function NationalView({ page }: { page: number }) {
+  const [data, settings, signals] = await Promise.all([getNationalFront(page), getSiteSettings(), getSiteSignals()]);
+  if (page > latestPages(data.count)) notFound();
+  const copy = resolveCopy(settings?.copy);
+
+  return (
+    <>
+      <div className="shell">
+        <header className="pt-10 sm:pt-14">
+          <div className="flex flex-col gap-3 pb-6">
+            <p className="label-caps text-fg-muted">College sports</p>
+            <h1 className="headline text-[3rem] leading-[0.95] tracking-[-0.035em] sm:text-[4.5rem] lg:text-[5.5rem]">
+              {page === 1 ? "National" : `National: latest, page ${page}`}
+            </h1>
+          </div>
+          <div className="border-t-[3px] border-fg" />
+        </header>
+        <FrontPage
+          top={data.top}
+          latest={data.latest}
+          count={data.count}
+          media={data.media}
+          page={page}
+          basePath={`/${NATIONAL_SLUG}`}
+          national
+          hideAuthors={signals.singleAuthor}
+          copy={copy}
+        />
+      </div>
+      <div className="mt-24">
+        <NewsletterSignup
+          variant="band"
+          headline={settings?.newsletterHeadline}
+          blurb={settings?.newsletterBlurb}
+          sampleUrl={settings?.newsletterSampleUrl}
+          copy={copy.newsletter}
+          location="national"
+        />
+      </div>
+    </>
+  );
+}

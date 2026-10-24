@@ -34,6 +34,7 @@ const nextConfig: NextConfig = {
     return {
       beforeFiles: [
         { source: "/", has: PAGE, destination: "/latest/:page" },
+        { source: "/national", has: PAGE, destination: "/national/latest/:page" },
         { source: `/:school((?!${notReserved})[a-z0-9-]+)`, has: PAGE, destination: "/:school/latest/:page" },
         ...filterRewrites("/podcasts", "/podcasts"),
         ...filterRewrites("/videos", "/videos"),

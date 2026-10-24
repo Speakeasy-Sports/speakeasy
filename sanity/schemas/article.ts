@@ -22,7 +22,22 @@ export const ARTICLE_STATUSES = [
   { title: "Published", value: "published" },
 ] as const;
 
+export const COVERAGE_SCOPES = [
+  { title: "School", value: "school" },
+  { title: "National", value: "national" },
+] as const;
+
+export const HERO_TYPES = [
+  { title: "No hero (text only)", value: "none" },
+  { title: "Image", value: "image" },
+  { title: "Video", value: "video" },
+  { title: "Podcast", value: "podcast" },
+] as const;
+
 type RefLike = { _ref?: string } | undefined;
+
+/** Documents written before coverage scope existed are school stories. */
+const isNational = (doc?: { [key: string]: unknown }) => doc?.coverageScope === "national";
 
 export const article = defineType({
   name: "article",
@@ -66,11 +81,27 @@ export const article = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: "coverageScope",
+      title: "Coverage",
+      type: "string",
+      group: "content",
+      description: "National stories live at /national and need no school. School stories live under their primary school.",
+      options: { list: [...COVERAGE_SCOPES], layout: "radio", direction: "horizontal" },
+      initialValue: "school",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
       name: "schools",
       type: "array",
       group: "content",
+      description: "For national stories, optional: listing a school also shows the story on that school's front.",
       of: [defineArrayMember({ type: "reference", to: [{ type: "school" }] })],
-      validation: (rule) => rule.required().min(1).unique(),
+      validation: (rule) => [
+        rule.unique(),
+        rule.custom((value: unknown[] | undefined, context) =>
+          isNational(context.document) || (value?.length ?? 0) > 0 ? true : "Add at least one school",
+        ),
+      ],
     }),
     defineField({
       name: "primarySchool",
@@ -78,10 +109,12 @@ export const article = defineType({
       group: "content",
       to: [{ type: "school" }],
       description: "Sets the canonical URL. Must be one of the schools above.",
+      hidden: ({ document }) => isNational(document),
       validation: (rule) =>
-        rule.required().custom((value: RefLike, context) => {
+        rule.custom((value: RefLike, context) => {
+          if (isNational(context.document)) return value?._ref ? "National stories have no primary school. Clear this field." : true;
+          if (!value?._ref) return "Pick the primary school";
           const schools = (context.document?.schools as RefLike[] | undefined) ?? [];
-          if (!value?._ref) return true;
           return schools.some((s) => s?._ref === value._ref) || "Primary school must be listed in Schools";
         }),
     }),
@@ -106,15 +139,9 @@ export const article = defineType({
       name: "heroType",
       type: "string",
       group: "media",
-      options: {
-        list: [
-          { title: "Image", value: "image" },
-          { title: "Video", value: "video" },
-          { title: "Podcast", value: "podcast" },
-        ],
-        layout: "radio",
-      },
-      initialValue: "image",
+      description: "Text only is a normal format: use a photo when it adds something.",
+      options: { list: [...HERO_TYPES], layout: "radio" },
+      initialValue: "none",
       validation: (rule) => rule.required(),
     }),
     defineField({
@@ -134,7 +161,7 @@ export const article = defineType({
       name: "heroEmbed",
       type: "heroEmbed",
       group: "media",
-      hidden: ({ document }) => document?.heroType === "image",
+      hidden: ({ document }) => document?.heroType !== "video" && document?.heroType !== "podcast",
       validation: (rule) =>
         rule.custom((value: { url?: string; provider?: string } | undefined, context) => {
           const type = context.document?.heroType;
@@ -151,7 +178,7 @@ export const article = defineType({
       rows: 4,
       group: "media",
       description: "Shown under the player for podcast and video leads.",
-      hidden: ({ document }) => document?.heroType === "image",
+      hidden: ({ document }) => document?.heroType !== "video" && document?.heroType !== "podcast",
       validation: (rule) => rule.max(1200),
     }),
     defineField({
@@ -159,7 +186,7 @@ export const article = defineType({
       type: "array",
       group: "media",
       of: [defineArrayMember({ type: "episodeTimestamp" })],
-      hidden: ({ document }) => document?.heroType === "image",
+      hidden: ({ document }) => document?.heroType !== "video" && document?.heroType !== "podcast",
     }),
 
     // Workflow

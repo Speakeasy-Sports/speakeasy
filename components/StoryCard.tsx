@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ArticleCard } from "@/lib/types";
-import { articlePath } from "@/lib/seo";
+import { storyPath } from "@/lib/seo";
 import { LabelRow } from "./Labels";
 import { StoryImage } from "./StoryImage";
 import { StoryMeta } from "./StoryMeta";
@@ -12,6 +12,8 @@ type Props = {
   sizes?: string;
   priority?: boolean;
   showSchool?: boolean;
+  /** False on the national front, where "National" on every card would be noise. */
+  showNational?: boolean;
   showDek?: boolean;
   /** Phones show secondary stories as thumbnail rows so the lead stays the only big picture. */
   compactOnPhone?: boolean;
@@ -25,23 +27,24 @@ export function StoryCard({
   sizes = "(min-width: 1024px) 360px, (min-width: 640px) 45vw, 100vw",
   priority,
   showSchool = true,
+  showNational = true,
   showDek = true,
   compactOnPhone = false,
   hideAuthors,
 }: Props) {
-  if (!article.slug || !article.school?.slug) return null;
-  const href = articlePath(article.school.slug, article.slug);
+  const href = storyPath(article);
+  if (!href) return null;
 
   return (
     <article
-      data-school={article.school.slug}
+      data-school={article.school?.slug ?? undefined}
       className={`group ${compactOnPhone ? "grid grid-cols-[1fr_7rem] gap-4 sm:flex sm:flex-col" : "flex flex-col"} sm:gap-4`}
     >
       <Link href={href} tabIndex={-1} aria-hidden="true" className={`block ${compactOnPhone ? "order-2 sm:order-none" : ""}`}>
         <StoryImage article={article} width={imageWidth} sizes={sizes} priority={priority} badge={!compactOnPhone} aspect="wide" />
       </Link>
       <div className="flex min-w-0 flex-col gap-2.5">
-        <LabelRow type={article.contentType} school={article.school} showSchool={showSchool} />
+        <LabelRow type={article.contentType} scope={article.scope} school={article.school} showSchool={showSchool} showNational={showNational} />
         <h3 className="headline text-[1.1875rem] leading-[1.2] sm:text-[1.375rem]">
           <Link href={href} className="story-link">
             {article.title}

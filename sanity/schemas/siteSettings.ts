@@ -12,12 +12,24 @@ export const siteSettings = defineType({
   icon: CogIcon,
   groups: [
     { name: "general", title: "General", default: true },
+    { name: "editorial", title: "Editorial" },
     { name: "navigation", title: "Navigation" },
     { name: "newsletter", title: "Newsletter" },
     { name: "copy", title: "Copy" },
     { name: "seo", title: "SEO" },
   ],
   fields: [
+    defineField({
+      name: "homepageLead",
+      title: "Homepage lead",
+      type: "reference",
+      group: "editorial",
+      to: [{ type: "article" }],
+      // Weak, so the lead story can still be unpublished or deleted; the site then falls back to the newest story.
+      weak: true,
+      options: { disableNew: true },
+      description: "The one story that leads the home page. Leave empty to lead with the newest story.",
+    }),
     defineField({
       name: "siteName",
       type: "string",

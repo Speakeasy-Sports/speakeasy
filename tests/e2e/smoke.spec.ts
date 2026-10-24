@@ -63,6 +63,29 @@ test("non-canonical school path redirects, unknown school 404s", async ({ page, 
   expect(missing?.status()).toBe(404);
 });
 
+test("national front and a text-only national article", async ({ page }) => {
+  await page.goto("/national");
+  await expect(page.getByRole("heading", { level: 1, name: "National" })).toBeVisible();
+  await page.getByRole("link", { name: /Every tailgate has a rulebook/ }).first().click();
+  await expect(page).toHaveURL(/\/national\/tailgate-rulebook$/);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Every tailgate has a rulebook");
+  // Text only: no hero figure, and no Georgia discuss or join button for a national story.
+  await expect(page.locator("article figure")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /Dawg Social Club/ })).toHaveCount(0);
+  // Related stories include other national coverage.
+  await expect(page.getByRole("link", { name: /Why the road trip is the best part/ }).first()).toBeVisible();
+});
+
+test("national and school article URLs redirect to their canonical scope", async ({ request }) => {
+  // A national story associated with Georgia is still canonical at /national.
+  const toNational = await request.get("/georgia/road-trip-best-part", { maxRedirects: 0 });
+  expect(toNational.status()).toBe(308);
+  expect(toNational.headers()["location"]).toMatch(/\/national\/road-trip-best-part$/);
+  const toSchool = await request.get("/national/healthy-line-ole-miss", { maxRedirects: 0 });
+  expect(toSchool.status()).toBe(308);
+  expect(toSchool.headers()["location"]).toMatch(/\/georgia\/healthy-line-ole-miss$/);
+});
+
 test("social card renders", async ({ request }) => {
   const [, slug] = ARTICLE.split("/").filter(Boolean);
   const res = await request.get(`/api/og?slug=${slug}`);

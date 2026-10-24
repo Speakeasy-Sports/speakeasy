@@ -4,10 +4,13 @@ import { defineLocations, type PresentationPluginOptions } from "sanity/presenta
 export const resolve: PresentationPluginOptions["resolve"] = {
   locations: {
     article: defineLocations({
-      select: { title: "title", slug: "slug.current", school: "primarySchool.slug.current" },
+      select: { title: "title", slug: "slug.current", school: "primarySchool.slug.current", scope: "coverageScope" },
       resolve: (doc) => ({
         locations: [
-          { title: doc?.title || "Untitled", href: `/${doc?.school ?? "_"}/${doc?.slug ?? ""}` },
+          {
+            title: doc?.title || "Untitled",
+            href: doc?.scope === "national" ? `/national/${doc?.slug ?? ""}` : `/${doc?.school ?? "_"}/${doc?.slug ?? ""}`,
+          },
           { title: "Home", href: "/" },
         ],
       }),

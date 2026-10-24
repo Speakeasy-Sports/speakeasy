@@ -12,7 +12,8 @@ const HEIGHT = 630;
 const CACHE = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800";
 
 /**
- * Social card for an article: headline, school accent, Speakeasy mark, author (AGENTS.md section 6).
+ * Social card for an article: headline, school accent (neutral for national stories), Speakeasy mark, author
+ * (AGENTS.md section 6).
  * Published content only, cached at the edge for a day. Headline and names are drawn as text, so no
  * input reaches the markup unescaped.
  */
@@ -27,7 +28,8 @@ export async function GET(request: NextRequest) {
   const accentFg = accentForeground(accent);
   const title = truncate(article.title ?? "", 110);
   const authors = (article.authors ?? []).map((a) => a.name).filter(Boolean).join(", ");
-  const kicker = [contentTypeLabel(article.contentType), article.school?.shortName].filter(Boolean).join("  /  ");
+  const section = article.scope === "national" ? "National" : article.school?.shortName;
+  const kicker = [contentTypeLabel(article.contentType), section].filter(Boolean).join("  /  ");
 
   return new ImageResponse(
     (

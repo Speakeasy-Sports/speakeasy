@@ -4,7 +4,7 @@ import { StoryCard } from "./StoryCard";
 type Props = { articles: ArticleCard[] | null | undefined; heading: string; hideAuthors?: boolean };
 
 export function RelatedStories({ articles, heading, hideAuthors }: Props) {
-  const list = (articles ?? []).filter((a) => a.slug && a.school?.slug);
+  const list = (articles ?? []).filter((a) => a.path);
   if (list.length === 0) return null;
   return (
     <section aria-labelledby="related-h" className="mt-16 border-t border-line pt-8">

@@ -1,24 +1,24 @@
 import Link from "next/link";
 import type { ArticleCard } from "@/lib/types";
-import { articlePath } from "@/lib/seo";
+import { storyPath } from "@/lib/seo";
 import { LabelRow } from "./Labels";
 import { StoryImage } from "./StoryImage";
 import { StoryMeta } from "./StoryMeta";
 
-type Props = { article: ArticleCard; showSchool?: boolean; hideAuthors?: boolean };
+type Props = { article: ArticleCard; showSchool?: boolean; showNational?: boolean; hideAuthors?: boolean };
 
 /** River unit for Latest and archive lists: labels, headline, dek, meta, with a small photo on the right. */
-export function StoryRow({ article, showSchool = true, hideAuthors }: Props) {
-  if (!article.slug || !article.school?.slug) return null;
-  const href = articlePath(article.school.slug, article.slug);
+export function StoryRow({ article, showSchool = true, showNational = true, hideAuthors }: Props) {
+  const href = storyPath(article);
+  if (!href) return null;
 
   return (
     <article
-      data-school={article.school.slug}
+      data-school={article.school?.slug ?? undefined}
       className="group grid grid-cols-[1fr_6.5rem] items-start gap-4 py-6 sm:grid-cols-[1fr_11rem] sm:gap-8"
     >
       <div className="flex min-w-0 flex-col gap-2">
-        <LabelRow type={article.contentType} school={article.school} showSchool={showSchool} />
+        <LabelRow type={article.contentType} scope={article.scope} school={article.school} showSchool={showSchool} showNational={showNational} />
         <h3 className="headline text-[1.1875rem] leading-[1.2] sm:text-[1.4375rem]">
           <Link href={href} className="story-link">
             {article.title}
@@ -35,16 +35,24 @@ export function StoryRow({ article, showSchool = true, hideAuthors }: Props) {
 }
 
 /** Rail unit: small square picture, kicker, headline. */
-export function CompactRow({ article, showSchool = true }: { article: ArticleCard; showSchool?: boolean }) {
-  if (!article.slug || !article.school?.slug) return null;
-  const href = articlePath(article.school.slug, article.slug);
+export function CompactRow({
+  article,
+  showSchool = true,
+  showNational = true,
+}: {
+  article: ArticleCard;
+  showSchool?: boolean;
+  showNational?: boolean;
+}) {
+  const href = storyPath(article);
+  if (!href) return null;
   return (
-    <article data-school={article.school.slug} className="group grid grid-cols-[4.5rem_1fr] items-center gap-4 py-4">
+    <article data-school={article.school?.slug ?? undefined} className="group grid grid-cols-[4.5rem_1fr] items-center gap-4 py-4">
       <Link href={href} tabIndex={-1} aria-hidden="true" className="block">
         <StoryImage article={article} width={160} sizes="72px" aspect="square" artSize="sm" />
       </Link>
       <div className="flex min-w-0 flex-col gap-1.5">
-        <LabelRow type={article.contentType} school={article.school} showSchool={showSchool} />
+        <LabelRow type={article.contentType} scope={article.scope} school={article.school} showSchool={showSchool} showNational={showNational} />
         <h3 className="headline text-base leading-[1.25]">
           <Link href={href} className="story-link">
             {article.title}

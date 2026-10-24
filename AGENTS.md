@@ -1,6 +1,6 @@
 # Speakeasy Sports content site: build spec
 
-Status: v1.6, October 22, 2026
+Status: v1.7, October 24, 2026
 Owner: Jon Smith
 Purpose: Build spec and working agreement for the Speakeasy Sports content site. Lives at the repo root as `AGENTS.md`. Every contributor treats the Decisions section as fixed and everything else as the plan of record.
 
@@ -76,6 +76,8 @@ Principles:
     /[school]/[slug]/page.tsx      article
     /authors/[slug]/page.tsx
     /tags/[slug]/page.tsx
+    /national/page.tsx             national front
+    /national/[slug]/page.tsx      national article
     /podcasts/page.tsx             all podcast-type articles
     /videos/page.tsx               all video-type articles
     /search/page.tsx
@@ -134,12 +136,14 @@ Conventions: server components unless a component needs state or browser APIs; c
 Identity
 - `title` (string, max 90), `slug`, `dek` (string, max 200, required)
 - `contentType` (enum: `analysis`, `recap`, `preview`, `feature`, `podcast`, `video`, `news`, `opinion`)
-- `schools` (array of refs, min 1). `primarySchool` (ref, required; must be in `schools`). Canonical URL uses `primarySchool`.
+- `coverageScope` (enum: `school`, `national`; required, default `school`; a missing value is read as `school`).
+- School scope: `schools` (array of refs, min 1). `primarySchool` (ref, required; must be in `schools`). Canonical URL uses `primarySchool`.
+- National scope: no `primarySchool` (hidden, and rejected if set). `schools` is optional: related schools only. Listing a school shows the story on that school's front; it never changes the canonical URL and never creates a Circle post.
 - `authors` (array of refs, min 1)
 - `tags` (array of refs)
 
 Media
-- `heroType` (enum: `image`, `video`, `podcast`)
+- `heroType` (enum: `none`, `image`, `video`, `podcast`; default `none`, labeled "No hero (text only)"). Text-only is a normal format: no frame, placeholder, or caption renders.
 - `heroImage` (image with required `alt`, `caption`, `credit`) required when heroType = image
 - `heroEmbed` (object: `provider` enum youtube|spotify|apple|other, `url`, `title`) required when heroType = video or podcast
 - `episodeSummary` (text, optional, for podcast and video leads)
@@ -168,6 +172,7 @@ Circle sync (read-only in Studio, written by the webhook handler)
 
 ### siteSettings (singleton)
 Tabs in the Studio: General, Navigation, Newsletter, Copy, SEO.
+- Editorial: `homepageLead` (weak reference to one article; empty or unpublished means the newest story leads)
 - General: `siteName`, `tagline`, `joinUrl` (default Circle join url), `footerText`
 - Navigation: `navSchools` (ordered refs), `menuLinks` (phone menu links after the sections, up to 6), `footerColumns` (up to 2 columns of {title, links}, between Sections and Follow), `legalLinks` (up to 4), `socialLinks`. A link is {label, href}; href is a site path or an https URL. An empty list keeps the built-in default (Search and Newsletter; one Speakeasy column; Terms and Privacy). Header section links (schools, Podcasts, Videos) stay automatic.
 - Newsletter: `newsletterHeadline`, `newsletterBlurb`, `newsletterSampleUrl` (url, a past issue)
@@ -211,7 +216,7 @@ Tabs in the Studio: General, Navigation, Newsletter, Copy, SEO.
 - Same layout as home scoped to the school, using the school accent token.
 - Section header: school name, `communityName`, join CTA to `circleJoinUrl`.
 - Sub-nav: Latest, Podcasts, Videos, then the school's `navTags` in order (curated in the school document, up to 6). Podcasts and Videos appear once the site has published at least one of each (the page you are on always shows), and a sub-nav that would only say "Latest" is not rendered.
-- Reserved slugs (not valid school slugs): `authors`, `tags`, `podcasts`, `videos`, `search`, `newsletter`, `about`, `contact`, `terms`, `privacy`, `write-for-us`, `studio`, `api`, `feed.xml`, `latest`, `all`, `search-index.json`, `sitemap.xml`, `robots.txt`.
+- Reserved slugs (not valid school slugs): `national`, `authors`, `tags`, `podcasts`, `videos`, `search`, `newsletter`, `about`, `contact`, `terms`, `privacy`, `write-for-us`, `studio`, `api`, `feed.xml`, `latest`, `all`, `search-index.json`, `sitemap.xml`, `robots.txt`.
 - Podcasts, Videos, and tag links in the sub-nav go to the site-wide pages filtered with `?school={slug}`; those pages render with the school's header, accent, and sub-nav, so the reader stays in the section.
 
 ### `/[school]/[slug]` Article
@@ -225,10 +230,14 @@ Top to bottom:
 7. Correction note (if present)
 8. End block: "Discuss in {communityName}" button to `circlePostUrl` with `{circleCommentCount} comments`, author card, a one-line "Want to cover {school}? Write for Speakeasy." link to `/write-for-us`, newsletter signup
 9. Related: 3 articles, same `primarySchool` and sharing a tag, else same school most recent
-- Canonical: `/{primarySchool}/{slug}`. Requests at `/{otherSchool}/{slug}` where the article lists that school 301 to canonical.
+- Canonical: `/{primarySchool}/{slug}` for school stories, `/national/{slug}` for national stories. Requests at `/{otherSchool}/{slug}` where the article lists that school 301 to canonical; a national story requested under any school, or a school story requested under `/national`, 301s to its canonical URL. Slugs stay globally unique.
+- National stories use the neutral brand treatment, label "National", and show no Discuss or Join button for a school.
 - Member-only (Phase 2): body truncated after 2 paragraphs with a join wall; full text for signed-in members with a qualifying tier.
 - Structured data: `NewsArticle` with author, publisher, image, dates. `BreadcrumbList`.
 - OG image: `/api/og?slug=...` rendering headline, school accent, Speakeasy mark, author. 1200x630. Cached.
+
+### `/national` and `/national/[slug]`
+National front: national-scope stories in the school-front layout, no Join card, pagination at `/national?page=N` (rewritten to `/national/latest/N`). National articles share the article page with school articles. School fronts also list national stories associated with the school; those link to `/national/{slug}`.
 
 ### `/authors/[slug]`
 Photo, name, role, bio, social links, article list (paginated).
@@ -277,6 +286,7 @@ Derived from what is published (`lib/site-signals.ts`, one cached query tagged `
 - Trigger: Sanity webhook with filter `_type == "article"` on create and update, drafts and versions excluded (the default), so it fires on every publish. Do not filter on `status`: it is still `scheduled` or `review` at the moment of publish and is set by this handler (see section 5, Studio configuration).
 - Handler: `lib/circle/syncArticle(articleId)`
   1. Fetch the article (published perspective).
+  1a. National stories are skipped. One that already has a post (it changed scope) keeps the post; the handler records `circleSyncError` once and makes no Circle calls.
   2. If `circlePostId` is empty: `POST` a new post in `primarySchool.circleSpaceId` with title = article title, body = dek + "Read the full story: {canonical url}" + hero image. Store `circlePostId`, `circlePostUrl`, `circleSyncedAt` on the article using a Sanity write token (server-side only).
   3. If `circlePostId` exists and the title or dek changed: `PATCH` the Circle post.
   4. On failure, write `circleSyncError` and return; do not retry in a loop. A daily job retries anything with an error.
