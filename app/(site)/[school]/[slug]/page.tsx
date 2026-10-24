@@ -1,33 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { stegaClean } from "@sanity/client/stega";
-import { sanityFetch } from "@/lib/sanity/fetch";
 import { client } from "@/lib/sanity/client";
-import { ARTICLE_QUERY, ARTICLE_SLUGS_QUERY } from "@/lib/sanity/queries";
-import { getSiteSettings, getSiteSignals } from "@/lib/sanity/loaders";
-import { articlePageTags } from "@/lib/sanity/tags";
-import { urlFor } from "@/lib/sanity/image";
+import { ARTICLE_SLUGS_QUERY } from "@/lib/sanity/queries";
 import { isReservedSlug } from "@/lib/reserved-slugs";
-import { joinUrlFor } from "@/lib/circle-links";
-import { closingPeriod, fillCopy, resolveCopy } from "@/lib/site-copy";
-import { contentTypeLabel } from "@/lib/content-types";
-import { absoluteUrl, articlePath, authorPath, breadcrumbJsonLd, buildMetadata, newsArticleJsonLd, ogImageUrl, schoolPath } from "@/lib/seo";
-import { LabelRow } from "@/components/Labels";
-import { Byline } from "@/components/Byline";
-import { HeroImage } from "@/components/HeroImage";
-import { YouTubeEmbed } from "@/components/YouTubeEmbed";
-import { PodcastEmbed } from "@/components/PodcastEmbed";
-import { EpisodeNotes } from "@/components/EpisodeNotes";
-import { SponsorSlot } from "@/components/SponsorSlot";
-import { PortableTextRenderer } from "@/components/PortableTextRenderer";
-import { CorrectionNote } from "@/components/CorrectionNote";
-import { DiscussInClub } from "@/components/DiscussInClub";
-import { AuthorCard } from "@/components/AuthorCard";
-import { NewsletterSignup } from "@/components/NewsletterSignup";
-import { RelatedStories } from "@/components/RelatedStories";
-import { SchoolTheme } from "@/components/SchoolTheme";
-import { JsonLd } from "@/components/JsonLd";
+import { articlePath, nationalArticlePath } from "@/lib/seo";
+import { ArticleView, articleMetadata, getArticle } from "../../_views/ArticleView";
 
 // ISR: the newest articles are prerendered at build, the rest on first request, all revalidated every 60s
 // and on demand from the webhook. generateStaticParams is what makes Next treat the route as static.
@@ -36,13 +14,11 @@ export const dynamicParams = true;
 
 type Props = { params: Promise<{ school: string; slug: string }> };
 
-const SLUG_RE = /^[a-z0-9-]+$/;
-
 export async function generateStaticParams() {
   try {
     const rows = await client.fetch(ARTICLE_SLUGS_QUERY, {}, { useCdn: false });
     return rows
-      .filter((r): r is { slug: string; school: string } => Boolean(r.slug && r.school))
+      .filter((r): r is typeof r & { slug: string; school: string } => r.scope === "school" && Boolean(r.slug && r.school))
       .map((r) => ({ school: r.school, slug: r.slug }));
   } catch (err) {
     // A Sanity outage at build time should not fail the deploy; pages render on first request instead.
@@ -51,29 +27,22 @@ export async function generateStaticParams() {
   }
 }
 
-async function getArticle(slug: string, school: string, stega = true) {
-  if (!SLUG_RE.test(slug)) return null;
-  return sanityFetch({
-    query: ARTICLE_QUERY,
-    params: { slug },
-    tags: articlePageTags(slug, school),
-    stega,
-  });
-}
+type Article = NonNullable<Awaited<ReturnType<typeof getArticle>>>;
 
 /**
- * Canonical is /{primarySchool}/{slug}. A request at another listed school's path 301s there (AGENTS.md section 6).
- * Returns the article when the path is canonical, otherwise redirects or 404s.
+ * Canonical is /{primarySchool}/{slug} for school stories (AGENTS.md section 6) and /national/{slug} for national
+ * ones. A school story requested under another school it lists, or a national story requested under any school,
+ * 301s to its canonical URL. Returns the article when the path is canonical, otherwise redirects or 404s.
  */
-function resolveCanonical<T extends { school: { slug: string | null } | null; schools: Array<{ slug: string | null }> | null; slug: string | null }>(
-  article: T | null,
-  requestedSchool: string,
-): T {
-  if (!article?.school?.slug || !article.slug) notFound();
+function resolveCanonical(article: Article | null, requestedSchool: string): Article {
+  if (!article?.slug) notFound();
+  const slug = stegaClean(article.slug);
+  if (article.scope === "national") permanentRedirect(nationalArticlePath(slug));
+  if (!article.school?.slug) notFound();
   const canonicalSchool = stegaClean(article.school.slug);
   if (canonicalSchool === requestedSchool) return article;
   const listed = (article.schools ?? []).some((s) => stegaClean(s.slug) === requestedSchool);
-  if (listed) permanentRedirect(articlePath(canonicalSchool, stegaClean(article.slug)));
+  if (listed) permanentRedirect(articlePath(canonicalSchool, slug));
   notFound();
 }
 
@@ -81,154 +50,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { school, slug } = await params;
   if (isReservedSlug(school)) return {};
   const article = await getArticle(slug, school, false);
-  if (!article?.school?.slug || article.school.slug !== school) return {};
-
-  const image = article.ogImageOverride?.asset
-    ? {
-        url: urlFor(article.ogImageOverride).width(1200).height(630).fit("crop").url(),
-        width: 1200,
-        height: 630,
-        alt: article.ogImageOverride.alt ?? undefined,
-      }
-    : { url: ogImageUrl(article.slug ?? slug), width: 1200, height: 630 };
-
-  return buildMetadata({
-    title: article.seoTitle ?? article.title ?? "",
-    description: article.seoDescription ?? article.dek,
-    path: articlePath(article.school.slug, article.slug ?? slug),
-    image,
-    type: "article",
-    noIndex: article.noIndex,
-    article: {
-      publishedTime: article.publishedAt,
-      modifiedTime: article.updatedAt ?? article.publishedAt,
-      authors: (article.authors ?? []).map((a) => a.name).filter((n): n is string => Boolean(n)),
-      section: article.school.shortName ?? article.school.name,
-      tags: (article.tags ?? []).map((t) => t.name).filter((n): n is string => Boolean(n)),
-    },
-  });
+  if (!article || article.scope !== "school" || article.school?.slug !== school) return {};
+  return articleMetadata(article, slug);
 }
 
 export default async function ArticlePage({ params }: Props) {
-  const { school: requestedSchool, slug } = await params;
-  if (isReservedSlug(requestedSchool)) notFound();
-
-  const [fetched, settings, signals] = await Promise.all([getArticle(slug, requestedSchool), getSiteSettings(), getSiteSignals()]);
-  const article = resolveCanonical(fetched, requestedSchool);
-  const school = article.school!;
-  const schoolSlug = stegaClean(school.slug) ?? requestedSchool;
-  const heroType = stegaClean(article.heroType);
-  const canonical = articlePath(schoolSlug, stegaClean(article.slug) ?? slug);
-  const joinUrl = joinUrlFor(school, settings);
-  const copy = resolveCopy(settings?.copy);
-  const authors = (article.authors ?? []).filter((a) => a.name);
-
-  const heroImageUrl = article.heroImage?.asset ? urlFor(article.heroImage).width(1200).height(675).fit("crop").url() : null;
-
-  const jsonLd = newsArticleJsonLd({
-    headline: stegaClean(article.title) ?? "",
-    description: stegaClean(article.dek) ?? "",
-    url: absoluteUrl(canonical),
-    imageUrls: [heroImageUrl, ogImageUrl(stegaClean(article.slug) ?? slug)].filter((u): u is string => Boolean(u)),
-    datePublished: article.publishedAt,
-    dateModified: article.updatedAt ?? article.publishedAt,
-    authors: authors.map((a) => ({ name: stegaClean(a.name) ?? "", url: a.slug ? absoluteUrl(authorPath(stegaClean(a.slug))) : undefined })),
-    section: stegaClean(school.shortName ?? school.name),
-    keywords: (article.tags ?? []).map((t) => stegaClean(t.name) ?? "").filter(Boolean),
-  });
-  const crumbs = breadcrumbJsonLd([
-    { name: "Home", path: "/" },
-    { name: stegaClean(school.shortName ?? school.name) ?? "", path: schoolPath(schoolSlug) },
-    { name: stegaClean(article.title) ?? "", path: canonical },
-  ]);
-
-  return (
-    <article data-school={schoolSlug} className="shell py-8 sm:py-12">
-      <SchoolTheme slug={schoolSlug} accentColor={school.accentColor} accentColorDark={school.accentColorDark} />
-      <JsonLd data={jsonLd} />
-      <JsonLd data={crumbs} />
-
-      <div className="mx-auto max-w-4xl">
-        <header className="measure">
-          {/* 1. Labels */}
-          <LabelRow type={article.contentType} school={school} />
-
-          {/* 2. Headline and dek */}
-          <h1 className="headline mt-3 text-4xl leading-[1.08] md:text-5xl">{article.title}</h1>
-          {article.dek && <p className="mt-4 text-xl leading-snug text-fg-muted md:text-2xl">{article.dek}</p>}
-
-          {/* 3. Byline */}
-          <div className="mt-6">
-            <Byline authors={authors} publishedAt={article.publishedAt} updatedAt={article.updatedAt} />
-          </div>
-        </header>
-
-        {/* 4. Hero */}
-        {heroType === "image" && <HeroImage image={article.heroImage} />}
-        {heroType === "video" && article.heroEmbed?.url && (
-          <div className="my-8">
-            <YouTubeEmbed url={stegaClean(article.heroEmbed.url)} title={article.heroEmbed.title} />
-            <EpisodeNotes summary={article.episodeSummary} timestamps={article.episodeTimestamps} />
-          </div>
-        )}
-        {heroType === "podcast" && article.heroEmbed?.url && (
-          <div className="my-8">
-            <PodcastEmbed
-              provider={stegaClean(article.heroEmbed.provider) ?? "other"}
-              url={stegaClean(article.heroEmbed.url)}
-              title={article.heroEmbed.title}
-              eager
-            />
-            <EpisodeNotes summary={article.episodeSummary} timestamps={article.episodeTimestamps} />
-          </div>
-        )}
-
-        {/* 5. Sponsor, only when one matches */}
-        <SponsorSlot sponsor={article.sponsor} />
-
-        {/* 6. Body */}
-        <PortableTextRenderer value={article.body} />
-
-        {/* 7. Correction */}
-        <CorrectionNote text={article.correction} />
-
-        {/* 8. End block */}
-        <footer className="measure mt-12 flex flex-col divide-y divide-line border-t border-line [&>*]:py-8 [&>*:last-child]:pb-0">
-          <DiscussInClub
-            label={fillCopy(copy.join.discussButton, { community: stegaClean(school.communityName) ?? "the Club" })}
-            postUrl={article.circlePostUrl}
-            commentCount={article.circleCommentCount}
-            joinUrl={joinUrl}
-            schoolSlug={schoolSlug}
-          />
-          <div className="flex flex-col gap-3">
-            {authors.map((a) => (
-              <AuthorCard key={a._id} author={a} />
-            ))}
-            <p className="font-ui text-sm text-fg-muted">
-              {fillCopy(copy.article.writePrompt, { school: stegaClean(school.shortName) ?? "college sports" })}{" "}
-              <Link href="/write-for-us" className="text-fg underline decoration-line underline-offset-4 hover:decoration-fg">
-                {copy.article.writeLink}
-              </Link>
-              {closingPeriod(copy.article.writeLink)}
-            </p>
-          </div>
-          <NewsletterSignup
-            headline={settings?.newsletterHeadline}
-            blurb={settings?.newsletterBlurb}
-            school={schoolSlug}
-            copy={copy.newsletter}
-            location="article_end"
-          />
-        </footer>
-      </div>
-
-      {/* 9. Related */}
-      <RelatedStories articles={article.related} heading={copy.article.relatedHeading} hideAuthors={signals.singleAuthor} />
-
-      <p className="sr-only">
-        {contentTypeLabel(stegaClean(article.contentType))} from {school.name}
-      </p>
-    </article>
-  );
+  const { school, slug } = await params;
+  if (isReservedSlug(school)) notFound();
+  const article = resolveCanonical(await getArticle(slug, school), school);
+  return <ArticleView article={article} slug={slug} />;
 }

@@ -25,6 +25,7 @@ describe("buildPostContent", () => {
   it("explains what is missing", () => {
     expect(buildPostContent({ ...base, school: { slug: "georgia", circleSpaceId: null } })).toEqual({ error: "Primary school has no Circle space id" });
     expect(buildPostContent({ ...base, slug: null })).toEqual({ error: "Article or primary school has no slug" });
+    expect(buildPostContent({ ...base, scope: "national" })).toEqual({ error: "National stories are not posted to Circle" });
   });
   it("builds a TipTap body with the dek and a link, text never parsed as markup", () => {
     const c = buildPostContent(base);

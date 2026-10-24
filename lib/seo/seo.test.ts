@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildMetadata, defaultOgImage } from "./metadata";
-import { absoluteUrl, articlePath, ogImageUrl } from "./site";
+import { absoluteUrl, articlePath, ogImageUrl, storyPath } from "./site";
 import { breadcrumbJsonLd, jsonLdString, newsArticleJsonLd } from "./structured-data";
 
 describe("site urls", () => {
@@ -10,6 +10,13 @@ describe("site urls", () => {
     expect(absoluteUrl("https://example.com/a")).toBe("https://example.com/a");
     expect(articlePath("georgia", "kirby-presser")).toBe("/georgia/kirby-presser");
     expect(ogImageUrl("a b")).toBe("https://speakeasysports.com/api/og?slug=a%20b");
+  });
+  it("builds the canonical path for either coverage scope", () => {
+    expect(storyPath({ scope: "national", slug: "tailgates", school: { slug: "georgia" } })).toBe("/national/tailgates");
+    expect(storyPath({ scope: "school", slug: "x", school: { slug: "georgia" } })).toBe("/georgia/x");
+    expect(storyPath({ slug: "x", school: { slug: "georgia" } })).toBe("/georgia/x");
+    expect(storyPath({ scope: "school", slug: "x", school: null })).toBeNull();
+    expect(storyPath({ scope: "national", slug: null, school: null })).toBeNull();
   });
 });
 

@@ -7,8 +7,22 @@ export function absoluteUrl(path: string): string {
   return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
+export const NATIONAL_SLUG = "national";
+
 export function articlePath(schoolSlug: string, slug: string): string {
   return `/${schoolSlug}/${slug}`;
+}
+
+/** National stories live at /national/{slug}; they have no primary school. */
+export function nationalArticlePath(slug: string): string {
+  return `/${NATIONAL_SLUG}/${slug}`;
+}
+
+/** The canonical path for either scope. A school story without a school has no URL. */
+export function storyPath(a: { scope?: string | null; slug?: string | null; school?: { slug?: string | null } | null }): string | null {
+  if (!a.slug) return null;
+  if (a.scope === "national") return nationalArticlePath(a.slug);
+  return a.school?.slug ? articlePath(a.school.slug, a.slug) : null;
 }
 
 export function schoolPath(schoolSlug: string): string {

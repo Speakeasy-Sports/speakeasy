@@ -147,11 +147,14 @@ const rows = [
   ["early-signing-period", "What the early signing period means this year", "Fewer surprises, more flips.", "news", 180, "avery", ["recruiting", "portal"], {}],
   ["pod-basketball-preview", "Pod: Basketball season preview", "Rotation, schedule, and expectations.", "podcast", 190, "jon", ["basketball"], { podcast: true }],
   ["bama-only-story", "An Alabama story for the redirect test", "Listed only under Alabama.", "news", 195, "jon", [], { schools: ["alabama"] }],
+  // National coverage (docs/specs/phase-1-ux-update.md, 3): no primary school, canonical at /national/{slug}.
+  ["tailgate-rulebook", "Every tailgate has a rulebook. Nobody ever writes it down.", "Where to park, who brings the grill, and the etiquette of the tent next door.", "feature", 1, "jon", [], { national: true, noHero: true }],
+  ["road-trip-best-part", "Why the road trip is the best part of college football", "The stadium is the destination. The drive is where the stories come from.", "analysis", 12, "jon", [], { national: true, schools: ["georgia"] }],
 ];
 
 const heroAssets = [];
 const articles = rows.map(([slug, title, dek, contentType, ago, author, tagSlugs, extra], i) => {
-  const schoolsList = extra.schools ?? ["georgia"];
+  const schoolsList = extra.schools ?? (extra.national ? [] : ["georgia"]);
   const doc = {
     _id: `article-${slug}`,
     _type: "article",
@@ -163,8 +166,10 @@ const articles = rows.map(([slug, title, dek, contentType, ago, author, tagSlugs
     contentType,
     status: "published",
     publishedAt: hoursAgo(ago),
+    // School stories written before coverageScope existed have no value; keep it that way here to test the default.
+    ...(extra.national ? { coverageScope: "national" } : {}),
     schools: schoolsList.map((s) => ref(`school-${s}`)),
-    primarySchool: ref(`school-${schoolsList[0]}`),
+    ...(extra.national ? {} : { primarySchool: ref(`school-${schoolsList[0]}`) }),
     authors: [ref(`author-${author}`)],
     tags: tagSlugs.map((t) => ({ ...ref(`tag-${t}`), _key: key() })),
     featured: Boolean(extra.featured),
@@ -183,6 +188,8 @@ const articles = rows.map(([slug, title, dek, contentType, ago, author, tagSlugs
   } else if (extra.video) {
     doc.heroType = "video";
     doc.heroEmbed = { provider: "youtube", url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", title };
+  } else if (extra.noHero) {
+    doc.heroType = "none";
   } else {
     const a = asset(`hero${i.toString(16).padStart(4, "0")}abcd`);
     heroAssets.push(a);

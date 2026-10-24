@@ -6,6 +6,8 @@ import {
   FEED_QUERY,
   HOME_QUERY,
   INFO_PAGE_QUERY,
+  ARTICLE_QUERY,
+  NATIONAL_FRONT_QUERY,
   MEDIA_QUERY,
   SCHOOL_FEED_QUERY,
   SCHOOL_FRONT_QUERY,
@@ -25,8 +27,8 @@ async function run<T>(query: string, params: Record<string, unknown> = {}): Prom
   return (await value.get()) as T;
 }
 
-const live = (dataset as Array<{ _type: string; primarySchool?: unknown; slug?: { current?: string } }>).filter(
-  (d) => d._type === "article" && d.primarySchool && d.slug?.current,
+const live = (dataset as Array<{ _type: string; coverageScope?: string; primarySchool?: unknown; slug?: { current?: string } }>).filter(
+  (d) => d._type === "article" && (d.coverageScope === "national" || d.primarySchool) && d.slug?.current,
 );
 
 describe("HOME_QUERY", () => {
@@ -152,5 +154,51 @@ describe("pageQuery", () => {
     expect(() => pageQuery("*[0...4]", "[0...20]", 2, 20)).toThrow();
     expect(() => pageQuery("*[0...20] + *[0...20]", "[0...20]", 2, 20)).toThrow();
     expect(pageQuery("x[0...20]", "[0...20]", 3, 20)).toBe("x[40...60]");
+  });
+});
+
+describe("national coverage", () => {
+  type Story = { slug: string; scope: string; path: string; school: { slug: string } | null };
+
+  it("puts national stories on /national with national paths and no school", async () => {
+    const front = await run<{ top: Story[]; latest: Story[]; count: number }>(NATIONAL_FRONT_QUERY);
+    const all = [...front.top, ...front.latest];
+    expect(all.map((a) => a.slug).sort()).toEqual(["road-trip-best-part", "tailgate-rulebook"]);
+    expect(front.count).toBe(2);
+    for (const a of all) {
+      expect(a.scope).toBe("national");
+      expect(a.school).toBeNull();
+      expect(a.path).toBe(`/national/${a.slug}`);
+    }
+  });
+
+  it("shows a national story on a school front it is associated with, still linking to /national", async () => {
+    const ga = await run<{ top: Story[]; latest: Story[] }>(SCHOOL_FRONT_QUERY, { slug: "georgia" });
+    const roadTrip = [...ga.top, ...ga.latest].find((a) => a.slug === "road-trip-best-part");
+    expect(roadTrip?.path).toBe("/national/road-trip-best-part");
+    const bama = await run<{ top: Story[]; latest: Story[] }>(SCHOOL_FRONT_QUERY, { slug: "alabama" });
+    expect([...bama.top, ...bama.latest].some((a) => a.scope === "national")).toBe(false);
+  });
+
+  it("treats school stories saved before coverageScope existed as school stories", async () => {
+    const home = await run<{ top: Story[] }>(HOME_QUERY);
+    expect(home.top[0]).toMatchObject({ scope: "school", path: "/georgia/fourth-quarter-collapse-defensive-rotation" });
+  });
+
+  it("loads a text-only national article with national related stories", async () => {
+    const a = await run<{ scope: string; school: unknown; heroType: string; related: Story[] }>(ARTICLE_QUERY, { slug: "tailgate-rulebook" });
+    expect(a).toMatchObject({ scope: "national", school: null, heroType: "none" });
+    expect(a.related.map((r) => r.slug)).toEqual(["road-trip-best-part"]);
+  });
+
+  it("keeps national stories in feeds, search, and the sitemap at their national URLs", async () => {
+    const idx = await run<{ u: string }[]>(SEARCH_INDEX_QUERY);
+    expect(idx.map((i) => i.u)).toContain("/national/tailgate-rulebook");
+    const sm = await run<{ articles: { path: string }[] }>(SITEMAP_QUERY);
+    expect(sm.articles.map((a) => a.path)).toContain("/national/road-trip-best-part");
+    const feed = await run<{ path: string }[]>(FEED_QUERY);
+    expect(feed.map((i) => i.path)).toContain("/national/tailgate-rulebook");
+    const ga = await run<{ items: { path: string }[] }>(SCHOOL_FEED_QUERY, { slug: "georgia" });
+    expect(ga.items.map((i) => i.path)).toContain("/national/road-trip-best-part");
   });
 });

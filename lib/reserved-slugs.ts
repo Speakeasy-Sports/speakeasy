@@ -1,5 +1,6 @@
 // Top-level paths that are not valid school slugs (AGENTS.md section 6), plus paths the site itself serves.
 export const RESERVED_SLUGS = [
+  "national", // national coverage front and articles (docs/specs/phase-1-ux-update.md, 3.3)
   "authors",
   "tags",
   "podcasts",

@@ -44,6 +44,15 @@ const AUTHOR_REF_FIELDS = /* groq */ `
   socialLinks[]{ _key, platform, url }
 `;
 
+// Coverage scope (docs/specs/phase-1-ux-update.md, 3.1). Articles saved before the field existed are school stories,
+// so every test is written as "is national" and a missing value reads as school.
+const NATIONAL = /* groq */ `coverageScope == "national"`;
+// Canonical path: /national/{slug} for national stories, /{primarySchool}/{slug} for school stories.
+const PATH = /* groq */ `select(${NATIONAL} => "/national/" + slug.current, "/" + primarySchool->slug.current + "/" + slug.current)`;
+// The school a story belongs to, or null for national stories (their related schools are in `schools`).
+const SCHOOL_OF = /* groq */ `select(${NATIONAL} => null, primarySchool->{ ${SCHOOL_REF_FIELDS} })`;
+const SCOPE = /* groq */ `"scope": select(${NATIONAL} => "national", "school")`;
+
 const CARD_FIELDS = /* groq */ `
   _id,
   title,
@@ -52,17 +61,20 @@ const CARD_FIELDS = /* groq */ `
   contentType,
   heroType,
   publishedAt,
-  "school": primarySchool->{ ${SCHOOL_REF_FIELDS} },
+  ${SCOPE},
+  "path": ${PATH},
+  "school": ${SCHOOL_OF},
   "authors": authors[]->{ _id, name, "slug": slug.current, ${AUTHOR_PHOTO} },
   heroImage { ${IMAGE_FIELDS} },
   heroEmbed { provider, url, title }
 `;
 
-// What counts as live: any article in the published perspective with a slug and a primary school.
+// What counts as live: any article in the published perspective with a slug and either national scope or a primary
+// school.
 // Site queries never filter on `status`. It is a Studio workflow field; Sanity's publish action (immediate or scheduled)
 // is the only thing that moves a document into the published perspective, and draft mode reads the drafts perspective
 // so editors can preview any status. Filtering on status here is what broke preview and hid freshly published stories.
-const LIVE = /* groq */ `_type == "article" && defined(slug.current) && defined(primarySchool)`;
+const LIVE = /* groq */ `_type == "article" && defined(slug.current) && (${NATIONAL} || defined(primarySchool))`;
 const BY_DATE = /* groq */ `order(coalesce(publishedAt, _createdAt) desc)`;
 
 // Front-page order: featured ranks 1 to 4 first (a newer story wins a tied rank), then everything else newest first.
@@ -140,6 +152,22 @@ export const SCHOOL_FRONT_QUERY = defineQuery(`
   }
 `);
 
+// /national: the same front as a school, scoped to national stories.
+export const NATIONAL_FRONT_QUERY = defineQuery(`
+  {
+    "top": (*[${LIVE} && ${NATIONAL}] | ${TOP_ORDER})[0...4]{ ${CARD_FIELDS} },
+    "latest": *[
+      ${LIVE} && ${NATIONAL}
+      && !(_id in ((*[${LIVE} && ${NATIONAL}] | ${TOP_ORDER})[0...4]._id))
+    ] | ${BY_DATE} [0...20]{ ${CARD_FIELDS} },
+    "count": count(*[${LIVE} && ${NATIONAL}]),
+    "media": *[
+      ${LIVE} && ${NATIONAL} && contentType in ${MEDIA_TYPES}
+      && !(_id in ((*[${LIVE} && ${NATIONAL}] | ${TOP_ORDER})[0...4]._id))
+    ] | ${BY_DATE} [0...4]{ ${CARD_FIELDS} }
+  }
+`);
+
 export const AUTHOR_QUERY = defineQuery(`
   *[_type == "author" && slug.current == $slug][0]{
     ${AUTHOR_REF_FIELDS},
@@ -194,7 +222,9 @@ export const ARTICLE_QUERY = defineQuery(`
     seoTitle,
     seoDescription,
     ogImageOverride { asset->{ _id, url }, alt },
-    "school": primarySchool->{ ${SCHOOL_REF_FIELDS} },
+    ${SCOPE},
+    "path": ${PATH},
+    "school": ${SCHOOL_OF},
     "schools": schools[]->{ _id, "slug": slug.current },
     "authors": authors[]->{ ${AUTHOR_REF_FIELDS} },
     "tags": tags[]->{ _id, name, "slug": slug.current },
@@ -211,7 +241,8 @@ export const ARTICLE_QUERY = defineQuery(`
     circlePostUrl,
     circleCommentCount,
     "related": *[
-      ${LIVE} && _id != ^._id && primarySchool._ref == ^.primarySchool._ref
+      ${LIVE} && _id != ^._id
+      && select(^.coverageScope == "national" => ${NATIONAL}, !(${NATIONAL}) && primarySchool._ref == ^.primarySchool._ref)
     ] | order(coalesce(count((tags[]._ref)[@ in ^.^.tags[]._ref]), 0) desc, coalesce(publishedAt, _createdAt) desc) [0...3] { ${CARD_FIELDS} },
     "sponsor": *[
       _type == "sponsorSlot" && active == true && placement == "articleBelowHero"
@@ -229,7 +260,8 @@ export const ARTICLE_OG_QUERY = defineQuery(`
     title,
     dek,
     contentType,
-    "school": primarySchool->{ shortName, accentColor, "slug": slug.current },
+    ${SCOPE},
+    "school": select(${NATIONAL} => null, primarySchool->{ shortName, accentColor, "slug": slug.current }),
     "authors": authors[]->{ name }
   }
 `);
@@ -238,7 +270,8 @@ export const ARTICLE_OG_QUERY = defineQuery(`
 export const ARTICLE_SLUGS_QUERY = defineQuery(`
   *[${LIVE}] | ${BY_DATE} [0...100] {
     "slug": slug.current,
-    "school": primarySchool->slug.current
+    ${SCOPE},
+    "school": select(${NATIONAL} => null, primarySchool->slug.current)
   }
 `);
 
@@ -266,8 +299,8 @@ export const SEARCH_INDEX_QUERY = defineQuery(`
   *[${LIVE} && noIndex != true] | ${BY_DATE} [0...5000]{
     "t": title,
     "d": dek,
-    "u": "/" + primarySchool->slug.current + "/" + slug.current,
-    "s": primarySchool->shortName,
+    "u": ${PATH},
+    "s": select(${NATIONAL} => "National", primarySchool->shortName),
     "k": contentType,
     "a": authors[]->name,
     "g": tags[]->name,
@@ -281,7 +314,8 @@ const FEED_ITEM = /* groq */ `
   dek,
   "slug": slug.current,
   contentType,
-  "school": primarySchool->{ shortName, "slug": slug.current },
+  "path": ${PATH},
+  "school": select(${NATIONAL} => null, primarySchool->{ shortName, "slug": slug.current }),
   "authors": authors[]->name,
   "tags": tags[]->name,
   "published": coalesce(publishedAt, _createdAt),
@@ -305,8 +339,7 @@ export const SCHOOL_FEED_QUERY = defineQuery(`
 export const SITEMAP_QUERY = defineQuery(`
   {
     "articles": *[${LIVE} && noIndex != true]{
-      "slug": slug.current,
-      "school": primarySchool->slug.current,
+      "path": ${PATH},
       "updated": coalesce(updatedAt, _updatedAt)
     },
     "schools": *[_type == "school" && defined(slug.current)]{ "slug": slug.current, "updated": _updatedAt },
@@ -328,7 +361,8 @@ export const ARTICLE_SYNC_QUERY = defineQuery(`
       publishedAt,
       circlePostId,
       circleSyncError,
-      "school": primarySchool->{ "slug": slug.current, circleSpaceId },
+      ${SCOPE},
+      "school": select(${NATIONAL} => null, primarySchool->{ "slug": slug.current, circleSpaceId }),
       "heroImageUrl": heroImage.asset->url
     },
     "versions": *[sanity::versionOf($id) && _id != $id]._id
@@ -341,7 +375,7 @@ export const REVIEW_NOTIFY_QUERY = defineQuery(`
     title,
     dek,
     "authors": authors[]->name,
-    "school": primarySchool->shortName
+    "school": select(${NATIONAL} => "National", primarySchool->shortName)
   }
 `);
 
@@ -359,7 +393,7 @@ export const CIRCLE_DAILY_QUERY = defineQuery(`
   {
     "retry": *[
       _type == "article" && !(_id in path("drafts.**")) && !(_id in path("versions.**"))
-      && (defined(circleSyncError) || (!defined(circlePostId) && coalesce(publishedAt, _createdAt) > $postSince))
+      && (defined(circleSyncError) || (!defined(circlePostId) && !(${NATIONAL}) && coalesce(publishedAt, _createdAt) > $postSince))
     ] | order(coalesce(publishedAt, _createdAt) desc) [0...20]._id,
     "counts": *[
       _type == "article" && defined(circlePostId) && !(_id in path("drafts.**")) && !(_id in path("versions.**"))

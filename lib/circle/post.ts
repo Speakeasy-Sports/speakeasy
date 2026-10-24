@@ -9,13 +9,20 @@ export type SyncableArticle = {
   title: string | null;
   dek: string | null;
   slug: string | null;
+  /** "national" stories never get a Circle post (docs/specs/phase-1-ux-update.md, 3.5). */
+  scope?: string | null;
   circlePostId: string | null;
   school: { slug: string | null; circleSpaceId: string | null } | null;
   heroImageUrl: string | null;
 };
 
+export const NATIONAL_NO_POST = "National stories are not posted to Circle";
+/** Recorded when a story that already has a Circle post becomes national. The post stays; nothing else is called. */
+export const NATIONAL_KEEPS_POST = "Scope changed to national; existing Circle post left in place";
+
 /** Returns the post content, or the reason the article cannot be posted yet. */
 export function buildPostContent(a: SyncableArticle): CirclePostContent | { error: string } {
+  if (a.scope === "national") return { error: NATIONAL_NO_POST };
   if (!a.school?.circleSpaceId) return { error: "Primary school has no Circle space id" };
   if (!a.school.slug || !a.slug) return { error: "Article or primary school has no slug" };
   if (!a.title) return { error: "Article has no title" };

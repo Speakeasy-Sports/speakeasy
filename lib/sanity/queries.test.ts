@@ -145,8 +145,8 @@ describe("ARTICLE_OG_QUERY and slugs", () => {
   it("agrees with the article page on what is live", async () => {
     const og = await run<{ title: string; school: { slug: string } } | null>(ARTICLE_OG_QUERY, { slug: "review-status" });
     expect(og?.school.slug).toBe("georgia");
-    const slugs = await run<{ slug: string; school: string }[]>(ARTICLE_SLUGS_QUERY);
-    expect(slugs).toContainEqual({ slug: "review-status", school: "georgia" });
+    const slugs = await run<{ slug: string; scope: string; school: string | null }[]>(ARTICLE_SLUGS_QUERY);
+    expect(slugs).toContainEqual({ slug: "review-status", scope: "school", school: "georgia" });
     expect(slugs.find((s) => s.slug === "broken")).toBeUndefined();
   });
 });

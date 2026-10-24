@@ -127,4 +127,19 @@ describe("finalizePublishedArticle", () => {
     await expect(finalizePublishedArticle("a1", { textChanged: true }, d)).rejects.toThrow("down");
     expect(release).toHaveBeenCalled();
   });
+  it("never posts a national story to Circle", async () => {
+    const d = deps(article({ scope: "national", school: null }));
+    const r = await finalizePublishedArticle("a1", { textChanged: true }, d);
+    expect(r.circle).toBe("skipped");
+    expect(d.circle.create).not.toHaveBeenCalled();
+    expect(d.circle.update).not.toHaveBeenCalled();
+  });
+
+  it("keeps the existing post when a story becomes national, and says so once", async () => {
+    const d = deps(article({ scope: "national", school: null, circlePostId: "p1", status: "published" }));
+    const r = await finalizePublishedArticle("a1", { textChanged: true }, d);
+    expect(r.circle).toBe("error");
+    expect(d.circle.update).not.toHaveBeenCalled();
+    expect(firstCommit(d)[1].set).toEqual({ circleSyncError: "Scope changed to national; existing Circle post left in place" });
+  });
 });

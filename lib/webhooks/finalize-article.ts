@@ -1,7 +1,7 @@
 // Runs after the Sanity webhook has revalidated: sets status on publish and keeps the Circle post in step
 // (AGENTS.md section 5, Studio configuration, and 7.2). Dependencies are passed in so this is unit tested
 // without Sanity, Circle, or KV.
-import { buildPostContent, type CirclePostContent, type SyncableArticle } from "@/lib/circle/post";
+import { buildPostContent, NATIONAL_KEEPS_POST, type CirclePostContent, type SyncableArticle } from "@/lib/circle/post";
 
 export type SyncArticle = SyncableArticle & { status: string | null; publishedAt: string | null; circleSyncError: string | null };
 
@@ -39,6 +39,8 @@ async function syncCircle(
 ): Promise<{ result: FinalizeResult["circle"]; set: Record<string, unknown>; unset: string[] }> {
   const none = { set: {}, unset: [] };
   if (!deps.circle.enabled) return { result: "skipped", ...none };
+  // National stories never auto-post. One that already had a post (a scope change) keeps it and says so once.
+  if (a.scope === "national") return a.circlePostId ? errorResult(a, NATIONAL_KEEPS_POST) : { result: "skipped", ...none };
   // A recorded error waits for the retry job or a real edit. Retrying on every delivery would loop, because writing
   // the error fires the webhook again.
   if (a.circleSyncError && !textChanged && !retry) return { result: "skipped", ...none };
