@@ -4,6 +4,7 @@ export type PlausibleEvent =
   | { name: "join_click"; props: { location: "article_end" | "school_header" | "rail" | "community_page" } }
   | { name: "newsletter_signup"; props?: { location?: string } }
   | { name: "discuss_click"; props?: { school?: string } }
+  | { name: "read_next_click"; props?: undefined }
   | { name: "video_play"; props?: { provider?: string } }
   | { name: "podcast_play"; props?: { provider?: string } };
 

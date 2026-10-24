@@ -224,9 +224,13 @@ describe("national coverage", () => {
   });
 
   it("loads a text-only national article with national related stories", async () => {
-    const a = await run<{ scope: string; school: unknown; heroType: string; related: Story[] }>(ARTICLE_QUERY, { slug: "tailgate-rulebook" });
-    expect(a).toMatchObject({ scope: "national", school: null, heroType: "none" });
-    expect(a.related.map((r) => r.slug)).toEqual(["road-trip-best-part"]);
+    const a = await run<{ scope: string; school: unknown; heroType: string; related: Story[]; openClub: string | null }>(ARTICLE_QUERY, {
+      slug: "tailgate-rulebook",
+    });
+    expect(a).toMatchObject({ scope: "national", school: null, heroType: "none", openClub: "Dawg Social Club" });
+    // Read next is the other national story; More to read fills with the newest.
+    expect(a.related.map((r) => r.slug)[0]).toBe("road-trip-best-part");
+    expect(a.related).toHaveLength(3);
   });
 
   it("keeps national stories in feeds, search, and the sitemap at their national URLs", async () => {

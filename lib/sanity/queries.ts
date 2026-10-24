@@ -79,6 +79,10 @@ const BY_DATE = /* groq */ `order(coalesce(publishedAt, _createdAt) desc)`;
 
 // Front-page order: newest first, with _id breaking ties so the same data always gives the same order.
 const FRONT_ORDER = /* groq */ `order(coalesce(publishedAt, _createdAt) desc, _id asc)`;
+// Tags a candidate shares with the article being read (the outer document, two scopes up inside the filter).
+const SHARED_TAGS = /* groq */ `coalesce(count((tags[]._ref)[@ in ^.^.tags[]._ref]), 0)`;
+// The candidate is in the same section as the article: both national, or both from the same primary school.
+const SAME_SECTION = /* groq */ `select(^.coverageScope == "national" => ${NATIONAL}, !(${NATIONAL}) && primarySchool._ref == ^.primarySchool._ref)`;
 // The curated lead (Site settings > Editorial), when it is live and belongs on the front being built.
 const PINNED = /* groq */ `*[_id == "siteSettings"][0].homepageLead._ref`;
 
@@ -236,6 +240,9 @@ export const MEDIA_QUERY = defineQuery(`
   }
 `);
 
+// `related`: Read next is the first, More to read the next two (docs/specs/phase-1-ux-update.md, 6.2). Best first:
+// same section sharing a tag, then any shared tag or school association, then the newest, same section first.
+// `openClub`: the first school with a club, named in the invitation that national stories show instead of a signup.
 export const ARTICLE_QUERY = defineQuery(`
   *[${LIVE} && slug.current == $slug][0]{
     _id,
@@ -271,10 +278,18 @@ export const ARTICLE_QUERY = defineQuery(`
     },
     circlePostUrl,
     circleCommentCount,
-    "related": *[
-      ${LIVE} && _id != ^._id
-      && select(^.coverageScope == "national" => ${NATIONAL}, !(${NATIONAL}) && primarySchool._ref == ^.primarySchool._ref)
-    ] | order(coalesce(count((tags[]._ref)[@ in ^.^.tags[]._ref]), 0) desc, coalesce(publishedAt, _createdAt) desc) [0...3] { ${CARD_FIELDS} },
+    "related": *[${LIVE} && _id != ^._id] | order(
+      select(
+        ${SHARED_TAGS} > 0 && ${SAME_SECTION} => 3,
+        ${SHARED_TAGS} > 0 || coalesce(count((schools[]._ref)[@ in ^.^.schools[]._ref]), 0) > 0 => 2,
+        ${SAME_SECTION} => 1,
+        0
+      ) desc,
+      ${SHARED_TAGS} desc,
+      coalesce(publishedAt, _createdAt) desc,
+      _id asc
+    ) [0...3] { ${CARD_FIELDS} },
+    "openClub": *[_type == "school" && defined(circleJoinUrl)] | order(order asc, name asc) [0].communityName,
     "sponsor": *[
       _type == "sponsorSlot" && active == true && placement == "articleBelowHero"
       && (!defined(startDate) || startDate <= now())

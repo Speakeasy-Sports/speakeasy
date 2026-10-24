@@ -30,7 +30,7 @@ Volume: 10 to 12 articles per week from Jon plus a few contributors. Review and 
 | Domains | `speakeasysports.com` = site. `club.speakeasysports.com` = Circle. Path-based school sections (`/georgia`) | Same top-level domain is required for Circle cookie injection later. Redirect any school domains to their section |
 | Newsletter | Circle Email Hub | Flodesk is retired once contacts are migrated |
 | Transactional email | Postmark, separate sending domain and message stream for speakeasysports.com | Phase 2 only (magic links) |
-| Analytics | Plausible | Goals: `join_click`, `newsletter_signup`, `discuss_click`, `podcast_play`, `video_play` |
+| Analytics | Plausible | Goals: `join_click`, `newsletter_signup`, `discuss_click`, `read_next_click`, `podcast_play`, `video_play` |
 | Ads | None. Two direct-sold sponsor slots modeled in the CMS, hidden until sold | Article page below hero, and newsletter |
 | Media hosting | None. Embed YouTube, Spotify, Apple Podcasts, and generic podcast RSS players | No self-hosted video or audio in v1 |
 | Age policy | 13+ in terms and at Circle signup. No age gate on the site | |
@@ -230,8 +230,10 @@ Top to bottom:
 5. Sponsor slot `articleBelowHero` if an active slot matches school and date; otherwise nothing (no empty box)
 6. Body (Portable Text renderer with the custom blocks)
 7. Correction note (if present)
-8. End block: "Discuss in {communityName}" button to `circlePostUrl` with `{circleCommentCount} comments`, author card, a one-line "Want to cover {school}? Write for Speakeasy." link to `/write-for-us`, newsletter signup
-9. Related: 3 articles, same `primarySchool` and sharing a tag, else same school most recent
+8. Read next: one related story, shown larger. Fires `read_next_click`.
+9. End block: author card with a one-line "Want to cover {school}? Write for Speakeasy." link to `/write-for-us`, newsletter signup, then the community invitation: a school story whose school has a club shows "Discuss in {communityName}" with `{circleCommentCount} comments` once the Circle post exists, else "Join {communityName}" to `circleJoinUrl`; a national story, or a school without a club, shows "Find your community" to `/community`. National readers are never sent to one school's signup.
+10. More to read: the next two related stories.
+- Related ranking (one query, three results): same section (both national, or same `primarySchool`) sharing a tag, then any shared tag or school association, then the newest, same section first. Ties go to more shared tags, then newer.
 - Canonical: `/{primarySchool}/{slug}` for school stories, `/national/{slug}` for national stories. Requests at `/{otherSchool}/{slug}` where the article lists that school 301 to canonical; a national story requested under any school, or a school story requested under `/national`, 301s to its canonical URL. Slugs stay globally unique.
 - National stories use the neutral brand treatment, label "National", and show no Discuss or Join button for a school.
 - Member-only (Phase 2): body truncated after 2 paragraphs with a join wall; full text for signed-in members with a qualifying tier.
@@ -313,7 +315,7 @@ Derived from what is published (`lib/site-signals.ts`, one cached query tagged `
 
 ### 7.5 Analytics
 - Plausible script in root layout with `data-domain="speakeasysports.com"`. Outbound link tracking on.
-- Custom events via `plausible('event', {props})`: `join_click` (location prop: community_page|article_end|school_header|rail), `newsletter_signup`, `discuss_click`, `video_play`, `podcast_play`.
+- Custom events via `plausible('event', {props})`: `join_click` (location prop: community_page|article_end|school_header|rail), `newsletter_signup`, `discuss_click`, `read_next_click`, `video_play`, `podcast_play`.
 - No cookie banner needed with Plausible. Add one only if a cookie-setting embed is introduced.
 
 ### 7.6 Email
@@ -421,11 +423,13 @@ Rules:
 | `PortableTextRenderer` | Maps blocks in section 5 to components |
 | `PullQuote`, `Callout` | |
 | `SponsorSlot` | Renders only when an active slot matches; "Presented by" label, logo, headline, link |
-| `DiscussInClub` | Button to Circle post with comment count; falls back to the school join url if no post yet. Fires `discuss_click` |
+| `DiscussInClub` | Button to Circle post with comment count. Before the post exists it reads "Join {communityName}" and links to the school's join url. Fires `discuss_click`, or `join_click` (article_end) before the post |
+| `CommunityInvite` | End of national stories and schools without a club: "Find your community" to `/community` |
+| `ReadNext` | The one larger related story after the body. Fires `read_next_click` |
 | `AuthorCard` | End-of-article |
 | `NewsletterSignup` | Inline and page variants. Fires `newsletter_signup` |
 | `WriteForUsForm` | Contributor application on `/write-for-us` (section 7.9) |
-| `RelatedStories` | |
+| `RelatedStories` | More to read, two stories after the end block |
 | `CorrectionNote` | |
 | `JoinWall` | Phase 2 |
 | `Footer` | Nav, social, legal, "Built for fans" line |

@@ -52,7 +52,7 @@ Circle:
 
 Postmark: sending domain `mail.speakeasysports.com` verified (DKIM and return-path), stream `speakeasy-transactional`.
 
-Plausible: site added, and the goals `join_click`, `newsletter_signup`, `discuss_click`, `podcast_play`, `video_play` created in the dashboard. Events that are not set up as goals are recorded but do not show in the goal report.
+Plausible: site added, and the goals `join_click`, `newsletter_signup`, `discuss_click`, `read_next_click`, `podcast_play`, `video_play` created in the dashboard. Events that are not set up as goals are recorded but do not show in the goal report.
 
 ## 4. Search engines (by November 2)
 
