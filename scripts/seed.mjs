@@ -67,7 +67,7 @@ async function existingBySlug(type, slug) {
 }
 
 async function uploadImages() {
-  const used = [...new Set(stories.map((s) => s.image))];
+  const used = [...new Set(stories.map((s) => s.image).filter(Boolean))];
   const ids = {};
   for (const n of used) {
     const file = `sample-${n}.jpg`;
@@ -126,22 +126,26 @@ async function seed() {
       slug: { _type: "slug", current: s.slug },
       dek: s.dek,
       contentType: s.type,
-      schools: [{ ...ref(schoolId), _key: key() }],
-      primarySchool: ref(schoolId),
+      coverageScope: s.scope === "national" ? "national" : "school",
+      // National stories have no primary school; their related schools (if any) still place them on that front.
+      schools: s.scope === "national" ? (s.schools ?? []).map(() => ({ ...ref(schoolId), _key: key() })) : [{ ...ref(schoolId), _key: key() }],
+      ...(s.scope === "national" ? {} : { primarySchool: ref(schoolId) }),
       authors: [{ ...ref(authorId), _key: key() }],
       tags: s.tags.map((t) => ({ ...ref(tagIds[t]), _key: key() })),
-      heroType: "image",
-      heroImage: {
-        _type: "image",
-        asset: ref(images[s.image]),
-        alt: "Abstract color gradient used as a placeholder image",
-        credit: "Placeholder image",
-      },
+      ...(s.image
+        ? {
+            heroType: "image",
+            heroImage: {
+              _type: "image",
+              asset: ref(images[s.image]),
+              alt: "Abstract color gradient used as a placeholder image",
+              credit: "Placeholder image",
+            },
+          }
+        : { heroType: "none" }),
       body: toBody(s.body),
       status: "published",
       publishedAt: published,
-      featured: Boolean(s.featuredRank),
-      ...(s.featuredRank ? { featuredRank: s.featuredRank } : {}),
       memberOnly: false,
       noIndex: true,
     });

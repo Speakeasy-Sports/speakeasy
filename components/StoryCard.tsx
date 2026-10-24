@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ArticleCard } from "@/lib/types";
 import { storyPath } from "@/lib/seo";
 import { LabelRow } from "./Labels";
-import { StoryImage } from "./StoryImage";
+import { hasPicture, StoryImage } from "./StoryImage";
 import { StoryMeta } from "./StoryMeta";
 
 type Props = {
@@ -34,6 +34,26 @@ export function StoryCard({
 }: Props) {
   const href = storyPath(article);
   if (!href) return null;
+  const labels = <LabelRow type={article.contentType} scope={article.scope} school={article.school} showSchool={showSchool} showNational={showNational} />;
+
+  // Text only: a heavy rule in the section color instead of a picture, so the card reads as finished, not missing.
+  if (!hasPicture(article)) {
+    return (
+      <article
+        data-school={article.school?.slug ?? undefined}
+        className={`group flex flex-col gap-2.5 border-t-[3px] pt-4 ${article.scope === "national" ? "border-fg" : "border-accent"}`}
+      >
+        {labels}
+        <h3 className="headline text-[1.375rem] leading-[1.15] sm:text-[1.5rem]">
+          <Link href={href} className="story-link">
+            {article.title}
+          </Link>
+        </h3>
+        {showDek && article.dek && <p className="text-base leading-snug text-fg-muted">{article.dek}</p>}
+        <StoryMeta article={article} hideAuthors={hideAuthors} className="mt-1" />
+      </article>
+    );
+  }
 
   return (
     <article
@@ -44,7 +64,7 @@ export function StoryCard({
         <StoryImage article={article} width={imageWidth} sizes={sizes} priority={priority} badge={!compactOnPhone} aspect="wide" />
       </Link>
       <div className="flex min-w-0 flex-col gap-2.5">
-        <LabelRow type={article.contentType} scope={article.scope} school={article.school} showSchool={showSchool} showNational={showNational} />
+        {labels}
         <h3 className="headline text-[1.1875rem] leading-[1.2] sm:text-[1.375rem]">
           <Link href={href} className="story-link">
             {article.title}

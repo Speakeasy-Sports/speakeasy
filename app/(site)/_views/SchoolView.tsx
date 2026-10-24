@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import { stegaClean } from "@sanity/client/stega";
 import { sanityFetch } from "@/lib/sanity/fetch";
-import { SCHOOL_FRONT_QUERY } from "@/lib/sanity/queries";
+import { SCHOOL_FRONT_QUERY, SCHOOL_PICKS_QUERY } from "@/lib/sanity/queries";
+import { selectFront } from "@/lib/fronts";
 import { getSiteSettings, getSiteSignals } from "@/lib/sanity/loaders";
 import { pageQuery } from "@/lib/sanity/paginate";
-import { schoolPageTags } from "@/lib/sanity/tags";
+import { schoolPageTags, tags } from "@/lib/sanity/tags";
 import { isReservedSlug } from "@/lib/reserved-slugs";
 import { joinUrlFor } from "@/lib/circle-links";
 import { resolveCopy } from "@/lib/site-copy";
@@ -15,12 +16,16 @@ import { SchoolTheme } from "@/components/SchoolTheme";
 
 const SLUG_RE = /^[a-z0-9-]+$/;
 
-export function getSchoolFront(slug: string, page = 1) {
-  if (isReservedSlug(slug) || !SLUG_RE.test(slug)) return Promise.resolve(null);
+export async function getSchoolFront(slug: string, page = 1) {
+  if (isReservedSlug(slug) || !SLUG_RE.test(slug)) return null;
+  // Settings tag too: changing the homepage lead can change this front's lead.
+  const frontTags = [...schoolPageTags(slug), tags.settings];
+  const picks = await sanityFetch({ query: SCHOOL_PICKS_QUERY, params: { slug }, tags: frontTags });
+  const { lead, supporting } = selectFront(picks);
   return sanityFetch({
     query: pageQuery(SCHOOL_FRONT_QUERY, "[0...20]", page, LATEST_PER_PAGE),
-    params: { slug },
-    tags: schoolPageTags(slug),
+    params: { slug, lead: lead ?? "", supporting },
+    tags: frontTags,
   });
 }
 
@@ -61,7 +66,7 @@ export async function SchoolView({ slug, page }: { slug: string; page: number })
           />
         )}
         <FrontPage
-          top={school.top}
+          top={[school.lead, ...school.supporting].filter((a) => a !== null)}
           latest={school.latest}
           count={school.count}
           media={school.media}

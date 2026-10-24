@@ -68,6 +68,12 @@ export const COPY_SPEC = {
   fronts: {
     title: "Front pages",
     fields: {
+      positioning: {
+        title: "Home positioning line",
+        default: "College sports, on the field and beyond.",
+        description: "One short line above the home page lead.",
+        max: 80,
+      },
       emptyKicker: { title: "No stories yet, label", default: "Nothing yet", max: 24 },
       emptyHeadline: { title: "No stories yet, headline", default: "The first stories are on the way." },
       latestEmpty: { title: "Latest list empty", default: "Everything new is in the stories above." },

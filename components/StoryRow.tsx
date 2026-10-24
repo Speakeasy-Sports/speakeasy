@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ArticleCard } from "@/lib/types";
 import { storyPath } from "@/lib/seo";
 import { LabelRow } from "./Labels";
-import { StoryImage } from "./StoryImage";
+import { hasPicture, StoryImage } from "./StoryImage";
 import { StoryMeta } from "./StoryMeta";
 
 type Props = { article: ArticleCard; showSchool?: boolean; showNational?: boolean; hideAuthors?: boolean };
@@ -11,11 +11,17 @@ type Props = { article: ArticleCard; showSchool?: boolean; showNational?: boolea
 export function StoryRow({ article, showSchool = true, showNational = true, hideAuthors }: Props) {
   const href = storyPath(article);
   if (!href) return null;
+  const picture = hasPicture(article);
 
   return (
     <article
       data-school={article.school?.slug ?? undefined}
-      className="group grid grid-cols-[1fr_6.5rem] items-start gap-4 py-6 sm:grid-cols-[1fr_11rem] sm:gap-8"
+      className={
+        picture
+          ? "group grid grid-cols-[1fr_6.5rem] items-start gap-4 py-6 sm:grid-cols-[1fr_11rem] sm:gap-8"
+          : // Text only: the row runs full width, with no empty thumbnail column.
+            "group py-6"
+      }
     >
       <div className="flex min-w-0 flex-col gap-2">
         <LabelRow type={article.contentType} scope={article.scope} school={article.school} showSchool={showSchool} showNational={showNational} />
@@ -24,12 +30,14 @@ export function StoryRow({ article, showSchool = true, showNational = true, hide
             {article.title}
           </Link>
         </h3>
-        {article.dek && <p className="hidden text-base leading-snug text-fg-muted sm:block">{article.dek}</p>}
+        {article.dek && <p className={`text-base leading-snug text-fg-muted ${picture ? "hidden sm:block" : ""}`}>{article.dek}</p>}
         <StoryMeta article={article} hideAuthors={hideAuthors} className="mt-1" />
       </div>
-      <Link href={href} tabIndex={-1} aria-hidden="true" className="block">
-        <StoryImage article={article} width={360} sizes="(min-width: 640px) 176px, 104px" aspect="wide" artSize="sm" />
-      </Link>
+      {picture && (
+        <Link href={href} tabIndex={-1} aria-hidden="true" className="block">
+          <StoryImage article={article} width={360} sizes="(min-width: 640px) 176px, 104px" aspect="wide" artSize="sm" />
+        </Link>
+      )}
     </article>
   );
 }

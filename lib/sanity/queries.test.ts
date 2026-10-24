@@ -4,10 +4,13 @@ import {
   ARTICLE_OG_QUERY,
   ARTICLE_QUERY,
   ARTICLE_SLUGS_QUERY,
+  HOME_PICKS_QUERY,
   HOME_QUERY,
   SCHOOL_FRONT_QUERY,
+  SCHOOL_PICKS_QUERY,
   SITE_SETTINGS_QUERY,
 } from "./queries";
+import { selectFront } from "@/lib/fronts";
 
 // Runs the real GROQ against an in-memory dataset. This is the published perspective: every document here is live.
 // Drafts never appear in this perspective, so there are none in the fixture.
@@ -81,11 +84,18 @@ async function run<T = unknown>(query: string, params: Record<string, unknown> =
   return (await value.get()) as T;
 }
 
+/** A front the way the views build it: picks, then the front query with the chosen ids. */
+async function front<T extends { lead: Card | null; supporting: Card[] }>(picks: string, query: string, params: Record<string, unknown> = {}) {
+  const { lead, supporting } = selectFront(await run<{ pinned: string | null; newest: string[] }>(picks, params));
+  const r = await run<T>(query, { ...params, lead: lead ?? "", supporting });
+  return { ...r, top: [r.lead, ...r.supporting].filter((c): c is Card => c !== null) };
+}
+
 type Card = { _id: string; slug: string; school: { slug: string } | null };
 
 describe("HOME_QUERY", () => {
-  it("with nothing featured, tops the page with the four newest, then lists the rest, regardless of status", async () => {
-    const home = await run<{ top: Card[]; latest: Card[]; count: number }>(HOME_QUERY);
+  it("with no curated lead, tops the page with the four newest, then lists the rest, regardless of status", async () => {
+    const home = await front<{ lead: Card | null; supporting: Card[]; latest: Card[]; count: number }>(HOME_PICKS_QUERY, HOME_QUERY);
     expect(home.top.map((r) => r._id)).toEqual(["a-review", "a-subject", "a-none", "a-bama"]);
     expect(home.latest.map((r) => r._id)).toEqual(["a-one", "a-both", "a-nodate"]);
     expect(home.count).toBe(7);
@@ -95,7 +105,7 @@ describe("HOME_QUERY", () => {
 
 describe("SCHOOL_FRONT_QUERY", () => {
   it("includes articles that list the school as primary or secondary", async () => {
-    const s = await run<{ top: Card[]; latest: Card[] }>(SCHOOL_FRONT_QUERY, { slug: "alabama" });
+    const s = await front<{ lead: Card | null; supporting: Card[]; latest: Card[] }>(SCHOOL_PICKS_QUERY, SCHOOL_FRONT_QUERY, { slug: "alabama" });
     expect([...s.top, ...s.latest].map((r) => r._id)).toEqual(["a-subject", "a-bama"]);
   });
 });

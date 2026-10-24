@@ -2,7 +2,8 @@
 // coverage without inventing facts: no scores, no player or coach names, no quotes attributed to real people.
 // Every story ends with a note saying it is a sample, and the seed marks each one noIndex.
 
-// image is a file number in scripts/seed-assets. featuredRank is optional; rank 1 leads the home page.
+// image is a file number in scripts/seed-assets, or absent for a text-only story. scope "national" makes a national
+// story (no primary school; `schools` lists related schools).
 // Body items: string = paragraph, ["h2", text], ["bullets", [...]], ["quote", text], ["callout", title, body].
 export const stories = [
   {
@@ -13,7 +14,6 @@ export const stories = [
     hoursAgo: 3,
     tags: ["defense"],
     image: 1,
-    featuredRank: 1,
     body: [
       "Every defense looks tired in the fourth quarter. The question is whether it looks tired because of the opponent or because of the plan.",
       ["h2", "Where the snaps go"],
@@ -67,7 +67,6 @@ export const stories = [
     type: "news",
     hoursAgo: 30,
     tags: ["recruiting"],
-    image: 4,
     body: [
       "Recruiting news arrives in bursts, and most of it lands on a handful of weekends. Knowing the calendar helps you read the noise.",
       ["h2", "The visits that matter"],
@@ -98,7 +97,6 @@ export const stories = [
     type: "opinion",
     hoursAgo: 60,
     tags: ["quarterbacks"],
-    image: 6,
     body: [
       "Every fan base wants a pretty offense. Very few fan bases remember how pretty it was in December.",
       "Ball control, field position, and fewer mistakes than the other side still win most games in this league.",
@@ -126,12 +124,13 @@ export const stories = [
   },
   {
     slug: "how-we-cover-recruiting",
+    scope: "national",
+    schools: ["georgia"],
     title: "How we will cover recruiting, and what we will not do",
     dek: "No crystal balls, no anonymous rumor mill. Here are the rules we hold ourselves to.",
     type: "opinion",
     hoursAgo: 100,
     tags: ["recruiting"],
-    image: 3,
     body: [
       "Recruiting coverage can be great fun and terrible journalism at the same time. We want the fun without the second part.",
       ["h2", "Our rules"],
@@ -146,7 +145,6 @@ export const stories = [
     type: "preview",
     hoursAgo: 130,
     tags: ["basketball"],
-    image: 4,
     body: [
       "Football season does not leave much oxygen, but basketball tips off soon. Here is what we want answered early.",
       ["bullets", ["Who closes games", "How deep is the rotation", "Can the defense hold up on the perimeter", "Who becomes the go-to shooter", "How the team handles its first road test"]],
@@ -155,12 +153,12 @@ export const stories = [
   },
   {
     slug: "welcome-to-speakeasy-sports",
+    scope: "national",
     title: "Welcome to Speakeasy Sports",
     dek: "Coverage built for fans who watch every snap, and a club where the conversation keeps going.",
     type: "feature",
     hoursAgo: 160,
     tags: [],
-    image: 5,
     body: [
       "Speakeasy Sports is a publication for people who care about college sports more than is probably healthy. We write for you.",
       "Every story here also starts a thread in the Dawg Social Club, so the conversation does not end at the last paragraph.",
