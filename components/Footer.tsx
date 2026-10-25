@@ -54,7 +54,7 @@ export function Footer({ settings, signoff, media }: Props) {
       <div className="shell py-14">
         <div className="grid gap-12 md:grid-cols-12">
           <div className="flex flex-col gap-4 md:col-span-5">
-            <Link href="/" className="font-display text-[2rem] font-bold leading-none tracking-[-0.03em] no-underline">
+            <Link href="/" className="font-display text-[2rem] font-semibold leading-none tracking-[-0.02em] no-underline">
               {siteName}
             </Link>
             {settings?.tagline && <p className="max-w-sm text-lg leading-snug text-fg-muted">{settings.tagline}</p>}

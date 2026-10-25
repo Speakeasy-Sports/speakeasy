@@ -14,8 +14,8 @@
   --accent: #141414;
   --accent-fg: #ffffff;
 
-  /* Type. --font-serif is set by next/font/local in lib/fonts.ts. Placeholder family until brand type is chosen. */
-  --font-display: var(--font-serif, Georgia), Georgia, serif;
+  /* Type. --font-fraunces and --font-serif are set by next/font/local in lib/fonts.ts. */
+  --font-display: var(--font-fraunces, Georgia), Georgia, serif;
   --font-body: var(--font-serif, Georgia), Georgia, serif;
   --font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;
 

@@ -365,8 +365,8 @@ How these tokens are used (direction, type scale, utilities, and each component 
   --accent-fg: #FFFFFF;
 
   /* Type */
-  --font-display: "DisplayFace", Georgia, serif;     /* placeholder until brand type is chosen */
-  --font-body: "BodyFace", Georgia, serif;
+  --font-display: "Fraunces", Georgia, serif;        /* headlines and wordmark, weight 600 */
+  --font-body: "Source Serif 4", Georgia, serif;     /* decks, body, pull quotes, weights 400 to 700 */
   --font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;
 
   --text-body: 1.125rem;    /* 18px mobile */
@@ -401,7 +401,7 @@ Dark-mode school overrides must sit inside the `prefers-color-scheme: dark` quer
 Rules:
 - Accent is used for labels, links, section headers, and the join button only. Never as a page background.
 - Contrast: body text and accent-on-background must pass 4.5:1 in both themes. Each school's `accentColorDark` exists to make that true.
-- Fonts self-hosted in `/public/fonts`, loaded with `next/font/local`, `display: swap`. Two families maximum.
+- Fonts self-hosted in `/public/fonts`, loaded with `next/font/local`, `display: swap`. Two families maximum on the site: Fraunces and Source Serif 4, both cut down to the weights in use (about 105KB for all three files). Share images render server-side with fixed cuts in `/assets/fonts` (Fraunces, plus a sans for labels); nothing there reaches readers.
 - Dark mode follows the system; no toggle in v1.
 
 ---
@@ -530,7 +530,7 @@ Acceptance: inline thread matches the Circle post, MAU usage visible in a monthl
 | V4 | Admin API v2 base URL, create-post body format (TipTap JSON vs. plain), image attachment on posts | Section 7.2 | Done October 19, 2026: TipTap JSON, cover via direct upload. See `docs/circle-api-notes.md` |
 | V5 | Circle Workflows can call an external webhook on "comment created" | Section 7.3 primary vs. fallback | Engineering, Circle admin. Docs confirm webhook actions exist; the "comment created" trigger still needs checking in the admin |
 | V6 | Current WordPress URLs worth redirecting | Section 6 redirects | Done October 20, 2026: No legacy content; no redirects needed |
-| V7 | Brand assets and type choices | Tokens and fonts | Jon |
+| V7 | Brand assets and type choices | Tokens and fonts | Type done October 25, 2026: Fraunces headlines, Source Serif 4 text. Mark and icon still placeholders (Jon) |
 | V8 | Photo rights plan for hero images | Content ops, not code | Jon |
 | V9 | Admin API budget target vs. comment-count fallback. Section 3 says design for under 5,000 requests per month; the hourly cron fallback in 7.3 uses about 18,000. Decide: raise the target, or run the fallback every 4 hours (about 4,500) | Only matters if V5 fails and the cron fallback is used | Jon |
 
