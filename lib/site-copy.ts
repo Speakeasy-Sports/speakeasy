@@ -1,5 +1,5 @@
 /**
- * Interface copy editors can change in Site settings > Copy. Each entry's `default` is what the site shows while the
+ * Interface copy editors can change in Site settings > Buttons and labels. Each entry's `default` is what the site shows while the
  * Studio field is empty, and the Studio shows it as the field's placeholder, so a blank field never blanks the page.
  * `{community}` and `{school}` in a string are filled in where the copy is used; `tokens` lists which ones apply.
  *

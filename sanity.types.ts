@@ -21,6 +21,8 @@ export type Join = {
   homeCardHeadline?: string;
   cardBody?: string;
   cardButton?: string;
+  articleLead?: string;
+  articleLeadWithCount?: string;
   discussButton?: string;
 };
 
@@ -29,6 +31,7 @@ export type Newsletter = {
   kicker?: string;
   button?: string;
   success?: string;
+  invalidEmail?: string;
   finePrint?: string;
   sampleLink?: string;
   recentHeading?: string;
