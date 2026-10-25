@@ -8,6 +8,8 @@ export const PAGE_SEO_PAGES = [
   { name: "videos", title: "Videos" },
   { name: "newsletter", title: "Newsletter" },
   { name: "search", title: "Search" },
+  { name: "national", title: "National front" },
+  { name: "community", title: "Community" },
 ] as const;
 
 export type PageSeoKey = (typeof PAGE_SEO_PAGES)[number]["name"];
