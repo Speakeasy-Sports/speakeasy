@@ -2,7 +2,7 @@ import Link from "next/link";
 import { formatLongDate, formatPublished, isUpdated } from "@/lib/format/date";
 import { authorPath } from "@/lib/seo";
 import type { ImageWithMeta } from "@/lib/sanity/image";
-import { SanityImage } from "./SanityImage";
+import { AuthorAvatar } from "./AuthorAvatar";
 
 type Author = {
   _id: string;
@@ -25,14 +25,9 @@ export function Byline({ authors, publishedAt, updatedAt }: Props) {
     <div className="flex items-center gap-3 font-ui text-sm">
       {list.length > 0 && (
         <div className="flex -space-x-2">
-          {list.slice(0, 3).map(
-            (a) =>
-              a.photo?.asset && (
-                <span key={a._id} className="h-10 w-10 overflow-hidden rounded-full border-2 border-bg bg-bg-elev">
-                  <SanityImage image={a.photo} alt={a.name ?? ""} width={40} aspect={1} sizes="40px" className="h-full w-full object-cover" />
-                </span>
-              ),
-          )}
+          {list.slice(0, 3).map((a) => (
+            <AuthorAvatar key={a._id} name={a.name ?? ""} photo={a.photo} size={40} className="border-2 border-bg" />
+          ))}
         </div>
       )}
       <div>

@@ -120,7 +120,7 @@ export async function ArticleView({ article, slug }: { article: LoadedArticle; s
       <JsonLd data={crumbs} />
 
       <div className="mx-auto max-w-4xl">
-        <header className="measure">
+        <header className="measure mb-8 md:mb-10">
           {/* 1. Labels */}
           <LabelRow type={article.contentType} scope={article.scope} school={school} />
 
@@ -137,13 +137,13 @@ export async function ArticleView({ article, slug }: { article: LoadedArticle; s
         {/* 4. Hero */}
         {heroType === "image" && <HeroImage image={article.heroImage} />}
         {heroType === "video" && article.heroEmbed?.url && (
-          <div className="my-8">
+          <div className="mb-8">
             <YouTubeEmbed url={stegaClean(article.heroEmbed.url)} title={article.heroEmbed.title} />
             <EpisodeNotes summary={article.episodeSummary} timestamps={article.episodeTimestamps} />
           </div>
         )}
         {heroType === "podcast" && article.heroEmbed?.url && (
-          <div className="my-8">
+          <div className="mb-8">
             <PodcastEmbed
               provider={stegaClean(article.heroEmbed.provider) ?? "other"}
               url={stegaClean(article.heroEmbed.url)}

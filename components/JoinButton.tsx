@@ -14,7 +14,7 @@ export function JoinButton({ href, location, children = "Join the Club", classNa
     <a
       href={href}
       onClick={() => track({ name: "join_click", props: { location } })}
-      className={`inline-flex h-10 items-center justify-center whitespace-nowrap rounded-base bg-accent px-4 font-ui text-sm font-semibold text-accent-fg no-underline transition-opacity hover:opacity-90 ${className}`}
+      className={`inline-flex h-11 items-center justify-center whitespace-nowrap rounded-base bg-accent px-4 font-ui text-sm font-semibold text-accent-fg no-underline transition-colors hover-accent-shift sm:h-10 ${className}`}
     >
       {children}
     </a>

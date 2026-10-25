@@ -84,6 +84,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Page width shared by header, fronts, and footer. */
@@ -94,6 +95,19 @@
   padding-inline: 1rem;
   @media (min-width: 640px) {
     padding-inline: 1.5rem;
+  }
+}
+
+/* Filled buttons shift their color on hover instead of fading, so the label never loses contrast (design sweep F9).
+   Mixing toward --fg darkens in light mode and lightens in dark mode. */
+@utility hover-accent-shift {
+  &:hover {
+    background-color: color-mix(in srgb, var(--accent) 88%, var(--fg));
+  }
+}
+@utility hover-ink-shift {
+  &:hover {
+    background-color: color-mix(in srgb, var(--fg) 85%, var(--bg));
   }
 }
 
@@ -116,6 +130,12 @@
   &:hover,
   &:focus-visible {
     text-decoration-color: currentColor;
+  }
+  /* The whole story unit (photo, labels, headline) reacts as one, matching the photo zoom. */
+  @media (hover: hover) {
+    :where(.group:hover) & {
+      text-decoration-color: currentColor;
+    }
   }
 }
 
@@ -209,9 +229,16 @@
 .article-body h3 {
   font-size: 1.2em;
 }
+/* Outside a school the accent is the text color, so the underline carries the link at full strength. Inside a school
+   the accent color does that work and the underline steps back. */
 .article-body a {
   color: var(--accent);
   text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+  text-decoration-color: var(--accent);
+}
+[data-school] .article-body a {
   text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
 }
 .article-body a:hover {

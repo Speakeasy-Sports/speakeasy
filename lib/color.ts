@@ -2,6 +2,14 @@
 
 export const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
+/**
+ * Light-mode accents for schools whose colors are also built into styles/tokens.css. The school document in the
+ * Studio is the source; these are the backup for places that cannot read the CSS, such as share images.
+ */
+export const BUILTIN_ACCENTS: Record<string, string> = {
+  georgia: "#BA0C2F",
+};
+
 export function isHex(value: unknown): value is string {
   return typeof value === "string" && HEX_RE.test(value);
 }

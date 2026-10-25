@@ -44,12 +44,13 @@ export function StoryCard({
         className={`group flex flex-col gap-2.5 border-t-[3px] pt-4 ${article.scope === "national" ? "border-fg" : "border-accent"}`}
       >
         {labels}
-        <h3 className="headline text-[1.375rem] leading-[1.15] sm:text-[1.5rem]">
+        {/* A step above the photo cards beside it, so a story without a picture reads as a choice (design sweep F4). */}
+        <h3 className="headline text-[1.5rem] leading-[1.1] tracking-[-0.022em] lg:text-[1.75rem]">
           <Link href={href} className="story-link">
             {article.title}
           </Link>
         </h3>
-        {showDek && article.dek && <p className="text-base leading-snug text-fg-muted">{article.dek}</p>}
+        {showDek && article.dek && <p className="text-[1.0625rem] leading-snug text-fg-muted">{article.dek}</p>}
         <StoryMeta article={article} hideAuthors={hideAuthors} className="mt-1" />
       </article>
     );

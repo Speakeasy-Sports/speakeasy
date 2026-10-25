@@ -90,7 +90,7 @@ export async function AuthorView({ slug, page }: { slug: string; page: number })
                     href={s.url!}
                     rel="me noopener noreferrer"
                     target="_blank"
-                    className="inline-flex h-9 items-center rounded-full border border-line bg-bg-elev px-4 font-ui text-[0.8125rem] font-medium text-fg no-underline transition-colors hover:border-fg"
+                    className="inline-flex h-11 items-center rounded-full border border-line bg-bg-elev sm:h-9 px-4 font-ui text-[0.8125rem] font-medium text-fg no-underline transition-colors hover:border-fg"
                   >
                     {PLATFORM_LABELS[s.platform ?? ""] ?? s.platform}
                   </a>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { AuthorRef } from "@/lib/types";
 import { authorPath } from "@/lib/seo";
-import { SanityImage } from "./SanityImage";
+import { AuthorAvatar } from "./AuthorAvatar";
 
 const PLATFORM_LABELS: Record<string, string> = {
   x: "X",
@@ -19,11 +19,7 @@ export function AuthorCard({ author }: { author: AuthorRef }) {
 
   return (
     <div className="flex gap-4 font-ui">
-      {author.photo?.asset && (
-        <span className="h-16 w-16 shrink-0 overflow-hidden rounded-full">
-          <SanityImage image={author.photo} alt={author.name} width={64} aspect={1} sizes="64px" className="h-full w-full object-cover" />
-        </span>
-      )}
+      <AuthorAvatar name={author.name} photo={author.photo} size={64} />
       <div className="min-w-0">
         <p className="text-base font-semibold">
           {author.slug ? (
@@ -37,10 +33,15 @@ export function AuthorCard({ author }: { author: AuthorRef }) {
         </p>
         {author.bio && <p className="mt-1 text-sm text-fg-muted">{author.bio}</p>}
         {socials.length > 0 && (
-          <ul className="mt-2 flex flex-wrap gap-3 text-sm">
+          <ul className="mt-3 flex flex-wrap gap-2 text-sm">
             {socials.map((s) => (
               <li key={s._key}>
-                <a href={s.url ?? "#"} rel="noopener noreferrer me" target="_blank" className="text-accent">
+                <a
+                  href={s.url ?? "#"}
+                  rel="noopener noreferrer me"
+                  target="_blank"
+                  className="inline-flex h-11 items-center rounded-base border border-line px-3 text-accent no-underline hover:border-accent sm:h-9"
+                >
                   {PLATFORM_LABELS[s.platform ?? ""] ?? s.platform}
                 </a>
               </li>

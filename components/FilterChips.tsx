@@ -13,7 +13,7 @@ export function FilterChips({ chips, label }: { chips: Chip[]; label: string }) 
           href={c.href}
           data-school={c.school ?? undefined}
           aria-current={c.active ? "page" : undefined}
-          className={`inline-flex h-9 items-center rounded-full border px-4 font-ui text-[0.8125rem] font-medium no-underline transition-colors ${
+          className={`inline-flex h-11 items-center rounded-full sm:h-9 border px-4 font-ui text-[0.8125rem] font-medium no-underline transition-colors ${
             c.active ? "border-fg bg-fg text-bg" : "border-line bg-bg-elev text-fg hover:border-fg"
           }`}
         >
