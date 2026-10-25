@@ -343,12 +343,13 @@ After launch:
 - F8 Author photo and hero photo on the share image.
 - F12 Full type scale pass and F14 spacing pass (do them together, one PR, with before and after screenshots at 390 and 1280).
 - F13 Speakeasy monogram for Georgia in header, Join card, and share image (decision 4; needs the asset).
-- F15 Article ending copy and compact More to read.
-- F17 Section nav size.
-- F19 Form states in the site voice.
-- F20 404 and search empty states.
+- F15 Article ending copy and compact More to read. Done before launch (polish batch 1).
+- F17 Section nav size. Done before launch (polish batch 1).
+- F19 Form states in the site voice. Done before launch (polish batch 1).
+- F20 404 and search empty states. Done before launch (polish batch 1).
 - F21 Dark subtle token headroom (only if the band surface changes).
-- F23 Masthead weight and the game-week positioning line; the wordmark cut waits for the real logo (decision 5).
+- F23 Masthead weight and the game-week positioning line; the wordmark cut waits for the real logo (decision 5). Masthead weight done before launch (polish batch 1); the positioning line is a Studio edit.
+- S1 Phone-friendly Studio for contributors (added October 25, after launch, about half a day). Test the article form at 390px and simplify it for the Contributor role: title, dek, school, body, and hero first; SEO, Circle sync, episode notes, and sponsor fields collapsed or hidden. No new system: contributors keep drafting in the Studio and submit for review. Revisit a separate quick-draft form only if two or three regular contributors still find the Studio painful on a phone after this pass, and build it after the Phase 2 login work.
 
 ## 5. Already working well
 
