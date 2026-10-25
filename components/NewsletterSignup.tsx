@@ -17,7 +17,7 @@ type Props = {
   school?: string | null;
   location?: string;
   sampleUrl?: string | null;
-  /** Button, messages, and fine print from Site settings > Copy. */
+  /** Button, messages, and fine print from Site settings > Buttons and labels. */
   copy: SiteCopy["newsletter"];
 };
 

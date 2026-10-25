@@ -16,7 +16,7 @@ export const siteSettings = defineType({
     { name: "editorial", title: "Editorial" },
     { name: "navigation", title: "Navigation" },
     { name: "newsletter", title: "Newsletter" },
-    { name: "copy", title: "Copy" },
+    { name: "copy", title: "Buttons and labels" },
     { name: "seo", title: "SEO" },
   ],
   fields: [
@@ -135,7 +135,7 @@ export const siteSettings = defineType({
       name: "copy",
       type: "siteCopy",
       group: "copy",
-      description: "Buttons, labels, and messages across the site. Every field shows the current text until you change it.",
+      description: "Wording outside articles. Leave a field blank to keep the default shown in gray.",
     }),
 
     defineField({

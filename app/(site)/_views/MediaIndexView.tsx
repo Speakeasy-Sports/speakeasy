@@ -28,7 +28,7 @@ const PAGES: Record<Kind, { title: string; path: string; seo: "podcasts" | "vide
   video: { title: "Videos", path: "/videos", seo: "videos" },
 };
 
-/** Kicker, intro, and empty line from Site settings > Copy. */
+/** Kicker, intro, and empty line from Site settings > Buttons and labels. */
 function pageCopy(kind: Kind, copy: SiteCopy) {
   const m = copy.media;
   return kind === "podcast"

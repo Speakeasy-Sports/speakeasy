@@ -12,7 +12,8 @@ import { CogIcon } from "@sanity/icons/Cog";
 import { DocumentIcon } from "@sanity/icons/Document";
 import { SITE_SETTINGS_ID } from "./schemas/siteSettings";
 
-// Desk structure (AGENTS.md section 5): Articles by status, Schools, Authors, Tags, Sponsor slots, Settings.
+// Desk structure (AGENTS.md section 5): Articles by status, Site settings, then Schools, Authors, Tags, Sponsor slots,
+// Pages. Settings sits near the top because it holds every piece of wording outside articles.
 export const structure: StructureResolver = (S) =>
   S.list()
     .title("Speakeasy Sports")
@@ -68,15 +69,14 @@ export const structure: StructureResolver = (S) =>
               S.documentTypeListItem("article").title("All articles"),
             ]),
         ),
+      S.listItem()
+        .title("Site settings")
+        .icon(CogIcon)
+        .child(S.document().schemaType("siteSettings").documentId(SITE_SETTINGS_ID).title("Site settings")),
       S.divider(),
       S.documentTypeListItem("school").title("Schools").icon(HomeIcon),
       S.documentTypeListItem("author").title("Authors").icon(UserIcon),
       S.documentTypeListItem("tag").title("Tags").icon(TagIcon),
       S.documentTypeListItem("sponsorSlot").title("Sponsor slots").icon(BillIcon),
       S.documentTypeListItem("infoPage").title("Pages").icon(DocumentIcon),
-      S.divider(),
-      S.listItem()
-        .title("Settings")
-        .icon(CogIcon)
-        .child(S.document().schemaType("siteSettings").documentId(SITE_SETTINGS_ID).title("Site settings")),
     ]);

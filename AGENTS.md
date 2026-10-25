@@ -172,12 +172,12 @@ Circle sync (read-only in Studio, written by the webhook handler)
 - `schools` (array of refs, empty = all), `startDate`, `endDate`
 
 ### siteSettings (singleton)
-Tabs in the Studio: General, Navigation, Newsletter, Copy, SEO.
+Tabs in the Studio: General, Editorial, Navigation, Newsletter, Buttons and labels, SEO. It sits second in the Studio sidebar, under Articles.
 - Editorial: `homepageLead` (weak reference to one article; empty or unpublished means the newest story leads)
 - General: `siteName`, `tagline`, `joinUrl` (default Circle join url), `footerText`
 - Navigation: `navSchools` (ordered refs), `menuLinks` (phone menu links after the sections, up to 6), `footerColumns` (up to 2 columns of {title, links}, between Sections and Follow), `legalLinks` (up to 4), `socialLinks`. A link is {label, href}; href is a site path or an https URL. An empty list keeps the built-in default (Search and Write for us; one Speakeasy column; Terms and Privacy). Header section links (National, schools, Podcasts, Videos, Community) stay automatic.
 - Newsletter: `newsletterHeadline`, `newsletterBlurb`, `newsletterSampleUrl` (url, a past issue)
-- Copy: `copy` (buttons, labels, empty states, form messages, the National front heading, the `/community` page text, 404, footer sign-off). The fields and their defaults live in `lib/site-copy.ts`; an empty field shows the default, which the Studio shows as its placeholder. `{community}` and `{school}` are filled in where a field allows them. Form field labels and screen-reader text stay in code.
+- Buttons and labels (field `copy`): buttons, labels, empty states, form messages, the National front heading, the `/community` page text, 404, footer sign-off. The fields and their defaults live in `lib/site-copy.ts`; an empty field shows the default, which the Studio shows as its placeholder. `{community}` and `{school}` are filled in where a field allows them. Form field labels and screen-reader text stay in code.
 - SEO: `defaultOgImage` (share image for any page without its own), `pageSeo` (title and description for home, podcasts, videos, newsletter, search, national, community)
 
 ### infoPage
@@ -185,7 +185,7 @@ Tabs in the Studio: General, Navigation, Newsletter, Copy, SEO.
 - One document per footer page. A missing page 404s rather than showing filler. On `write-for-us` the application form renders under the body.
 
 ### Studio configuration
-- Desk structure: Articles (by status: Needs review, Scheduled, Published, Drafts), Schools, Authors, Tags, Sponsor slots, Pages, Settings.
+- Desk structure: Articles (by status: Needs review, Scheduled, Published, Drafts), Site settings, Schools, Authors, Tags, Sponsor slots, Pages.
 - Featured rank: the Studio warns when another published article already holds the same rank. Ties are legal; the more recent story wins.
 - Scheduled drafts (Sanity Growth feature) handle timed publishing. Sanity does not set custom fields when it publishes, including scheduled publishes, so the site sets `status` itself: when `/api/webhooks/sanity` receives a published article whose `status` is not `published`, it patches the published document with `status: "published"` and `publishedAt` (if empty, set to now) using the write token. That patch fires the webhook again; the second delivery sees `published` and changes nothing. Nobody sets `published` by hand, and the option is hidden from Contributors.
 - Validation: `dek` required, hero alt required, at least one school and one author, `primarySchool` in `schools`.
@@ -256,7 +256,7 @@ Grid of articles where `contentType` = podcast or video, newest first, with the 
 Client-side search over a prebuilt JSON index (title, dek, tags, school, author) regenerated on publish. Good enough to 5,000 articles. Replace with Sanity search or Algolia later.
 
 ### `/community`
-Heading, intro, labels, and closing line from Settings, Copy; then one panel per school with a `circleJoinUrl`: "Open now", the community description, "Join {communityName}", and "Member sign in" when `circleSignInUrl` is set. The home Join card links here ("Find your community"). A waitlist for future schools is added after launch (spec release E).
+Heading, intro, labels, and closing line from Site settings, Buttons and labels; then one panel per school with a `circleJoinUrl`: "Open now", the community description, "Join {communityName}", and "Member sign in" when `circleSignInUrl` is set. The home Join card links here ("Find your community"). A waitlist for future schools is added after launch (spec release E).
 
 ### `/newsletter`
 Headline, blurb, email form posting to `/api/newsletter`, sample issue link.
