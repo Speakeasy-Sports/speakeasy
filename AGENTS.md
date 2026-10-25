@@ -177,8 +177,8 @@ Tabs in the Studio: General, Navigation, Newsletter, Copy, SEO.
 - General: `siteName`, `tagline`, `joinUrl` (default Circle join url), `footerText`
 - Navigation: `navSchools` (ordered refs), `menuLinks` (phone menu links after the sections, up to 6), `footerColumns` (up to 2 columns of {title, links}, between Sections and Follow), `legalLinks` (up to 4), `socialLinks`. A link is {label, href}; href is a site path or an https URL. An empty list keeps the built-in default (Search and Write for us; one Speakeasy column; Terms and Privacy). Header section links (National, schools, Podcasts, Videos, Community) stay automatic.
 - Newsletter: `newsletterHeadline`, `newsletterBlurb`, `newsletterSampleUrl` (url, a past issue)
-- Copy: `copy` (buttons, labels, empty states, form messages, 404, footer sign-off). The fields and their defaults live in `lib/site-copy.ts`; an empty field shows the default, which the Studio shows as its placeholder. `{community}` and `{school}` are filled in where a field allows them. Form field labels and screen-reader text stay in code.
-- SEO: `defaultOgImage` (share image for any page without its own), `pageSeo` (title and description for home, podcasts, videos, newsletter, search)
+- Copy: `copy` (buttons, labels, empty states, form messages, the National front heading, the `/community` page text, 404, footer sign-off). The fields and their defaults live in `lib/site-copy.ts`; an empty field shows the default, which the Studio shows as its placeholder. `{community}` and `{school}` are filled in where a field allows them. Form field labels and screen-reader text stay in code.
+- SEO: `defaultOgImage` (share image for any page without its own), `pageSeo` (title and description for home, podcasts, videos, newsletter, search, national, community)
 
 ### infoPage
 - `title`, `slug` (one of `about`, `contact`, `terms`, `privacy`, `write-for-us`), `intro` (text, max 200), `body` (same Portable Text as articles)
@@ -256,7 +256,7 @@ Grid of articles where `contentType` = podcast or video, newest first, with the 
 Client-side search over a prebuilt JSON index (title, dek, tags, school, author) regenerated on publish. Good enough to 5,000 articles. Replace with Sanity search or Algolia later.
 
 ### `/community`
-One panel per school with a `circleJoinUrl`: "Open now", the community description, "Join {communityName}", and "Member sign in" when `circleSignInUrl` is set. The home Join card links here ("Find your community"). A waitlist for future schools is added after launch (spec release E).
+Heading, intro, labels, and closing line from Settings, Copy; then one panel per school with a `circleJoinUrl`: "Open now", the community description, "Join {communityName}", and "Member sign in" when `circleSignInUrl` is set. The home Join card links here ("Find your community"). A waitlist for future schools is added after launch (spec release E).
 
 ### `/newsletter`
 Headline, blurb, email form posting to `/api/newsletter`, sample issue link.

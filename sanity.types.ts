@@ -68,6 +68,22 @@ export type WriteForUs = {
   responseTime?: string;
 };
 
+export type National = {
+  kicker?: string;
+  heading?: string;
+};
+
+export type Community = {
+  kicker?: string;
+  heading?: string;
+  intro?: string;
+  openLabel?: string;
+  joinButton?: string;
+  signIn?: string;
+  closing?: string;
+  closingLink?: string;
+};
+
 export type NotFound = {
   headline?: string;
   body?: string;
@@ -99,6 +115,16 @@ export type PageSeoNewsletter = {
 };
 
 export type Search = {
+  title?: string;
+  description?: string;
+};
+
+export type PageSeoNational = {
+  title?: string;
+  description?: string;
+};
+
+export type PageSeoCommunity = {
   title?: string;
   description?: string;
 };
@@ -172,6 +198,8 @@ export type PageSeo = {
   videos?: Videos;
   newsletter?: PageSeoNewsletter;
   search?: Search;
+  national?: PageSeoNational;
+  community?: PageSeoCommunity;
 };
 
 export type SiteCopy = {
@@ -182,6 +210,8 @@ export type SiteCopy = {
   fronts?: Fronts;
   media?: Media;
   writeForUs?: WriteForUs;
+  national?: National;
+  community?: Community;
   notFound?: NotFound;
   footer?: Footer;
 };
@@ -680,6 +710,8 @@ export type AllSanitySchemaTypes =
   | Fronts
   | Media
   | WriteForUs
+  | National
+  | Community
   | NotFound
   | Footer
   | Home
@@ -687,6 +719,8 @@ export type AllSanitySchemaTypes =
   | Videos
   | PageSeoNewsletter
   | Search
+  | PageSeoNational
+  | PageSeoCommunity
   | SponsorSlotReference
   | SponsorSlotRef
   | Callout

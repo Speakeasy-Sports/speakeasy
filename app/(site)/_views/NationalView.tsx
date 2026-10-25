@@ -35,9 +35,9 @@ export async function NationalView({ page }: { page: number }) {
       <div className="shell">
         <header className="pt-10 sm:pt-14">
           <div className="flex flex-col gap-3 pb-6">
-            <p className="label-caps text-fg-muted">College sports</p>
+            <p className="label-caps text-fg-muted">{copy.national.kicker}</p>
             <h1 className="headline text-[3rem] leading-[0.95] tracking-[-0.035em] sm:text-[4.5rem] lg:text-[5.5rem]">
-              {page === 1 ? "National" : `National: latest, page ${page}`}
+              {page === 1 ? copy.national.heading : `${copy.national.heading}: latest, page ${page}`}
             </h1>
           </div>
           <div className="border-t-[3px] border-fg" />

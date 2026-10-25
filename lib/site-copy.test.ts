@@ -2,6 +2,14 @@ import { describe, expect, it } from "vitest";
 import { closingPeriod, COPY_SPEC, fillCopy, resolveCopy, unknownTokens } from "./site-copy";
 
 describe("resolveCopy", () => {
+  it("uses edited community and national copy, and keeps defaults for blank fields", () => {
+    const copy = resolveCopy({ community: { heading: "Pick your club.", joinButton: "Join the {community} crew", intro: " " }, national: { heading: "Across the country" } });
+    expect(copy.community.heading).toBe("Pick your club.");
+    expect(fillCopy(copy.community.joinButton, { community: "Dawg Social Club" })).toBe("Join the Dawg Social Club crew");
+    expect(copy.community.intro).toBe(COPY_SPEC.community.fields.intro.default);
+    expect(copy.national).toEqual({ kicker: "College sports", heading: "Across the country" });
+  });
+
   it("returns every default when nothing is set", () => {
     const copy = resolveCopy(null);
     expect(copy.newsletter.headerButton).toBe("Newsletter");

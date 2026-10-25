@@ -118,6 +118,32 @@ export const COPY_SPEC = {
       },
     },
   },
+  national: {
+    title: "National front",
+    fields: {
+      kicker: { title: "Label above the heading", default: "College sports", max: 24 },
+      heading: { title: "Heading", default: "National", max: 40, description: "Later pages add \": latest, page 2\" and so on." },
+    },
+  },
+  community: {
+    title: "Community page",
+    fields: {
+      kicker: { title: "Label above the heading", default: "Community", max: 24 },
+      heading: { title: "Heading", default: "Find your college sports community.", max: 80 },
+      intro: {
+        title: "Intro",
+        default:
+          "Every story here can keep going with the people who care as much as you do. Dawg Social Club is open now, and more schools are on the way.",
+        long: true,
+        description: "Name the open clubs here as more schools launch.",
+      },
+      openLabel: { title: "Label on each open club", default: "Open now", max: 24 },
+      joinButton: { title: "Join button", default: "Join {community}", tokens: ["community"], max: 40 },
+      signIn: { title: "Member sign-in link", default: "Member sign in", max: 30, description: "Shown when the school has a sign-in URL." },
+      closing: { title: "Closing line", default: "More communities are on the way. Want one for your school?", long: true },
+      closingLink: { title: "Closing link to the newsletter", default: "Get the newsletter and hear first", max: 60 },
+    },
+  },
   notFound: {
     title: "Page not found",
     fields: {
