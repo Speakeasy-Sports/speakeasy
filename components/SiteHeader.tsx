@@ -26,7 +26,7 @@ export function SiteHeader({ settings, newsletterLabel, menuLinks, media }: Prop
         <span aria-hidden="true" className="hidden md:block" />
         <Link
           href="/"
-          className="font-display text-[1.375rem] font-semibold leading-none tracking-[-0.02em] no-underline md:justify-self-center md:text-[1.625rem]"
+          className="font-display text-[1.375rem] font-semibold leading-none tracking-[-0.02em] no-underline md:justify-self-center md:text-[1.75rem] md:tracking-[-0.03em]"
         >
           {siteName}
         </Link>

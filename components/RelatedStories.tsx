@@ -13,7 +13,7 @@ export function RelatedStories({ articles, heading, hideAuthors }: Props) {
       </h2>
       <div className="grid gap-8 sm:grid-cols-2">
         {list.map((a) => (
-          <StoryCard key={a._id} article={a} hideAuthors={hideAuthors} imageWidth={440} sizes="(min-width: 640px) 430px, 100vw" />
+          <StoryCard key={a._id} article={a} hideAuthors={hideAuthors} compactOnPhone imageWidth={440} sizes="(min-width: 640px) 430px, 100vw" />
         ))}
       </div>
     </section>

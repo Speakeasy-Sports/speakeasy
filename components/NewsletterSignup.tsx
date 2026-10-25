@@ -4,6 +4,9 @@ import { useId, useState } from "react";
 import { track } from "@/lib/analytics/plausible";
 import { closingPeriod, type SiteCopy } from "@/lib/site-copy";
 import { NEWSLETTER_BLURB, NEWSLETTER_HEADLINE } from "@/lib/newsletter-copy";
+import { CheckMark, FORM_ERROR } from "./FormNotice";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Props = {
   /** inline: end of article. band: full-width two-column, directly above the footer. page: the /newsletter page. */
@@ -33,6 +36,12 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
     e.preventDefault();
     const form = e.currentTarget;
     const data = new FormData(form);
+    // The browser's own bubble looks different on every phone, so the form checks the address itself.
+    if (!EMAIL_RE.test(String(data.get("email") ?? "").trim())) {
+      setMessage(copy.invalidEmail);
+      setState("error");
+      return;
+    }
     setState("submitting");
     setMessage(null);
     try {
@@ -63,11 +72,12 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
 
   const form =
     state === "done" ? (
-      <p className="font-ui text-base text-fg" role="status">
+      <p className="flex gap-2.5 font-ui text-base text-fg" role="status">
+        <CheckMark />
         {copy.success}
       </p>
     ) : (
-      <form onSubmit={onSubmit} className="flex flex-col gap-3 font-ui sm:flex-row">
+      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-3 font-ui sm:flex-row">
         <label htmlFor={`${id}-email`} className="sr-only">
           Email address
         </label>
@@ -76,6 +86,8 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
           name="email"
           type="email"
           required
+          aria-invalid={state === "error" ? true : undefined}
+          aria-describedby={state === "error" ? `${id}-error` : undefined}
           autoComplete="email"
           inputMode="email"
           placeholder="Email address"
@@ -96,7 +108,7 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
 
   const error =
     state === "error" ? (
-      <p className="font-ui text-sm text-fg-muted" role="alert">
+      <p id={`${id}-error`} className={FORM_ERROR} role="alert">
         {message ?? "That did not go through. Try again in a moment."}
       </p>
     ) : null;

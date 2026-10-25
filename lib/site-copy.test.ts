@@ -2,6 +2,12 @@ import { describe, expect, it } from "vitest";
 import { closingPeriod, COPY_SPEC, fillCopy, resolveCopy, unknownTokens } from "./site-copy";
 
 describe("resolveCopy", () => {
+  it("fills the comment count line", () => {
+    const copy = resolveCopy(null);
+    expect(fillCopy(copy.join.articleLeadWithCount, { count: "12 comments", community: "Dawg Social Club" })).toBe("12 comments so far in Dawg Social Club.");
+    expect(unknownTokens(copy.join.articleLeadWithCount, ["count", "community"])).toEqual([]);
+  });
+
   it("uses edited community and national copy, and keeps defaults for blank fields", () => {
     const copy = resolveCopy({ community: { heading: "Pick your club.", joinButton: "Join the {community} crew", intro: " " }, national: { heading: "Across the country" } });
     expect(copy.community.heading).toBe("Pick your club.");

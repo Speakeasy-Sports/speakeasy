@@ -2,6 +2,8 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import type { SiteCopy } from "@/lib/site-copy";
+import { parseApplication } from "@/lib/email/application";
+import { CheckMark, FORM_ERROR } from "./FormNotice";
 
 type State = { kind: "idle" | "submitting" | "done" } | { kind: "error"; message: string; field?: string };
 
@@ -30,20 +32,26 @@ export function WriteForUsForm({ copy }: { copy: SiteCopy["writeForUs"] }) {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
+    const fields = {
+      name: data.get("name"),
+      email: data.get("email"),
+      cover: data.get("cover"),
+      sample1: data.get("sample1"),
+      sample2: data.get("sample2"),
+      social: data.get("social"),
+      worth: data.get("worth"),
+      adult: data.get("adult") === "on",
+    };
+    // Same rules as the server, checked here first so a typo shows the message without using up the hourly limit.
+    const check = parseApplication(fields);
+    if (!check.ok) return setState({ kind: "error", message: check.message, field: check.field });
     setState({ kind: "submitting" });
     try {
       const res = await fetch("/api/write-for-us", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: data.get("name"),
-          email: data.get("email"),
-          cover: data.get("cover"),
-          sample1: data.get("sample1"),
-          sample2: data.get("sample2"),
-          social: data.get("social"),
-          worth: data.get("worth"),
-          adult: data.get("adult") === "on",
+          ...fields,
           website: data.get("website") || "", // honeypot
           elapsed: Date.now() - startedAt.current,
         }),
@@ -58,9 +66,12 @@ export function WriteForUsForm({ copy }: { copy: SiteCopy["writeForUs"] }) {
 
   if (state.kind === "done") {
     return (
-      <div ref={status} tabIndex={-1} role="status" className="flex flex-col gap-2 font-ui outline-none">
-        <p className="text-base font-semibold text-fg">{copy.successTitle}</p>
-        <p className="text-base text-fg-muted">{copy.responseTime}</p>
+      <div ref={status} tabIndex={-1} role="status" className="flex gap-3 font-ui outline-none">
+        <CheckMark />
+        <div className="flex flex-col gap-2">
+          <p className="text-base font-semibold text-fg">{copy.successTitle}</p>
+          <p className="text-base text-fg-muted">{copy.responseTime}</p>
+        </div>
       </div>
     );
   }
@@ -70,7 +81,7 @@ export function WriteForUsForm({ copy }: { copy: SiteCopy["writeForUs"] }) {
   const described = (field: string) => (invalid(field) ? errId : undefined);
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-5 font-ui">
+    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5 font-ui">
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
           <label htmlFor={`${id}-name`} className={label}>
@@ -153,7 +164,7 @@ export function WriteForUsForm({ copy }: { copy: SiteCopy["writeForUs"] }) {
       <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
       <div className="flex flex-col gap-3">
         {state.kind === "error" && (
-          <div ref={status} id={errId} tabIndex={-1} role="alert" className="text-sm text-fg outline-none">
+          <div ref={status} id={errId} tabIndex={-1} role="alert" className={`${FORM_ERROR} outline-none`}>
             {state.message}
           </div>
         )}
