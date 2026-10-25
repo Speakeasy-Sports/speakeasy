@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { draftMode } from "next/headers";
-import { serif, serifItalic } from "@/lib/fonts";
+import { display, serif, serifItalic } from "@/lib/fonts";
 import { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
 import { Analytics } from "@/components/Analytics";
 import { DraftTools } from "@/components/DraftTools";
@@ -25,7 +25,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const isDraft = (await draftMode()).isEnabled;
   return (
-    <html lang="en" className={`${serif.variable} ${serifItalic.variable}`}>
+    <html lang="en" className={`${display.variable} ${serif.variable} ${serifItalic.variable}`}>
       <body className="min-h-dvh bg-bg text-fg antialiased">
         {children}
         {isDraft && <DraftTools />}

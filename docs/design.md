@@ -7,7 +7,7 @@ Status: October 20, 2026. Describes the site as built in `components/`, `styles/
 An editorial print feel: a newspaper front page on warm paper, not an app.
 
 - **Paper and ink.** Warm white background (`--bg` #FCFBF8), near-black text (`--fg` #141414). `--bg-elev` (#FFFFFF) is used sparingly for bands and frames behind photos.
-- **Serif for reading, sans for working.** Headlines, decks, and body set in the serif (Source Serif 4, a placeholder until V7). Labels, meta, buttons, forms, and navigation set in the system sans (`--font-ui`).
+- **Serif for reading, sans for working.** Headlines and the wordmark set in Fraunces; decks and body in Source Serif 4. Labels, meta, buttons, forms, and navigation set in the system sans (`--font-ui`).
 - **Hairlines, not boxes.** Structure comes from 1px rules in `--line` and whitespace. Avoid bordered cards, drop shadows, and filled panels. A 3px accent rule marks the current section and the top of a school front.
 - **Square photos.** Photo corners are square. `--radius` (6px) is for controls only: buttons, inputs, the menu toggle.
 - **Accent is ink, not paint.** The school accent appears on kickers (type and school labels), rules, links in body text, focus rings, and the join button. Never as a page or section background.
@@ -38,12 +38,12 @@ Story units on mixed fronts carry their own `data-school`, so a Georgia story on
 
 ## Type
 
-Two families, one file each for roman and italic, loaded in `lib/fonts.ts` with `next/font/local`. The roman is `--font-serif` and is preloaded. The italic is a separate `next/font` family, `--font-serif-italic`, that is not preloaded: it only appears below the first screen (body emphasis, pull quotes), and preloading it cost about 0.7s of article LCP on Lighthouse mobile. `globals.css` applies it to `.article-body em` and `.font-display.italic`; any new serif italic needs a selector there.
+Two families, loaded in `lib/fonts.ts` with `next/font/local`. Fraunces (`--font-fraunces`) is cut to weight 600 with its optical-size axis kept, so small headlines stay sturdy and large ones get finer detail; it is preloaded. Source Serif 4 is cut to weights 400 to 700, one file each for roman and italic. The roman is `--font-serif` and is preloaded. The italic is a separate `next/font` family, `--font-serif-italic`, that is not preloaded: it only appears below the first screen (body emphasis, pull quotes), and preloading it cost about 0.7s of article LCP on Lighthouse mobile. `globals.css` applies it to `.article-body em` and `.font-display.italic`; any new serif italic needs a selector there.
 
 | Token | Family | Use |
 |---|---|---|
-| `--font-display` | Source Serif 4 (variable, 200 to 900) | Headlines, wordmark, pull quotes |
-| `--font-body` | Same | Body, decks |
+| `--font-display` | Fraunces (600, optical size 9 to 144) | Headlines, wordmark |
+| `--font-body` | Source Serif 4 (400 to 700) | Body, decks, pull quotes (italic) |
 | `--font-ui` | `system-ui` stack | Labels, meta, buttons, forms, nav, captions |
 
 Body: `--text-body` 18px on phones, 20px from 768px, `--leading-body` 1.6, `--measure` 42rem. Base styles turn on balanced wrapping for h1 to h3, pretty wrapping for paragraphs, common ligatures, and tabular numerals in `<time>`.
@@ -57,7 +57,7 @@ Body: `--text-body` 18px on phones, 20px from 768px, `--leading-body` 1.6, `--me
 | Article H1 | 36 / 48px (md) | `headline`, leading 1.08 |
 | Lead story | 32 / 40 / 46px | leading 1.06 |
 | Newsletter band | 32 / 44px | |
-| Wordmark | 22 / 26px (md) | bold, tracking -0.03em |
+| Wordmark | 22 / 26px (md) | semibold, tracking -0.02em |
 | Rail promo title | 26px | |
 | Story card, story row | 19 / 22 to 23px | leading 1.2 |
 | Compact row | 16px | |

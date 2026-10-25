@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
 import { client } from "@/lib/sanity/client";
@@ -10,6 +12,11 @@ import { SITE_NAME } from "@/lib/seo";
 const WIDTH = 1200;
 const HEIGHT = 630;
 const CACHE = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800";
+
+// Image rendering takes static TTF or WOFF only, so these are fixed cuts: Fraunces at weight 600 and optical size 60
+// for the headline and wordmark, and a sans for the label and byline, as on the site.
+const fraunces = readFile(join(process.cwd(), "assets/fonts/fraunces-600-display.ttf"));
+const sans = readFile(join(process.cwd(), "assets/fonts/inter-latin-600-normal.woff"));
 
 /**
  * Social card for an article: headline, school accent (neutral for national stories), Speakeasy mark, author
@@ -41,9 +48,9 @@ export async function GET(request: NextRequest) {
           flexDirection: "column",
           justifyContent: "space-between",
           background: "#fcfbf8",
+          fontFamily: "Inter",
           color: "#141414",
           padding: "64px 72px",
-          fontFamily: "serif",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -56,17 +63,19 @@ export async function GET(request: NextRequest) {
               letterSpacing: 4,
               textTransform: "uppercase",
               color: accent,
-              fontWeight: 700,
+              fontWeight: 600,
             }}
           >
             <div style={{ width: 14, height: 56, background: accent }} />
             {kicker}
           </div>
-          <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.5 }}>{SITE_NAME}</div>
+          <div style={{ fontFamily: "Fraunces", fontSize: 30, fontWeight: 600, letterSpacing: -0.5 }}>{SITE_NAME}</div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-          <div style={{ fontSize: title.length > 70 ? 56 : 68, lineHeight: 1.08, fontWeight: 700, letterSpacing: -1.5 }}>{title}</div>
+          <div style={{ fontFamily: "Fraunces", fontSize: title.length > 70 ? 56 : 68, lineHeight: 1.08, fontWeight: 600, letterSpacing: -0.8 }}>
+            {title}
+          </div>
           {authors && (
             <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 28, color: "#5b5b57" }}>
               <div
@@ -80,7 +89,7 @@ export async function GET(request: NextRequest) {
                   background: accent,
                   color: accentFg,
                   fontSize: 22,
-                  fontWeight: 700,
+                  fontWeight: 600,
                 }}
               >
                 {authors.charAt(0).toUpperCase()}
@@ -91,7 +100,15 @@ export async function GET(request: NextRequest) {
         </div>
       </div>
     ),
-    { width: WIDTH, height: HEIGHT, headers: { "Cache-Control": CACHE } },
+    {
+      width: WIDTH,
+      height: HEIGHT,
+      headers: { "Cache-Control": CACHE },
+      fonts: [
+        { name: "Inter", data: await sans, style: "normal", weight: 600 },
+        { name: "Fraunces", data: await fraunces, style: "normal", weight: 600 },
+      ],
+    },
   );
 }
 
