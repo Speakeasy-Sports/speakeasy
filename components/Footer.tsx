@@ -19,7 +19,7 @@ function Column({ title, children }: { title: string; children: React.ReactNode 
   return (
     <div className="flex flex-col gap-3">
       <h2 className="label-caps text-fg-muted">{title}</h2>
-      <ul className="flex flex-col gap-2.5 font-ui text-[0.9375rem]">{children}</ul>
+      <ul className="flex flex-col gap-0 font-ui text-[0.9375rem] sm:gap-2.5">{children}</ul>
     </div>
   );
 }
@@ -27,7 +27,7 @@ function Column({ title, children }: { title: string; children: React.ReactNode 
 function Item({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <li>
-      <MenuLink href={href} className="text-fg no-underline transition-colors hover:text-fg-muted">
+      <MenuLink href={href} className="inline-flex min-h-11 items-center text-fg no-underline transition-colors hover:text-fg-muted sm:min-h-0">
         {children}
       </MenuLink>
     </li>

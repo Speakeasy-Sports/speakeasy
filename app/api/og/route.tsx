@@ -6,7 +6,7 @@ import { client } from "@/lib/sanity/client";
 import { ARTICLE_OG_QUERY } from "@/lib/sanity/queries";
 import { tags } from "@/lib/sanity/tags";
 import { contentTypeLabel } from "@/lib/content-types";
-import { accentForeground, isHex } from "@/lib/color";
+import { accentForeground, BUILTIN_ACCENTS, isHex } from "@/lib/color";
 import { SITE_NAME } from "@/lib/seo";
 
 const WIDTH = 1200;
@@ -31,9 +31,11 @@ export async function GET(request: NextRequest) {
   const article = await client.fetch(ARTICLE_OG_QUERY, { slug }, { next: { revalidate: 3600, tags: [tags.articleSlug(slug)] } });
   if (!article) return new Response("Not found", { status: 404, headers: { "Cache-Control": "public, max-age=300" } });
 
-  const accent = isHex(article.school?.accentColor) ? article.school.accentColor : "#141414";
+  const builtIn = article.school?.slug ? BUILTIN_ACCENTS[article.school.slug] : undefined;
+  const accent = isHex(article.school?.accentColor) ? article.school.accentColor : (builtIn ?? "#141414");
   const accentFg = accentForeground(accent);
   const title = truncate(article.title ?? "", 110);
+  const dek = truncate(article.dek ?? "", 68);
   const authors = (article.authors ?? []).map((a) => a.name).filter(Boolean).join(", ");
   const section = article.scope === "national" ? "National" : article.school?.shortName;
   const kicker = [contentTypeLabel(article.contentType), section].filter(Boolean).join("  /  ");
@@ -66,16 +68,17 @@ export async function GET(request: NextRequest) {
               fontWeight: 600,
             }}
           >
-            <div style={{ width: 14, height: 56, background: accent }} />
+            <div style={{ width: 8, height: 56, background: accent }} />
             {kicker}
           </div>
           <div style={{ fontFamily: "Fraunces", fontSize: 30, fontWeight: 600, letterSpacing: -0.5 }}>{SITE_NAME}</div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-          <div style={{ fontFamily: "Fraunces", fontSize: title.length > 70 ? 56 : 68, lineHeight: 1.08, fontWeight: 600, letterSpacing: -0.8 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          <div style={{ fontFamily: "Fraunces", fontSize: title.length > 70 ? 60 : 72, lineHeight: 1.04, fontWeight: 600, letterSpacing: -0.8 }}>
             {title}
           </div>
+          {dek && <div style={{ fontSize: 28, lineHeight: 1.3, color: "#5b5b57" }}>{dek}</div>}
           {authors && (
             <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 28, color: "#5b5b57" }}>
               <div

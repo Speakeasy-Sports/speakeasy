@@ -12,7 +12,7 @@ export function CommunityInvite({ title, body }: Props) {
       </div>
       <Link
         href="/community"
-        className="inline-flex h-10 shrink-0 items-center justify-center self-start whitespace-nowrap rounded-base border border-fg px-4 text-sm font-semibold text-fg no-underline transition-opacity hover:opacity-90 sm:self-auto"
+        className="inline-flex h-11 shrink-0 items-center justify-center self-start whitespace-nowrap rounded-base border border-fg px-4 text-sm font-semibold text-fg no-underline transition-colors hover:bg-bg-elev sm:h-10 sm:self-auto"
       >
         {title}
       </Link>

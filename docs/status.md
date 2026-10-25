@@ -105,6 +105,10 @@ Stacked branches, each merged in order:
 - Supersedes the four-pick front-page curation in PR #12.
 - After launch: E (waitlist on `/community`, stored in Sanity) and F (share, topics).
 
+## Design sweep, before-launch fixes (October 25, 2026)
+
+From `docs/reviews/design-sweep-2026-10-25.md`: full-height email field on phones, space under the byline on text-only articles, the secondary row three across from 640px with a heavier text-only card, a two-column front from 768px, full-strength body links outside school sections, share images with the school color (built-in backup for Georgia), a larger headline and the summary, button hover that shifts color instead of fading, 44px tap targets on phones, author initials when there is no photo, the club card on the national front, whole-unit hover on stories, and tabular digits in labels and meta. Georgia's accent colors are set in the Studio. The after-launch list in the review is the plan of record.
+
 ## Remaining for launch (AGENTS.md section 12, Phase 1)
 
 - Live end-to-end test on a preview with the real Sanity project, Circle, and Postmark: publish to site and Circle post within a minute, comment count update (settles V5), review email, newsletter signup (the open questions in `docs/circle-api-notes.md`).

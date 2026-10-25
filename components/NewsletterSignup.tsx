@@ -79,7 +79,7 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
           autoComplete="email"
           inputMode="email"
           placeholder="Email address"
-          className="h-12 min-w-0 flex-1 rounded-base border border-line bg-bg px-4 text-base text-fg placeholder:text-fg-subtle focus:outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
+          className="h-12 min-w-0 rounded-base sm:flex-1 border border-line bg-bg px-4 text-base text-fg placeholder:text-fg-subtle focus:outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
         />
         {school && <input type="hidden" name="school" value={school} />}
         {/* Honeypot. Hidden from people, filled by bots. */}
@@ -87,7 +87,7 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
         <button
           type="submit"
           disabled={state === "submitting"}
-          className="h-12 shrink-0 rounded-base bg-fg px-6 text-sm font-semibold text-bg transition-opacity hover:opacity-90 disabled:opacity-60"
+          className="h-12 shrink-0 rounded-base bg-fg px-6 text-sm font-semibold text-bg transition-colors hover-ink-shift disabled:opacity-60"
         >
           {state === "submitting" ? "Signing up" : copy.button}
         </button>

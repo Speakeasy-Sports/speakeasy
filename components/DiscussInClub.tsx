@@ -29,7 +29,7 @@ export function DiscussInClub({ label, joinLabel, postUrl, commentCount, joinUrl
             ? track({ name: "discuss_click", props: { school: schoolSlug ?? undefined } })
             : track({ name: "join_click", props: { location: "article_end" } })
         }
-        className="inline-flex items-center gap-2 rounded-base bg-accent px-5 py-3 font-ui text-base font-semibold text-accent-fg no-underline transition-opacity hover:opacity-90"
+        className="inline-flex items-center gap-2 rounded-base bg-accent px-5 py-3 font-ui text-base font-semibold text-accent-fg no-underline transition-colors hover-accent-shift"
       >
         {postUrl ? label : joinLabel}
       </a>

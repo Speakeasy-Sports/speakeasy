@@ -161,7 +161,7 @@ export function WriteForUsForm({ copy }: { copy: SiteCopy["writeForUs"] }) {
           <button
             type="submit"
             disabled={state.kind === "submitting"}
-            className="h-12 shrink-0 rounded-base bg-fg px-6 text-sm font-semibold text-bg transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="h-12 shrink-0 rounded-base bg-fg px-6 text-sm font-semibold text-bg transition-colors hover-ink-shift disabled:opacity-60"
           >
             {state.kind === "submitting" ? "Sending" : copy.button}
           </button>

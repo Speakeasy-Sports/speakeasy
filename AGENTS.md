@@ -414,7 +414,7 @@ Rules:
 | `SchoolNav` | Section sub-nav: Latest, Podcasts, Videos, tags |
 | `LeadStory`, `StoryCard`, `StoryRow` | Front page units. Image sizes fixed via `next/image` with `sizes` set |
 | `TypeLabel`, `SchoolLabel` | Small caps labels in accent |
-| `Byline` | Author photo, name link, timestamp with `<time datetime>` |
+| `Byline` | Author photo (or the initial in the section color when there is none, via `AuthorAvatar`), name link, timestamp with `<time datetime>` |
 | `HeroImage` | `next/image`, priority on article pages, caption and credit |
 | `MediaFrame` | Fixed aspect-ratio container (16:9 video, 152px podcast) that prevents layout shift |
 | `YouTubeEmbed` | Facade: thumbnail + play button, loads iframe on click. Fires `video_play` |

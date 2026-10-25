@@ -43,7 +43,7 @@ export function SiteHeader({ settings, newsletterLabel, menuLinks, media }: Prop
           </Link>
           <Link
             href="/newsletter"
-            className="inline-flex h-11 items-center justify-center whitespace-nowrap rounded-base bg-fg px-4 font-ui text-sm font-semibold text-bg no-underline transition-opacity hover:opacity-90 md:h-10"
+            className="inline-flex h-11 items-center justify-center whitespace-nowrap rounded-base bg-fg px-4 font-ui text-sm font-semibold text-bg no-underline transition-colors hover-ink-shift md:h-10"
           >
             {newsletterLabel}
           </Link>

@@ -1,6 +1,6 @@
 import { formatPublished } from "@/lib/format/date";
 import type { ArticleCard } from "@/lib/types";
-import { SanityImage } from "./SanityImage";
+import { AuthorAvatar } from "./AuthorAvatar";
 
 type Props = {
   article: Pick<ArticleCard, "authors" | "publishedAt">;
@@ -18,12 +18,8 @@ export function StoryMeta({ article, withPhoto, hideAuthors, className = "" }: P
   const first = authors[0];
 
   return (
-    <p className={`flex items-center gap-2.5 font-ui text-[0.8125rem] leading-none text-fg-subtle ${className}`}>
-      {withPhoto && !hideAuthors && first?.photo?.asset && (
-        <span className="h-7 w-7 shrink-0 overflow-hidden rounded-full bg-line">
-          <SanityImage image={first.photo} decorative width={56} aspect={1} sizes="28px" className="h-full w-full object-cover" />
-        </span>
-      )}
+    <p className={`flex items-center gap-2.5 font-ui text-[0.8125rem] leading-none tabular-nums text-fg-subtle ${className}`}>
+      {withPhoto && !hideAuthors && first?.name && <AuthorAvatar name={first.name} photo={first.photo} size={28} />}
       {!hideAuthors && names && <span className="font-medium text-fg">{names}</span>}
       {!hideAuthors && names && article.publishedAt && <span aria-hidden="true">&middot;</span>}
       {article.publishedAt && <time dateTime={article.publishedAt}>{formatPublished(article.publishedAt)}</time>}

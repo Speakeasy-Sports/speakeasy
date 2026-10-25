@@ -7,6 +7,7 @@ import { pageQuery } from "@/lib/sanity/paginate";
 import { tags } from "@/lib/sanity/tags";
 import { resolveCopy } from "@/lib/site-copy";
 import { NATIONAL_SLUG } from "@/lib/seo";
+import { joinUrlFor } from "@/lib/circle-links";
 import { FrontPage, LATEST_PER_PAGE, latestPages } from "@/components/FrontPage";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
 
@@ -50,6 +51,8 @@ export async function NationalView({ page }: { page: number }) {
           page={page}
           basePath={`/${NATIONAL_SLUG}`}
           national
+          // Same club card as home: the site-wide join link and "Find your community", never one school's signup.
+          community={{ name: copy.join.homeCardHeadline, joinUrl: joinUrlFor(null, settings), findCommunity: true }}
           hideAuthors={signals.singleAuthor}
           copy={copy}
         />

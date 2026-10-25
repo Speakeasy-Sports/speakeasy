@@ -6,7 +6,7 @@ export function HeroImage({ image }: { image: ImageWithMeta | null | undefined }
   const hasText = Boolean(image.caption || image.credit);
 
   return (
-    <figure className="my-8">
+    <figure className="mb-8">
       <div className="overflow-hidden bg-bg-elev" style={{ aspectRatio: "16 / 9" }}>
         <SanityImage
           image={image}
