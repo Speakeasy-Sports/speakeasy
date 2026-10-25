@@ -530,7 +530,7 @@ Acceptance: inline thread matches the Circle post, MAU usage visible in a monthl
 | V4 | Admin API v2 base URL, create-post body format (TipTap JSON vs. plain), image attachment on posts | Section 7.2 | Done October 19, 2026: TipTap JSON, cover via direct upload. See `docs/circle-api-notes.md` |
 | V5 | Circle Workflows can call an external webhook on "comment created" | Section 7.3 primary vs. fallback | Engineering, Circle admin. Docs confirm webhook actions exist; the "comment created" trigger still needs checking in the admin |
 | V6 | Current WordPress URLs worth redirecting | Section 6 redirects | Done October 20, 2026: No legacy content; no redirects needed |
-| V7 | Brand assets and type choices | Tokens and fonts | Type done October 25, 2026: Fraunces headlines, Source Serif 4 text. Mark and icon still placeholders (Jon) |
+| V7 | Brand assets and type choices | Tokens and fonts | Type done October 25, 2026: Fraunces headlines, Source Serif 4 text. Logo still to come (Jon); the browser and home-screen icon is a stopgap Fraunces S |
 | V8 | Photo rights plan for hero images | Content ops, not code | Jon |
 | V9 | Admin API budget target vs. comment-count fallback. Section 3 says design for under 5,000 requests per month; the hourly cron fallback in 7.3 uses about 18,000. Decide: raise the target, or run the fallback every 4 hours (about 4,500) | Only matters if V5 fails and the cron fallback is used | Jon |
 

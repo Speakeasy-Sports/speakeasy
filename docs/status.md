@@ -109,14 +109,14 @@ Stacked branches, each merged in order:
 
 - Live end-to-end test on a preview with the real Sanity project, Circle, and Postmark: publish to site and Circle post within a minute, comment count update (settles V5), review email, newsletter signup (the open questions in `docs/circle-api-notes.md`).
 - Lighthouse on the Vercel preview to confirm the scores above.
-- V7 brand mark (the wordmark is set in Fraunces; the icon is a placeholder), V8 photo rights, V9 if V5 fails.
+- V7 brand logo (the wordmark is set in Fraunces; `app/icon.svg` and `app/apple-icon.png` are a stopgap Fraunces S), V8 photo rights, V9 if V5 fails.
 - Load 15 to 20 articles; Flodesk export and Email Hub import.
 
 ## Not possible from the repo
 
 - Creating the Sanity project, tokens, CORS origins, and roles. See `docs/setup.md`.
 - Creating the Vercel project and env vars.
-- Brand mark (V7). `app/icon.svg` is a placeholder.
+- Brand logo (V7). Replace `app/icon.svg` and `app/apple-icon.png` when it arrives.
 
 ## Decided
 
