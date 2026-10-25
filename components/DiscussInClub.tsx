@@ -3,25 +3,26 @@
 import { track } from "@/lib/analytics/plausible";
 
 type Props = {
+  /** One line above the button, already filled in, for example "12 comments so far in Dawg Social Club." */
+  lead: string;
   /** Button text when the post exists, already filled in, for example "Discuss in Dawg Social Club". */
   label: string;
   /** Button text before the post exists, for example "Join Dawg Social Club". */
   joinLabel: string;
   postUrl: string | null | undefined;
-  commentCount: number | null | undefined;
   joinUrl: string;
   schoolSlug?: string | null;
 };
 
 /**
- * Button to the Circle post with its comment count. Until the post exists it says what it does: join the school's
- * club (docs/specs/phase-1-ux-update.md, 6.3).
+ * One line about the conversation, then the button to the Circle post. Until the post exists the button says what it
+ * does: join the school's club (docs/specs/phase-1-ux-update.md, 6.3). The comment count lives in the line (design
+ * sweep F15), so the button never stands alone.
  */
-export function DiscussInClub({ label, joinLabel, postUrl, commentCount, joinUrl, schoolSlug }: Props) {
-  const count = typeof commentCount === "number" && postUrl ? commentCount : null;
-
+export function DiscussInClub({ lead, label, joinLabel, postUrl, joinUrl, schoolSlug }: Props) {
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-col items-start gap-3">
+      <p className="font-ui text-base text-fg">{lead}</p>
       <a
         href={postUrl || joinUrl}
         onClick={() =>
@@ -33,11 +34,6 @@ export function DiscussInClub({ label, joinLabel, postUrl, commentCount, joinUrl
       >
         {postUrl ? label : joinLabel}
       </a>
-      {count !== null && (
-        <span className="font-ui text-sm text-fg-muted">
-          {count} {count === 1 ? "comment" : "comments"}
-        </span>
-      )}
     </div>
   );
 }

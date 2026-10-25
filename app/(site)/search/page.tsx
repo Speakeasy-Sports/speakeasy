@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function SearchPage() {
   return (
     <div className="shell max-w-4xl pt-10 sm:pt-14">
-      <h1 className="label-caps mb-4 text-fg-muted">Search</h1>
+      <h1 className="headline mb-6 text-[2.75rem] leading-[0.98] tracking-[-0.03em] sm:text-[4rem]">Search</h1>
       {/* Same footprint as the input so nothing moves when the client part arrives. */}
       <Suspense fallback={<div aria-hidden="true" className="h-16 border-b-2 border-fg sm:h-20" />}>
         <SearchClient />

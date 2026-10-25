@@ -38,7 +38,7 @@ export function HeaderNav({ schools, media }: { schools: School[]; media: MediaS
   const items = sectionLinks(schools, media);
 
   return (
-    <nav aria-label="Sections" className="flex justify-center gap-8">
+    <nav aria-label="Sections" className="flex justify-center gap-10">
       {items.map((item) => {
         const current = segment === item.segment;
         return (
@@ -47,7 +47,8 @@ export function HeaderNav({ schools, media }: { schools: School[]; media: MediaS
             href={item.href}
             data-school={item.school ?? undefined}
             aria-current={current ? "page" : undefined}
-            className={`label-caps relative py-3 no-underline transition-colors ${
+            // One step above the 12px kickers on cards, so navigation does not read as a label (design sweep F17).
+            className={`relative py-3.5 font-ui text-[0.8125rem] font-semibold uppercase tracking-[0.06em] no-underline transition-colors ${
               current
                 ? "text-fg after:absolute after:inset-x-0 after:bottom-0 after:h-[3px] after:bg-accent"
                 : "text-fg-muted hover:text-fg"

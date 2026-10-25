@@ -90,6 +90,12 @@ export async function ArticleView({ article, slug }: { article: LoadedArticle; s
   const clubJoinUrl = school ? stegaClean(school.circleJoinUrl) : null;
   const [readNext, ...moreToRead] = (article.related ?? []).filter((a) => a.path);
   const copy = resolveCopy(settings?.copy);
+  const community = (school && stegaClean(school.communityName)) || "the Club";
+  const comments = postUrl && typeof article.circleCommentCount === "number" ? article.circleCommentCount : 0;
+  const clubLead =
+    comments > 0
+      ? fillCopy(copy.join.articleLeadWithCount, { community, count: `${comments} ${comments === 1 ? "comment" : "comments"}` })
+      : fillCopy(copy.join.articleLead, { community });
   const authors = (article.authors ?? []).filter((a) => a.name);
   const section = sectionName(article);
 
@@ -165,7 +171,7 @@ export async function ArticleView({ article, slug }: { article: LoadedArticle; s
 
         {/* 8. Read next, then the end block */}
         <ReadNext article={readNext} heading={copy.article.readNextHeading} />
-        <footer className="measure mt-12 flex flex-col divide-y divide-line border-t border-line [&>*]:py-8 [&>*:last-child]:pb-0">
+        <footer className="measure mt-12 flex flex-col divide-y divide-line border-t border-line [&>*]:py-6 [&>*:last-child]:pb-0">
           <div className="flex flex-col gap-3">
             {authors.map((a) => (
               <AuthorCard key={a._id} author={a} />
@@ -188,10 +194,10 @@ export async function ArticleView({ article, slug }: { article: LoadedArticle; s
           />
           {school && (postUrl || clubJoinUrl) ? (
             <DiscussInClub
-              label={fillCopy(copy.join.discussButton, { community: stegaClean(school.communityName) ?? "the Club" })}
-              joinLabel={fillCopy(copy.join.schoolButton, { community: stegaClean(school.communityName) ?? "the Club" })}
+              lead={clubLead}
+              label={fillCopy(copy.join.discussButton, { community })}
+              joinLabel={fillCopy(copy.join.schoolButton, { community })}
               postUrl={postUrl}
-              commentCount={article.circleCommentCount}
               joinUrl={clubJoinUrl ?? postUrl ?? ""}
               schoolSlug={schoolSlug}
             />

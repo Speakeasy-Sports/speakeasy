@@ -423,7 +423,7 @@ Rules:
 | `PortableTextRenderer` | Maps blocks in section 5 to components |
 | `PullQuote`, `Callout` | |
 | `SponsorSlot` | Renders only when an active slot matches; "Presented by" label, logo, headline, link |
-| `DiscussInClub` | Button to Circle post with comment count. Before the post exists it reads "Join {communityName}" and links to the school's join url. Fires `discuss_click`, or `join_click` (article_end) before the post |
+| `DiscussInClub` | One line above the button (`join.articleLead`, or `join.articleLeadWithCount` once there are comments), then the button to the Circle post. Before the post exists it reads "Join {communityName}" and links to the school's join url. Fires `discuss_click`, or `join_click` (article_end) before the post |
 | `CommunityInvite` | End of national stories and schools without a club: "Find your community" to `/community` |
 | `ReadNext` | The one larger related story after the body. Fires `read_next_click` |
 | `AuthorCard` | End-of-article |

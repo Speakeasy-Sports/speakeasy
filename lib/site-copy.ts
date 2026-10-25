@@ -7,7 +7,7 @@
  */
 // `max` is the Studio length limit. Buttons are short because they never wrap (the header has 390px on a phone).
 type Entry = { title: string; default: string; description?: string; tokens?: readonly CopyToken[]; long?: boolean; max?: number };
-export type CopyToken = "community" | "school";
+export type CopyToken = "community" | "school" | "count";
 
 export const COPY_SPEC = {
   join: {
@@ -32,6 +32,18 @@ export const COPY_SPEC = {
         long: true,
       },
       cardButton: { title: "Promo card button", default: "Join free", max: 24 },
+      articleLead: {
+        title: "Article club line",
+        default: "Every story continues in {community}.",
+        tokens: ["community"],
+        description: "One line above the club button at the end of school stories, before anyone has commented.",
+      },
+      articleLeadWithCount: {
+        title: "Article club line, with comments",
+        default: "{count} so far in {community}.",
+        tokens: ["count", "community"],
+        description: "Once the story has comments. {count} becomes the number with its noun, like \"12 comments\".",
+      },
       discussButton: {
         title: "Article discuss button",
         default: "Discuss in {community}",
@@ -47,6 +59,7 @@ export const COPY_SPEC = {
       kicker: { title: "Label above the headline", default: "Newsletter", max: 24 },
       button: { title: "Button", default: "Sign up", max: 20 },
       success: { title: "After signing up", default: "You are on the list. The next issue comes to your inbox.", long: true },
+      invalidEmail: { title: "Email address not valid", default: "Enter a full email address, like name@example.com." },
       finePrint: { title: "Fine print", default: "Free. Unsubscribe anytime." },
       sampleLink: { title: "Sample issue link", default: "Read a sample issue", description: "Shown when a sample issue URL is set." },
       recentHeading: { title: "Newsletter page, recent stories heading", default: "Recently on Speakeasy" },
@@ -180,7 +193,7 @@ export function resolveCopy(raw: RawCopy): SiteCopy {
   return out as SiteCopy;
 }
 
-/** Fills `{community}` and `{school}`. An unknown or missing token is left as typed so the mistake is visible. */
+/** Fills `{community}`, `{school}`, and `{count}`. An unknown or missing token is left as typed so the mistake is visible. */
 export function fillCopy(template: string, values: Partial<Record<CopyToken, string | null | undefined>>): string {
   return template.replace(/\{(\w+)\}/g, (match, name: string) => values[name as CopyToken] ?? match);
 }

@@ -147,6 +147,20 @@ test("write for us page shows the application and is linked from the footer", as
   await expect(page.getByRole("button", { name: "Send application" })).toBeVisible();
 });
 
+test("newsletter form explains a bad address in its own words", async ({ page }) => {
+  await page.goto("/newsletter");
+  await page.getByLabel("Email address").first().fill("not-an-email");
+  await page.getByRole("button", { name: "Sign up" }).first().click();
+  await expect(page.getByRole("alert").filter({ hasText: "Enter a full email address" })).toBeVisible();
+});
+
+test("a missing page offers the newest stories", async ({ page }) => {
+  const res = await page.goto("/georgia/no-such-story-here");
+  expect(res?.status()).toBe(404);
+  await expect(page.getByRole("link", { name: /front page/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Latest" })).toBeVisible();
+});
+
 test("newsletter form reaches the handler and says when signups are not open", async ({ page }) => {
   // CI has no Circle token or form id, so the handler answers 503 with its own message.
   await page.goto("/newsletter");

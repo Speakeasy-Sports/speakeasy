@@ -109,6 +109,8 @@ Stacked branches, each merged in order:
 
 From `docs/reviews/design-sweep-2026-10-25.md`: full-height email field on phones, space under the byline on text-only articles, the secondary row three across from 640px with a heavier text-only card, a two-column front from 768px, full-strength body links outside school sections, share images with the school color (built-in backup for Georgia), a larger headline and the summary, button hover that shifts color instead of fading, 44px tap targets on phones, author initials when there is no photo, the club card on the national front, whole-unit hover on stories, and tabular digits in labels and meta. Georgia's accent colors are set in the Studio. The after-launch list in the review is the plan of record.
 
+Polish batch 1 (same review): a one-line club invitation above the Discuss or Join button with the comment count in the sentence (two new copy fields), compact More to read rows on phones, tighter article-end spacing, form errors and confirmations in the site's own style (the Write for us form checks with the server's rules before sending, so typos never use the hourly limit), a 404 page with the three newest stories, a full-size Search heading, 13px desktop section links, and a larger desktop wordmark.
+
 ## Remaining for launch (AGENTS.md section 12, Phase 1)
 
 - Live end-to-end test on a preview with the real Sanity project, Circle, and Postmark: publish to site and Circle post within a minute, comment count update (settles V5), review email, newsletter signup (the open questions in `docs/circle-api-notes.md`).
