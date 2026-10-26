@@ -3,6 +3,7 @@ import { DocumentTextIcon } from "@sanity/icons/DocumentText";
 import { altField, imageWithAltFields } from "./shared/imageWithAlt";
 import { slugFormat } from "./shared/validation";
 import { StatusInput } from "../components/StatusInput";
+import { editorsOnly } from "../roles";
 
 export const CONTENT_TYPES = [
   { title: "Analysis", value: "analysis" },
@@ -48,8 +49,8 @@ export const article = defineType({
     { name: "content", title: "Content", default: true },
     { name: "media", title: "Media" },
     { name: "workflow", title: "Workflow" },
-    { name: "seo", title: "SEO and social" },
-    { name: "circle", title: "Circle sync" },
+    { name: "seo", title: "SEO and social", hidden: editorsOnly },
+    { name: "circle", title: "Circle sync", hidden: editorsOnly },
   ],
   fields: [
     // Identity
@@ -125,20 +126,12 @@ export const article = defineType({
       of: [defineArrayMember({ type: "reference", to: [{ type: "author" }] })],
       validation: (rule) => rule.required().min(1).unique(),
     }),
-    defineField({
-      name: "tags",
-      type: "array",
-      group: "content",
-      of: [defineArrayMember({ type: "reference", to: [{ type: "tag" }] })],
-      validation: (rule) => rule.unique(),
-    }),
-    defineField({ name: "body", type: "body", group: "content" }),
 
-    // Media
+    // Hero: in Content as well as Media, so a writer on a phone sets it without switching tabs (design sweep S1).
     defineField({
       name: "heroType",
       type: "string",
-      group: "media",
+      group: ["content", "media"],
       description: "Text only is a normal format: use a photo when it adds something.",
       options: { list: [...HERO_TYPES], layout: "radio" },
       initialValue: "none",
@@ -147,7 +140,7 @@ export const article = defineType({
     defineField({
       name: "heroImage",
       type: "image",
-      group: "media",
+      group: ["content", "media"],
       options: { hotspot: true },
       fields: imageWithAltFields,
       hidden: ({ document }) => document?.heroType !== "image",
@@ -160,7 +153,7 @@ export const article = defineType({
     defineField({
       name: "heroEmbed",
       type: "heroEmbed",
-      group: "media",
+      group: ["content", "media"],
       hidden: ({ document }) => document?.heroType !== "video" && document?.heroType !== "podcast",
       validation: (rule) =>
         rule.custom((value: { url?: string; provider?: string } | undefined, context) => {
@@ -172,6 +165,16 @@ export const article = defineType({
           return true;
         }),
     }),
+    defineField({ name: "body", type: "body", group: "content" }),
+    defineField({
+      name: "tags",
+      type: "array",
+      group: "content",
+      of: [defineArrayMember({ type: "reference", to: [{ type: "tag" }] })],
+      validation: (rule) => rule.unique(),
+    }),
+
+    // Media
     defineField({
       name: "episodeSummary",
       type: "text",
@@ -205,12 +208,14 @@ export const article = defineType({
       name: "publishedAt",
       type: "datetime",
       group: "workflow",
+      hidden: editorsOnly,
       description: "Set by editors on publish or schedule. Filled in automatically if left empty.",
     }),
     defineField({
       name: "updatedAt",
       type: "datetime",
       group: "workflow",
+      hidden: editorsOnly,
       description: 'Set on any edit after publish. Renders as "Updated ..." when later than the publish time.',
     }),
     defineField({
@@ -218,6 +223,7 @@ export const article = defineType({
       type: "text",
       rows: 3,
       group: "workflow",
+      hidden: editorsOnly,
       description: "Rendered at the end of the article. Corrections are never silent.",
       validation: (rule) => rule.max(1000),
     }),
@@ -229,28 +235,30 @@ export const article = defineType({
       name: "memberOnly",
       type: "boolean",
       group: "workflow",
+      hidden: editorsOnly,
       initialValue: false,
       description: "Enforced in Phase 2 only.",
     }),
 
     // SEO and social
-    defineField({ name: "seoTitle", type: "string", group: "seo", validation: (rule) => rule.max(70) }),
-    defineField({ name: "seoDescription", type: "text", rows: 2, group: "seo", validation: (rule) => rule.max(160) }),
+    defineField({ name: "seoTitle", type: "string", group: "seo", hidden: editorsOnly, validation: (rule) => rule.max(70) }),
+    defineField({ name: "seoDescription", type: "text", rows: 2, group: "seo", hidden: editorsOnly, validation: (rule) => rule.max(160) }),
     defineField({
       name: "ogImageOverride",
       type: "image",
       group: "seo",
+      hidden: editorsOnly,
       description: "Replaces the generated social card.",
       fields: [altField],
     }),
-    defineField({ name: "noIndex", type: "boolean", group: "seo", initialValue: false }),
+    defineField({ name: "noIndex", type: "boolean", group: "seo", hidden: editorsOnly, initialValue: false }),
 
     // Circle sync, written by the webhook handler
-    defineField({ name: "circlePostId", type: "string", group: "circle", readOnly: true }),
-    defineField({ name: "circlePostUrl", type: "url", group: "circle", readOnly: true }),
-    defineField({ name: "circleCommentCount", type: "number", group: "circle", readOnly: true }),
-    defineField({ name: "circleSyncedAt", type: "datetime", group: "circle", readOnly: true }),
-    defineField({ name: "circleSyncError", type: "string", group: "circle", readOnly: true }),
+    defineField({ name: "circlePostId", type: "string", group: "circle", readOnly: true, hidden: editorsOnly }),
+    defineField({ name: "circlePostUrl", type: "url", group: "circle", readOnly: true, hidden: editorsOnly }),
+    defineField({ name: "circleCommentCount", type: "number", group: "circle", readOnly: true, hidden: editorsOnly }),
+    defineField({ name: "circleSyncedAt", type: "datetime", group: "circle", readOnly: true, hidden: editorsOnly }),
+    defineField({ name: "circleSyncError", type: "string", group: "circle", readOnly: true, hidden: editorsOnly }),
   ],
   orderings: [
     { title: "Publish date, newest", name: "publishedAtDesc", by: [{ field: "publishedAt", direction: "desc" }] },

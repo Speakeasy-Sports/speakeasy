@@ -517,12 +517,6 @@ export type Article = {
       _key: string;
     } & AuthorReference
   >;
-  tags?: Array<
-    {
-      _key: string;
-    } & TagReference
-  >;
-  body?: Body;
   heroType?: "none" | "image" | "video" | "podcast";
   heroImage?: {
     asset?: SanityImageAssetReference;
@@ -535,6 +529,12 @@ export type Article = {
     _type: "image";
   };
   heroEmbed?: HeroEmbed;
+  body?: Body;
+  tags?: Array<
+    {
+      _key: string;
+    } & TagReference
+  >;
   episodeSummary?: string;
   episodeTimestamps?: Array<
     {

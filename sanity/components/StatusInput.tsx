@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { useCurrentUser, type StringInputProps, type StringSchemaType } from "sanity";
-
-const PUBLISH_ROLES = new Set(["administrator", "editor"]);
+import { canPublish as userCanPublish } from "../roles";
 
 type ListOption = { title: string; value: string };
 
@@ -9,7 +8,7 @@ type ListOption = { title: string; value: string };
 // The site sets status to published when a document publishes (AGENTS.md section 5).
 export function StatusInput(props: StringInputProps) {
   const user = useCurrentUser();
-  const canPublish = user?.roles.some((r) => PUBLISH_ROLES.has(r.name)) ?? false;
+  const canPublish = userCanPublish(user);
 
   const schemaType = useMemo<StringSchemaType>(() => {
     if (canPublish) return props.schemaType;

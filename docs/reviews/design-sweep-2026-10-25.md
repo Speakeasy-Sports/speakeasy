@@ -349,7 +349,7 @@ After launch:
 - F20 404 and search empty states. Done before launch (polish batch 1).
 - F21 Dark subtle token headroom (only if the band surface changes).
 - F23 Masthead weight and the game-week positioning line; the wordmark cut waits for the real logo (decision 5). Masthead weight done before launch (polish batch 1); the positioning line is a Studio edit.
-- S1 Phone-friendly Studio for contributors (added October 25, after launch, about half a day). Test the article form at 390px and simplify it for the Contributor role: title, dek, school, body, and hero first; SEO, Circle sync, episode notes, and sponsor fields collapsed or hidden. No new system: contributors keep drafting in the Studio and submit for review. Revisit a separate quick-draft form only if two or three regular contributors still find the Studio painful on a phone after this pass, and build it after the Phase 2 login work.
+- S1 Phone-friendly Studio for contributors (added October 25). Done October 26: essentials-first field order, hero in the Content tab, editor-only tabs and fields hidden from Contributors. Not yet tested on a phone with a Contributor login. Original note: Test the article form at 390px and simplify it for the Contributor role: title, dek, school, body, and hero first; SEO, Circle sync, episode notes, and sponsor fields collapsed or hidden. No new system: contributors keep drafting in the Studio and submit for review. Revisit a separate quick-draft form only if two or three regular contributors still find the Studio painful on a phone after this pass, and build it after the Phase 2 login work.
 
 ## 5. Already working well
 
