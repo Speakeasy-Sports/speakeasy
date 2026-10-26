@@ -45,7 +45,7 @@ export async function HomeView({ page }: { page: number }) {
           copy={copy}
         />
       </div>
-      <div className="mt-24">
+      <div className="mt-16">
         <NewsletterSignup
           variant="band"
           headline={settings?.newsletterHeadline}

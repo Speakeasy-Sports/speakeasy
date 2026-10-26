@@ -14,7 +14,7 @@ export function ReadNext({ article, heading }: Props) {
   const picture = hasPicture(article);
 
   return (
-    <section aria-labelledby="read-next-h" className="measure mt-14 border-t border-fg pt-6">
+    <section aria-labelledby="read-next-h" className="measure mt-12 border-t border-fg pt-6">
       <h2 id="read-next-h" className="label-caps text-fg-muted">
         {heading}
       </h2>

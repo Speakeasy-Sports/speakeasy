@@ -37,7 +37,7 @@ export async function NationalView({ page }: { page: number }) {
         <header className="pt-10 sm:pt-14">
           <div className="flex flex-col gap-3 pb-6">
             <p className="label-caps text-fg-muted">{copy.national.kicker}</p>
-            <h1 className="headline text-[3rem] leading-[0.95] tracking-[-0.035em] sm:text-[4.5rem] lg:text-[5.5rem]">
+            <h1 className="headline text-[3rem] leading-[0.95] tracking-[-0.03em] sm:text-[4.5rem] lg:text-[5rem]">
               {page === 1 ? copy.national.heading : `${copy.national.heading}: latest, page ${page}`}
             </h1>
           </div>
@@ -57,7 +57,7 @@ export async function NationalView({ page }: { page: number }) {
           copy={copy}
         />
       </div>
-      <div className="mt-24">
+      <div className="mt-16">
         <NewsletterSignup
           variant="band"
           headline={settings?.newsletterHeadline}

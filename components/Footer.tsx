@@ -50,7 +50,7 @@ export function Footer({ settings, signoff, media }: Props) {
 
   return (
     // A page that ends in the newsletter band runs straight into the footer rule instead of leaving a strip of paper.
-    <footer className="mt-24 border-t border-fg bg-bg [main:has([data-newsletter-band])+&]:mt-0">
+    <footer className="mt-16 border-t border-fg bg-bg [main:has([data-newsletter-band])+&]:mt-0">
       <div className="shell py-14">
         <div className="grid gap-12 md:grid-cols-12">
           <div className="flex flex-col gap-4 md:col-span-5">

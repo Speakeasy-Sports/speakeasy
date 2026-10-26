@@ -134,7 +134,7 @@ export function NewsletterSignup({ variant = "inline", headline, blurb, school, 
         <div className="shell grid gap-8 py-14 md:grid-cols-12 md:items-end md:gap-10 md:py-20">
           <div className="flex flex-col gap-3 md:col-span-6">
             <p className="label-caps text-fg-muted">{copy.kicker}</p>
-            <h2 id={`${id}-h`} className="headline text-[2rem] leading-[1.05] sm:text-[2.75rem] sm:tracking-[-0.025em]">
+            <h2 id={`${id}-h`} className="headline text-[2rem] leading-[1.05] tracking-[-0.022em] sm:text-[2.5rem]">
               {title}
             </h2>
             <p className="max-w-md text-lg leading-snug text-fg-muted">{text}</p>

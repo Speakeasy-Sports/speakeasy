@@ -78,7 +78,7 @@ export async function SchoolView({ slug, page }: { slug: string; page: number })
           copy={copy}
         />
       </div>
-      <div className="mt-24">
+      <div className="mt-16">
         <NewsletterSignup
           variant="band"
           headline={settings?.newsletterHeadline}

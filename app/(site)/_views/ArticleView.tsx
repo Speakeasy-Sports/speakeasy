@@ -131,8 +131,8 @@ export async function ArticleView({ article, slug }: { article: LoadedArticle; s
           <LabelRow type={article.contentType} scope={article.scope} school={school} />
 
           {/* 2. Headline and dek */}
-          <h1 className="headline mt-3 text-4xl leading-[1.08] md:text-5xl">{article.title}</h1>
-          {article.dek && <p className="mt-4 text-xl leading-snug text-fg-muted md:text-2xl">{article.dek}</p>}
+          <h1 className="headline mt-3 text-4xl leading-[1.06] tracking-[-0.022em] md:text-5xl">{article.title}</h1>
+          {article.dek && <p className="mt-4 text-xl leading-[1.35] text-fg-muted md:text-2xl">{article.dek}</p>}
 
           {/* 3. Byline */}
           <div className="mt-6">

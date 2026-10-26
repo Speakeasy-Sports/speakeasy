@@ -18,19 +18,19 @@ export function LeadStory({ article, showSchool = true, showNational = true, hid
     return (
       <article data-school={article.school?.slug ?? undefined} className="group flex max-w-4xl flex-col gap-4">
         {labels}
-        <h2 className="headline text-[2.25rem] leading-[1.04] sm:text-[3rem] lg:text-[3.5rem] lg:tracking-[-0.025em]">
+        <h2 className="headline text-[2.25rem] leading-[1.02] tracking-[-0.03em] sm:text-[3rem] lg:text-[3.5rem]">
           <Link href={href} className="story-link">
             {article.title}
           </Link>
         </h2>
-        {article.dek && <p className="max-w-3xl text-lg leading-snug text-fg-muted sm:text-xl lg:text-2xl">{article.dek}</p>}
+        {article.dek && <p className="max-w-3xl text-lg leading-snug text-fg-muted sm:text-xl lg:text-[1.375rem]">{article.dek}</p>}
         <StoryMeta article={article} withPhoto hideAuthors={hideAuthors} className="mt-1" />
       </article>
     );
   }
 
   return (
-    <article data-school={article.school?.slug ?? undefined} className="group grid gap-5 lg:grid-cols-12 lg:items-center lg:gap-10">
+    <article data-school={article.school?.slug ?? undefined} className="group grid gap-5 lg:grid-cols-12 lg:items-start lg:gap-10">
       <Link href={href} tabIndex={-1} aria-hidden="true" className="block lg:col-span-7">
         <StoryImage
           article={article}
@@ -41,9 +41,9 @@ export function LeadStory({ article, showSchool = true, showNational = true, hid
           artSize="lg"
         />
       </Link>
-      <div className="flex flex-col gap-4 lg:col-span-5">
+      <div className="flex flex-col gap-4 lg:col-span-5 lg:pt-1">
         {labels}
-        <h2 className="headline text-[2rem] leading-[1.06] sm:text-[2.5rem] lg:text-[2.875rem] lg:tracking-[-0.022em]">
+        <h2 className="headline text-[2rem] leading-[1.04] tracking-[-0.022em] sm:text-[2.5rem] lg:text-[2.875rem]">
           <Link href={href} className="story-link">
             {article.title}
           </Link>
