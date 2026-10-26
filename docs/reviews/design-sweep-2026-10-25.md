@@ -6,7 +6,7 @@ What keeps the site from feeling world-class for sports media two weeks before l
 
 October 25, 2026 · main at 3d1cfbe · live site plus local mock build · 23 findings · nothing in the repository was changed
 
-> **Status in the repo.** Before-launch code fixes F2, F3, F4, F5, F7, F8 (accent backup and layout), F9, F10 with decision 6, F11, F16, F18, and F22 shipped in the "design sweep launch fixes" pull request. Georgia's accent colors were set in the Studio on October 25. F15, F17, F19, F20, and the desktop wordmark size from F23 followed in the "design polish batch 1" pull request. F1's remaining Studio content is with Jon. The after-launch list in section 4 is the plan of record. The screenshots named below were captured in the review session and are not stored in the repository.
+> **Status in the repo.** Before-launch code fixes F2, F3, F4, F5, F7, F8 (accent backup and layout), F9, F10 with decision 6, F11, F16, F18, and F22 shipped in the "design sweep launch fixes" pull request. Georgia's accent colors were set in the Studio on October 25. F15, F17, F19, F20, and the desktop wordmark size from F23 followed in the "design polish batch 1" pull request. F6, F12, and F14 followed together in the type and spacing pass (October 26), on the mock dataset rather than real launch stories. F1's remaining Studio content is with Jon. The after-launch list in section 4 is the plan of record. The screenshots named below were captured in the review session and are not stored in the repository.
 
 Findings
 
@@ -339,9 +339,9 @@ Before launch (cheap and clearly better):
 
 After launch:
 
-- F6 River density (worth a day of looking at real stories first).
+- F6 River density. Done October 26 (type and spacing pass); recheck against a week of real stories.
 - F8 Author photo and hero photo on the share image.
-- F12 Full type scale pass and F14 spacing pass (do them together, one PR, with before and after screenshots at 390 and 1280).
+- F12 Full type scale pass and F14 spacing pass. Done October 26 in one PR, with before and after screenshots at 390 and 1280.
 - F13 Speakeasy monogram for Georgia in header, Join card, and share image (decision 4; needs the asset).
 - F15 Article ending copy and compact More to read. Done before launch (polish batch 1).
 - F17 Section nav size. Done before launch (polish batch 1).

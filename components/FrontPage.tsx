@@ -100,7 +100,7 @@ export function FrontPage({
             hideAuthors={hideAuthors}
           />
           {secondary.length > 0 && (
-            <div className="mt-10 grid gap-6 border-t border-line pt-8 sm:grid-cols-3 sm:gap-x-6 lg:mt-14 lg:gap-x-16 lg:column-rules [&>*+*]:border-t [&>*+*]:border-line [&>*+*]:pt-6 sm:[&>*+*]:border-t-0 sm:[&>*+*]:pt-0">
+            <div className="mt-8 grid gap-6 border-t border-line pt-8 sm:grid-cols-3 sm:gap-x-6 lg:mt-12 lg:gap-x-16 lg:column-rules [&>*+*]:border-t [&>*+*]:border-line [&>*+*]:pt-6 sm:[&>*+*]:border-t-0 sm:[&>*+*]:pt-0">
               {secondary.map((a) => (
                 // The row draws dividers on its direct children; the wrapper keeps them off a text-only card's own rule.
                 <div key={a._id}>
@@ -119,7 +119,7 @@ export function FrontPage({
       )}
 
       <div
-        className={`grid gap-14 md:grid-cols-12 md:gap-10 lg:gap-12 ${page === 1 ? "mt-14 lg:mt-20" : "mt-10"}`}
+        className={`grid gap-14 md:grid-cols-12 md:gap-10 lg:gap-12 ${page === 1 ? "mt-12 lg:mt-16" : "mt-10"}`}
       >
         <section
           aria-labelledby="latest-h"

@@ -7,7 +7,7 @@ export function RelatedStories({ articles, heading, hideAuthors }: Props) {
   const list = (articles ?? []).filter((a) => a.path);
   if (list.length === 0) return null;
   return (
-    <section aria-labelledby="related-h" className="mx-auto mt-16 max-w-4xl border-t border-line pt-8">
+    <section aria-labelledby="related-h" className="mx-auto mt-12 max-w-4xl border-t border-line pt-8">
       <h2 id="related-h" className="label-caps mb-6 text-fg-muted">
         {heading}
       </h2>

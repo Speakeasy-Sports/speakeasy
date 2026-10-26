@@ -18,7 +18,7 @@ export function StoryMeta({ article, withPhoto, hideAuthors, className = "" }: P
   const first = authors[0];
 
   return (
-    <p className={`flex items-center gap-2.5 font-ui text-[0.8125rem] leading-none tabular-nums text-fg-subtle ${className}`}>
+    <p className={`flex items-center gap-2.5 font-ui text-[0.8125rem] leading-[1.2] tabular-nums text-fg-subtle ${className}`}>
       {withPhoto && !hideAuthors && first?.name && <AuthorAvatar name={first.name} photo={first.photo} size={28} />}
       {!hideAuthors && names && <span className="font-medium text-fg">{names}</span>}
       {!hideAuthors && names && article.publishedAt && <span aria-hidden="true">&middot;</span>}

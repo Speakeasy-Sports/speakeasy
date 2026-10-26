@@ -52,28 +52,33 @@ Body: `--text-body` 18px on phones, 20px from 768px, `--leading-body` 1.6, `--me
 
 | Role | Size (phone / sm / lg) | Notes |
 |---|---|---|
-| School front title | 48 / 72 / 88px | `headline`, leading 0.95, tracking -0.035em |
-| Index page title (`PageHeader`) | 44 / 64px | leading 0.98, tracking -0.03em |
-| Article H1 | 36 / 48px (md) | `headline`, leading 1.08 |
-| Lead story | 32 / 40 / 46px | leading 1.06 |
-| Newsletter band | 32 / 44px | |
-| Wordmark | 22 / 26px (md) | semibold, tracking -0.02em |
-| Rail promo title | 26px | |
-| Story card, story row | 19 / 22 to 23px | leading 1.2 |
-| Compact row | 16px | |
-| Article dek | 20 / 24px (md) | `text-fg-muted` |
-| Lead dek | 18 / 20px (lg) | |
+| School and National front title | 48 / 72 / 80px | `headline`, leading 0.95, tracking -0.03em |
+| Index page title (`PageHeader`), Search, Community | 44 / 64px | leading 0.98, tracking -0.03em |
+| Lead story, text only | 36 / 48 / 56px | leading 1.02, tracking -0.03em |
+| Lead story, with picture | 32 / 40 / 46px | leading 1.04, tracking -0.022em; the text column hangs from the photo's top edge |
+| Article H1 | 36 / 48px (md) | leading 1.06, tracking -0.022em |
+| Newsletter band | 32 / 40px | leading 1.05, tracking -0.022em |
+| Wordmark | 22 / 28px (md) | semibold, tracking -0.02em, -0.03em from md |
+| Story card, text only | 24 / 28px (lg) | leading 1.1, tracking -0.022em |
+| Read next, rail promo title | 26px | leading 1.1 |
+| Story card | 20 / 22px | leading 1.18 |
+| Story row (Latest) | 19 / 22px | leading 1.18; summary only on rows without a picture |
+| Compact row | 16px | leading 1.25 |
+| Article dek | 20 / 24px (md) | leading 1.35, `text-fg-muted` |
+| Lead dek | 18 / 20 / 22px | leading 1.375 |
 | Body H2, H3 | 1.5em, 1.2em | display face, margin-top 2em |
-| Pull quote | 24 / 32px (md) | display italic, 500 |
-| UI text | 14 to 15px | buttons, nav, footer links |
-| Meta | 13px | `StoryMeta`, fine print |
-| Labels | 12px | `label-caps` |
+| Pull quote | 24 / 32px (md) | serif italic, 500 |
+| Section links (desktop) | 13px | caps, tracking 0.06em, one step above labels |
+| UI text | 14 to 15px | buttons, footer links |
+| Meta | 13px | `StoryMeta`, leading 1.2, tabular digits |
+| Labels | 12px | `label-caps`, tabular digits |
 
-Headline weight is 600 throughout; the wordmark is 700.
+Headline weight is 600 throughout, the wordmark included (the Fraunces cut has that one weight).
 
 ## Spacing and layout
 
 - Spacing tokens `--space-1` to `--space-16` (4 to 64px). Tailwind's default spacing scale is used in components; prefer its 4px steps.
+- Page rhythm (design sweep F14): 24px inside a story unit, 32px between units, 48px between front sections on phones and 64px on desktop, 64px before the newsletter band and the footer. Latest rows have 20px above and below. On articles: 32 to 40px from byline to body, 48px from body to Read next and from the end block to More to read, 24px between end sections.
 - Page width: `shell` (76rem max, 16px gutters on phones, 24px from 640px). Header, fronts, article, and footer share it.
 - Article column: one centered reading column at `--measure` for the header, body, and end block. The hero photo and players run wider (`max-w-4xl`, 56rem), centered over it. The end block (discuss, author, newsletter) is a stack of sections divided by hairlines.
 - Fronts: a 12-column grid at `lg`. Lead story 7/5, secondary row of three equal columns divided by vertical hairlines (`column-rules`), then Latest (8 columns) beside a sticky rail (4 columns).

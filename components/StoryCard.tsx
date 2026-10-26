@@ -66,7 +66,7 @@ export function StoryCard({
       </Link>
       <div className="flex min-w-0 flex-col gap-2.5">
         {labels}
-        <h3 className="headline text-[1.1875rem] leading-[1.2] sm:text-[1.375rem]">
+        <h3 className="headline text-[1.25rem] leading-[1.18] sm:text-[1.375rem]">
           <Link href={href} className="story-link">
             {article.title}
           </Link>

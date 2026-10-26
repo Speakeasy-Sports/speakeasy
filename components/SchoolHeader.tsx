@@ -34,7 +34,7 @@ export function SchoolHeader({ school, navTags, joinUrl, joinLabel, active, medi
             className={`headline ${
               compact
                 ? "text-[2.25rem] leading-none sm:text-[3rem]"
-                : "text-[3rem] leading-[0.95] tracking-[-0.035em] sm:text-[4.5rem] lg:text-[5.5rem]"
+                : "text-[3rem] leading-[0.95] tracking-[-0.03em] sm:text-[4.5rem] lg:text-[5rem]"
             }`}
           >
             {title ?? school.name}
