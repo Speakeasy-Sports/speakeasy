@@ -16,6 +16,7 @@
     "typegen": "sanity schema extract --path sanity/schema.json --force && sanity typegen generate",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:testdriver": "vitest run --config vitest.config.mjs",
     "check:secrets": "node scripts/check-client-secrets.mjs",
     "seed": "node --env-file-if-exists=.env.local scripts/seed.mjs",
     "migrate:scope": "node --env-file-if-exists=.env.local scripts/migrate-coverage-scope.mjs"
@@ -46,6 +47,7 @@
     "eslint-config-next": "16.4.2",
     "groq-js": "2.0.0",
     "tailwindcss": "^4.3.3",
+    "testdriverai": "^7.11.171",
     "typescript": "^5.9.3",
     "vitest": "^5.0.5"
   }
